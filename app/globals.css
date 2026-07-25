@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #0a0e14;
+  color: #e5e9f0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Zone de sécurité iOS (encoche + barre home) pour la nav du bas. */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Empêche le zoom au focus sur les inputs iOS (<16px déclenche le zoom). */
+input,
+select,
+textarea,
+button {
+  font-size: 16px;
+}
+
+/* Masque la molette des inputs number sans casser la saisie. */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
