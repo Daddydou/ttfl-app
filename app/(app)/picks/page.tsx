@@ -10,7 +10,7 @@ export const metadata = { title: "Mes picks — TTFL" };
 
 async function resolveMode(explicit?: string): Promise<Mode> {
   if (explicit === "regular" || explicit === "playoffs") return explicit;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await supabase
     .from("ttfl_runs")
     .select("mode")
@@ -23,10 +23,11 @@ async function resolveMode(explicit?: string): Promise<Mode> {
 export default async function PicksPage({
   searchParams,
 }: {
-  searchParams: { mode?: string };
+  searchParams: Promise<{ mode?: string }>;
 }) {
-  const mode = await resolveMode(searchParams.mode);
-  const supabase = createClient();
+  const { mode: explicitMode } = await searchParams;
+  const mode = await resolveMode(explicitMode);
+  const supabase = await createClient();
 
   const { data: picks } = await supabase
     .from("ttfl_picks")

@@ -10,7 +10,7 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Mode du dernier run, tous modes confondus : sert le badge de l'en-tête.
   const { data: lastRun } = await supabase

@@ -11,7 +11,7 @@ export async function signIn(_prev: string | null, formData: FormData) {
     return "Renseigne l'email et le mot de passe.";
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
@@ -23,7 +23,7 @@ export async function signIn(_prev: string | null, formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
 }

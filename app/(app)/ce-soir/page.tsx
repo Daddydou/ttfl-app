@@ -16,7 +16,7 @@ export const metadata = { title: "Ce soir — TTFL" };
 const CURRENT_MAX_AGE_MS = 18 * 3600 * 1000;
 
 export default async function CeSoirPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: run } = await supabase
     .from("ttfl_runs")

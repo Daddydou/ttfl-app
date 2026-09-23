@@ -27,7 +27,7 @@ export const metadata = { title: "Tableau de bord — TTFL" };
 // déjà écrit dans Supabase — voir lib/dashboard.ts.
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const today = todayISO();
 
   // --- Ce qui doit peindre en premier : le run + les alertes qui en dépendent.
@@ -177,7 +177,7 @@ export default async function DashboardPage() {
 // --- Bloc 2 : repères modèle (streaming indépendant) ------------------------
 
 async function BenchmarksBlock({ mode }: { mode: Mode }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const [{ data: benchmarks }, { data: stats }] = await Promise.all([
     supabase
@@ -225,7 +225,7 @@ async function CycleAbsentsBlock({
   mode: Mode;
   today: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: absents } = await supabase
     .from("ttfl_manual_absents")

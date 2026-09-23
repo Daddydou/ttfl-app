@@ -15,7 +15,7 @@ export async function pickPlayer(
   pickDate: string,
   player: string,
 ): Promise<ActionResult> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("ttfl_picks")
     .upsert(
@@ -37,7 +37,7 @@ export async function setScore(
   pickId: number,
   score: number | null,
 ): Promise<ActionResult> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("ttfl_picks")
     .update({ score })
@@ -50,7 +50,7 @@ export async function setScore(
 }
 
 export async function deletePick(pickId: number): Promise<ActionResult> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("ttfl_picks").delete().eq("id", pickId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/picks");
@@ -70,7 +70,7 @@ export async function addAbsent(
   if (dateFin && dateFin < dateDebut)
     return { ok: false, error: "La date de fin précède la date de début." };
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("ttfl_manual_absents").insert({
     player: player.trim(),
     date_debut: dateDebut,
@@ -84,7 +84,7 @@ export async function addAbsent(
 }
 
 export async function deleteAbsent(id: number): Promise<ActionResult> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("ttfl_manual_absents")
     .delete()

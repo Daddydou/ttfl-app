@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Absents — TTFL" };
 
 export default async function AbsentsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const today = todayISO();
 
   const { data: absents } = await supabase
