@@ -67,6 +67,28 @@ export interface TtflManualAbsent {
   created_at: string;
 }
 
+// Repères modèle par tournoi (compute_benchmarks.py, côté PC). L'app ne
+// calcule rien : elle lit `total`/`avg`/`detail_json` tels que poussés.
+export type BenchmarkStrategy = "greedy" | "plan_by_round" | "doctrine";
+
+export interface BenchmarkDetailEntry {
+  date: string;
+  player: string;
+  score: number;
+}
+
+export interface TtflBenchmark {
+  id: number;
+  tournoi: string; // "playoffs-2025-26", "regular-2025-26"
+  mode: Mode;
+  strategy: BenchmarkStrategy;
+  total: number;
+  n_picks: number;
+  avg: number | null;
+  detail_json: BenchmarkDetailEntry[];
+  computed_at: string;
+}
+
 export interface TtflSeasonStats {
   mode: Mode;
   total: number;

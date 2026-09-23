@@ -25,6 +25,7 @@ export async function pickPlayer(
 
   if (error) return { ok: false, error: error.message };
   revalidatePath("/");
+  revalidatePath("/ce-soir");
   revalidatePath("/picks");
   revalidatePath("/stats");
   return { ok: true, message: `${player} enregistré comme pick du ${pickDate}.` };

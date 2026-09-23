@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { ModeTabs } from "@/components/ModeTabs";
 import { CumulativeChart } from "@/components/CumulativeChart";
+import { BenchmarksCard } from "@/components/BenchmarksCard";
 import { distribution, cumulative, roundClusters } from "@/lib/stats";
 import { frDate } from "@/lib/format";
-import type { Mode, TtflPick } from "@/lib/types";
+import type { Mode, TtflBenchmark, TtflPick } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Stats — TTFL" };
@@ -34,6 +35,23 @@ export default async function StatsPage({
     .eq("mode", mode)
     .order("pick_date", { ascending: true })
     .returns<TtflPick[]>();
+
+  const { data: benchmarks } = await supabase
+    .from("ttfl_benchmarks")
+    .select("*")
+    .eq("mode", mode)
+    .order("computed_at", { ascending: false })
+    .returns<TtflBenchmark[]>();
+
+  // Un seul tournoi par mode pour l'instant (ttfl_picks ne distingue pas
+  // encore les éditions de playoffs) : si plusieurs lignes existaient quand
+  // même pour une même stratégie, ne garder que la plus récente.
+  const benchmarkRows = Object.values(
+    (benchmarks ?? []).reduce<Record<string, TtflBenchmark>>((acc, b) => {
+      if (!acc[b.strategy]) acc[b.strategy] = b;
+      return acc;
+    }, {}),
+  );
 
   const all = picks ?? [];
   const scored = all.filter((p) => p.score !== null);
@@ -66,6 +84,9 @@ export default async function StatsPage({
             scores dans « Mes picks » pour voir tes stats.
           </p>
         </div>
+        {benchmarkRows.length > 0 && (
+          <BenchmarksCard rows={benchmarkRows} userTotal={0} userAvg={null} />
+        )}
       </div>
     );
   }
@@ -97,6 +118,11 @@ export default async function StatsPage({
           tone="bad"
         />
       </div>
+
+      {/* Repères modèle */}
+      {benchmarkRows.length > 0 && (
+        <BenchmarksCard rows={benchmarkRows} userTotal={total} userAvg={avg} />
+      )}
 
       {/* Courbe du cumul / épuisement */}
       <section className="rounded-2xl border border-ink-800 bg-ink-900 p-4">
