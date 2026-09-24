@@ -60,3 +60,15 @@ poussé dans Supabase.
 
 \- Demande avant toute suppression de fichier.
 
+
+
+
+\## En attente (à rappeler à l'utilisateur quand ça se débloque)
+
+
+
+\- Graphique du classement sur la saison : le classement n'est dans aucune table Supabase. Il faut d'abord que le moteur (ttfl/pont/push_to_supabase.py) le pousse. La courbe du score existe déjà (Stats > Progression).
+
+\- Avis de l'agent IA sous le pick du soir (PickCard) : à faire une fois les bugs du projet Agents IA (mes-agents) corrigés.
+
+\- Décidé : pas de Web Push (notification app fermée), la version actuelle suffit.
