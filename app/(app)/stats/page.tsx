@@ -2,7 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import { ModeTabs } from "@/components/ModeTabs";
 import { CumulativeChart } from "@/components/CumulativeChart";
 import { BenchmarksCard } from "@/components/BenchmarksCard";
-import { distribution, cumulative, roundClusters } from "@/lib/stats";
+import { VersusEngineCard } from "@/components/VersusEngineCard";
+import {
+  distribution,
+  cumulative,
+  roundClusters,
+  engineBenchmark,
+  versusLastNights,
+} from "@/lib/stats";
 import { frDate } from "@/lib/format";
 import type { Mode, TtflBenchmark, TtflPick } from "@/lib/types";
 
@@ -73,6 +80,8 @@ export default async function StatsPage({
   const curve = cumulative(scored);
   const rounds = mode === "playoffs" ? roundClusters(scored) : [];
   const maxRound = Math.max(1, ...rounds.map((r) => r.avg));
+  const engine = engineBenchmark(benchmarkRows);
+  const versus = versusLastNights(all, engine, 7);
 
   if (scored.length === 0) {
     return (
@@ -123,6 +132,16 @@ export default async function StatsPage({
       {/* Repères modèle */}
       {benchmarkRows.length > 0 && (
         <BenchmarksCard rows={benchmarkRows} userTotal={total} userAvg={avg} />
+      )}
+
+      {/* Mon pick vs pick du moteur, derniers soirs */}
+      {engine && (
+        <VersusEngineCard
+          rows={versus}
+          engineLabel={
+            engine.strategy === "doctrine" ? "Doctrine" : "Glouton réaliste"
+          }
+        />
       )}
 
       {/* Courbe du cumul / épuisement */}

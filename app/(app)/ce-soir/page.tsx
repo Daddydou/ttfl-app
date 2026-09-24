@@ -4,7 +4,7 @@ import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PickButton } from "@/components/PickButton";
 import { PickCard } from "@/components/PickCard";
-import { fmtNum, frDate } from "@/lib/format";
+import { ageMs, fmtNum, frDate } from "@/lib/format";
 import type { Mode, TtflProjection, TtflRun } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -47,8 +47,7 @@ export default async function CeSoirPage() {
   const rows = projections ?? [];
   const recommended = rows.find((r) => r.is_pick) ?? rows[0];
   const pickedPlayer = pick?.player ?? null;
-  const isCurrent =
-    Date.now() - new Date(run.computed_at).getTime() < CURRENT_MAX_AGE_MS;
+  const isCurrent = ageMs(run.computed_at) < CURRENT_MAX_AGE_MS;
 
   return (
     <div className="space-y-4">

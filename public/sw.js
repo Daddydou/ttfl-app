@@ -53,3 +53,19 @@ self.addEventListener("fetch", (event) => {
   // Tout le reste (pages, données) : réseau d'abord, sans mise en cache HTML.
   // On laisse passer tel quel : pas de fallback stale sur des pages authentifiées.
 });
+
+// Clic sur la notification "nouvelles projections" (NewRunNotifier) : ramène
+// l'app au premier plan sur « Ce soir », ou l'ouvre si elle est fermée.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((wins) => {
+        const win = wins.find((w) => new URL(w.url).origin === self.location.origin);
+        if (win) return win.focus().then(() => win.navigate(url));
+        return self.clients.openWindow(url);
+      }),
+  );
+});

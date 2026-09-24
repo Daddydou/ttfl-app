@@ -6,7 +6,7 @@ import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { PickCard } from "@/components/PickCard";
 import { AlertsBanner, type Alert } from "@/components/AlertsBanner";
 import { BenchmarksCard } from "@/components/BenchmarksCard";
-import { frDate, todayISO } from "@/lib/format";
+import { ageMs, frDate, todayISO } from "@/lib/format";
 import { cycleBlocked, type CycleBlockedPlayer } from "@/lib/dashboard";
 import type {
   Mode,
@@ -77,8 +77,7 @@ export default async function DashboardPage() {
   // --- Alertes, non bloquantes -------------------------------------------
   const alerts: Alert[] = [];
   if (run && runIsToday) {
-    const ageHours =
-      (Date.now() - new Date(run.computed_at).getTime()) / 3600000;
+    const ageHours = ageMs(run.computed_at) / 3600000;
     if (ageHours > 2 || !run.injury_report_fresh) {
       alerts.push({
         id: "stale-report",

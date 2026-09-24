@@ -2,6 +2,12 @@ import type { PlayerStatus, Mode } from "./types";
 
 // --- Fraîcheur du run --------------------------------------------------------
 
+// Âge (en ms) d'un horodatage ISO. Isolé ici pour que les pages serveur n'aient
+// pas à appeler Date.now() directement pendant le rendu.
+export function ageMs(iso: string): number {
+  return Date.now() - new Date(iso).getTime();
+}
+
 export interface Freshness {
   label: string; // "il y a 12 min"
   minutes: number;
@@ -17,7 +23,7 @@ export function freshness(
 ): Freshness {
   const minutes = Math.max(
     0,
-    Math.round((Date.now() - new Date(computedAt).getTime()) / 60000),
+    Math.round(ageMs(computedAt) / 60000),
   );
 
   let tone: Freshness["tone"];

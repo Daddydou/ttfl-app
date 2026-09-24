@@ -1,4 +1,4 @@
-import type { TtflPick } from "./types";
+import type { BenchmarkDetailEntry, TtflBenchmark, TtflPick } from "./types";
 
 export interface Bucket {
   label: string;
@@ -85,4 +85,43 @@ export function roundClusters(
       avg: total / c.length,
     };
   });
+}
+
+// --- Mon pick vs pick du moteur ----------------------------------------------
+
+export interface VersusRow {
+  date: string;
+  mine: { player: string; score: number | null };
+  engine: BenchmarkDetailEntry | null; // null = le moteur n'a pas ce soir-là
+}
+
+// Repère servant de "pick du moteur" : la doctrine (mode conseillé) quand elle
+// existe, sinon le glouton (seul repère en saison régulière).
+export function engineBenchmark(rows: TtflBenchmark[]): TtflBenchmark | null {
+  return (
+    rows.find((r) => r.strategy === "doctrine") ??
+    rows.find((r) => r.strategy === "greedy") ??
+    null
+  );
+}
+
+// Aligne mes `n` derniers picks sur le choix du moteur le même soir, tel que
+// poussé dans detail_json par compute_benchmarks.py. Simple jointure par date :
+// aucun pick ni score n'est recalculé ici.
+export function versusLastNights(
+  picks: TtflPick[],
+  benchmark: TtflBenchmark | null,
+  n = 7,
+): VersusRow[] {
+  const byDate = new Map(
+    (benchmark?.detail_json ?? []).map((e) => [e.date.slice(0, 10), e]),
+  );
+  return [...picks]
+    .sort((a, b) => b.pick_date.localeCompare(a.pick_date))
+    .slice(0, n)
+    .map((p) => ({
+      date: p.pick_date,
+      mine: { player: p.player, score: p.score },
+      engine: byDate.get(p.pick_date) ?? null,
+    }));
 }

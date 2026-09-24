@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
+import { NewRunNotifier } from "@/components/NewRunNotifier";
+import { NotifyToggle } from "@/components/NotifyToggle";
 import { modeLabel } from "@/lib/format";
 import { signOut } from "@/app/login/actions";
 import type { Mode } from "@/lib/types";
@@ -31,6 +33,7 @@ export default async function AppLayout({
             <span className="font-bold tracking-tight text-white">TTFL</span>
           </Link>
           <div className="flex items-center gap-3">
+            <NotifyToggle />
             <span
               className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                 mode === "playoffs"
@@ -54,6 +57,8 @@ export default async function AppLayout({
       </header>
 
       <main className="flex-1 px-4 pb-24 pt-4">{children}</main>
+
+      <NewRunNotifier />
 
       <BottomNav />
     </div>
