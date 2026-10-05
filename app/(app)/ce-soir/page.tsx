@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
-import { StatusBadge } from "@/components/StatusBadge";
-import { PickButton } from "@/components/PickButton";
 import { PickCard } from "@/components/PickCard";
-import { ageMs, fmtNum, frDate } from "@/lib/format";
-import type { Mode, TtflProjection, TtflRun } from "@/lib/types";
+import { ProjectionRow } from "@/components/ProjectionRow";
+import { ageMs, frDate } from "@/lib/format";
+import type { TtflProjection, TtflRun } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Ce soir — TTFL" };
@@ -91,70 +90,6 @@ export default async function CeSoirPage() {
             : "Aucun pick enregistré pour ce soir."}
         </p>
       </section>
-    </div>
-  );
-}
-
-// --- Ligne du Top N ----------------------------------------------------------
-
-function ProjectionRow({
-  row,
-  mode,
-  pickDate,
-  picked,
-  isRecommended,
-}: {
-  row: TtflProjection;
-  mode: Mode;
-  pickDate: string;
-  picked: boolean;
-  isRecommended: boolean;
-}) {
-  return (
-    <div
-      className={`flex items-center gap-3 border-b border-ink-800 px-3 py-2.5 last:border-0 ${
-        isRecommended ? "bg-court-500/[0.06]" : ""
-      }`}
-    >
-      <span
-        className={`w-5 shrink-0 text-center text-sm font-bold tabular-nums ${
-          isRecommended ? "text-court-400" : "text-ink-600"
-        }`}
-      >
-        {row.rank}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="truncate font-semibold text-white">
-            {row.player}
-          </span>
-          {row.is_urgent && isRecommended && (
-            <span className="shrink-0 text-court-400">⚡</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 text-xs text-ink-600">
-          <span className="truncate">
-            {row.team} vs {row.opponent}
-          </span>
-          <StatusBadge status={row.status} />
-        </div>
-      </div>
-      <span className="shrink-0 text-right text-lg font-bold tabular-nums text-white">
-        {fmtNum(row.projection)}
-      </span>
-      <div className="w-16 shrink-0 text-right">
-        {picked ? (
-          <span className="text-xs font-semibold text-avail">✓ Pické</span>
-        ) : (
-          <PickButton
-            mode={mode}
-            pickDate={pickDate}
-            player={row.player}
-            alreadyPicked={false}
-            variant="row"
-          />
-        )}
-      </div>
     </div>
   );
 }
