@@ -56,6 +56,8 @@ export interface TtflPick {
   player: string;
   score: number | null;
   created_at: string;
+  compte: string; // '01' … '12' (01/02 = comptes principaux, 03 à 12 = équipe)
+  source: "app" | "site"; // posé depuis l'application ou repéré sur le site TTFL
 }
 
 export interface TtflManualAbsent {

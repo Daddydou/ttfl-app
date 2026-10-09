@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { COMPTE_REF } from "@/lib/compte";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { PickCard } from "@/components/PickCard";
@@ -40,6 +41,7 @@ export default async function CeSoirPage() {
       .select("player")
       .eq("mode", run.mode)
       .eq("pick_date", run.game_date)
+      .eq("compte", COMPTE_REF)
       .maybeSingle<{ player: string }>(),
   ]);
 

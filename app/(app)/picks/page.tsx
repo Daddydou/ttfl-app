@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { COMPTE_REF } from "@/lib/compte";
 import { ScoreInput } from "@/components/ScoreInput";
 import { ModeTabs } from "@/components/ModeTabs";
 import { DeletePickButton } from "@/components/DeletePickButton";
@@ -33,6 +34,7 @@ export default async function PicksPage({
     .from("ttfl_picks")
     .select("*")
     .eq("mode", mode)
+    .eq("compte", COMPTE_REF)
     .order("pick_date", { ascending: false })
     .returns<TtflPick[]>();
 

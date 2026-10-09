@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { COMPTE_REF } from "@/lib/compte";
 import { ModeTabs } from "@/components/ModeTabs";
 import { CumulativeChart } from "@/components/CumulativeChart";
 import { BenchmarksCard } from "@/components/BenchmarksCard";
@@ -41,6 +42,7 @@ export default async function StatsPage({
     .from("ttfl_picks")
     .select("*")
     .eq("mode", mode)
+    .eq("compte", COMPTE_REF)
     .order("pick_date", { ascending: true })
     .returns<TtflPick[]>();
 

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { COMPTE_REF } from "@/lib/compte";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { PickCard } from "@/components/PickCard";
@@ -61,6 +62,7 @@ export default async function DashboardPage() {
         .select("player")
         .eq("mode", run.mode)
         .eq("pick_date", run.game_date)
+        .eq("compte", COMPTE_REF)
         .maybeSingle<{ player: string }>(),
     ]);
     const rows = projections ?? [];
@@ -244,6 +246,7 @@ async function CycleAbsentsBlock({
       .from("ttfl_picks")
       .select("*")
       .eq("mode", "regular")
+      .eq("compte", COMPTE_REF)
       .gte("pick_date", since.toISOString().slice(0, 10))
       .returns<TtflPick[]>();
     cycleOrUsage = <CycleList blocked={cycleBlocked(picks ?? [], today)} />;
@@ -251,7 +254,8 @@ async function CycleAbsentsBlock({
     const { count } = await supabase
       .from("ttfl_picks")
       .select("id", { count: "exact", head: true })
-      .eq("mode", "playoffs");
+      .eq("mode", "playoffs")
+      .eq("compte", COMPTE_REF);
     cycleOrUsage = <UsageCounter count={count ?? 0} />;
   }
 

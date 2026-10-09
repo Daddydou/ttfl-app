@@ -3,24 +3,27 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Mode } from "@/lib/types";
+import { COMPTE_REF } from "@/lib/compte";
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
 
 // --- Picks -------------------------------------------------------------------
 
-// Enregistre le pick du soir. La table a une contrainte unique (mode, pick_date)
-// donc un upsert : re-picker le même soir remplace, il n'y a qu'un pick par soir.
+// Enregistre le pick du soir. La table a une contrainte unique (mode, pick_date, compte)
+// donc un upsert : re-picker le même soir pour le même compte remplace, il n'y a qu'un
+// pick par soir ET par compte (compte 01 par défaut = écrans actuels de l'application).
 export async function pickPlayer(
   mode: Mode,
   pickDate: string,
   player: string,
+  compte: string = COMPTE_REF,
 ): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase
     .from("ttfl_picks")
     .upsert(
-      { mode, pick_date: pickDate, player },
-      { onConflict: "mode,pick_date" },
+      { mode, pick_date: pickDate, player, compte },
+      { onConflict: "mode,pick_date,compte" },
     );
 
   if (error) return { ok: false, error: error.message };

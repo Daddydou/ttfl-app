@@ -5,7 +5,7 @@ import { VersusEngineCard } from "@/components/VersusEngineCard";
 import type { TtflBenchmark, TtflPick } from "@/lib/types";
 
 function pick(date: string, player: string, score: number | null): TtflPick {
-  return { id: Number(date.slice(-2)), mode: "regular", pick_date: date, player, score, created_at: date };
+  return { id: Number(date.slice(-2)), mode: "regular", pick_date: date, player, score, created_at: date, compte: "01", source: "app" };
 }
 
 function bench(strategy: TtflBenchmark["strategy"], detail: TtflBenchmark["detail_json"]): TtflBenchmark {

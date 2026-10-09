@@ -13,7 +13,7 @@ const { default: PicksPage } = await import("@/app/(app)/picks/page");
 function pick(p: Partial<TtflPick>): TtflPick {
   return {
     id: 0, mode: "regular", pick_date: "2026-03-10", player: "",
-    score: null, created_at: "2026-03-10T20:00:00Z", ...p,
+    score: null, created_at: "2026-03-10T20:00:00Z", compte: "01", source: "app", ...p,
   };
 }
 
