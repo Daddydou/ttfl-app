@@ -34,7 +34,7 @@ export default async function DashboardPage() {
   // --- Ce qui doit peindre en premier : le run + les alertes qui en dépendent.
   const [{ data: run }, { data: expiredAbsents }] = await Promise.all([
     supabase
-      .from("ttfl_runs")
+      .from("ttfl_latest_run")
       .select("*")
       .order("computed_at", { ascending: false })
       .limit(1)

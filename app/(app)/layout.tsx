@@ -16,7 +16,7 @@ export default async function AppLayout({
 
   // Mode du dernier run, tous modes confondus : sert le badge de l'en-tête.
   const { data: lastRun } = await supabase
-    .from("ttfl_runs")
+    .from("ttfl_latest_run")
     .select("mode")
     .order("computed_at", { ascending: false })
     .limit(1)

@@ -22,6 +22,9 @@ export function NewRunNotifier() {
         { event: "INSERT", schema: "public", table: "ttfl_runs" },
         (payload) => {
           const next = payload.new as TtflRun;
+          // Run « à l'avance » (soirée future poussée par push_avance.py) : ce n'est pas
+          // le pick de ce soir, donc ni bannière ni notification.
+          if ((next.note ?? "").startsWith("AVANCE")) return;
           setRun(next);
           if (document.visibilityState === "hidden") notifySystem(next);
         },

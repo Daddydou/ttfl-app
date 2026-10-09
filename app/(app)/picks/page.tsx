@@ -13,7 +13,7 @@ async function resolveMode(explicit?: string): Promise<Mode> {
   if (explicit === "regular" || explicit === "playoffs") return explicit;
   const supabase = await createClient();
   const { data } = await supabase
-    .from("ttfl_runs")
+    .from("ttfl_latest_run")
     .select("mode")
     .order("computed_at", { ascending: false })
     .limit(1)

@@ -19,7 +19,10 @@ export function RealtimeRuns() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "ttfl_runs" },
-        () => {
+        (payload) => {
+          // Un run « à l'avance » ne change rien à « Ce soir » : pas de rechargement.
+          const note = (payload.new as { note?: string | null }).note ?? "";
+          if (note.startsWith("AVANCE")) return;
           // Anti-rebond : un push insère un run + 10 projections quasi
           // simultanément ; on ne rafraîchit qu'une fois.
           const now = Date.now();

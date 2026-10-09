@@ -6,7 +6,8 @@ type Tables = Record<string, unknown[]>;
 export function fakeSupabase(tables: Tables) {
   return {
     from(table: string) {
-      const rows = tables[table] ?? [];
+      // La vue ttfl_latest_run se comporte comme ttfl_runs dans ces tests.
+      const rows = tables[table] ?? (table === "ttfl_latest_run" ? tables["ttfl_runs"] : undefined) ?? [];
       const result = { data: rows, error: null };
       const single = { data: rows[0] ?? null, error: null };
       const query: Record<string, unknown> = {

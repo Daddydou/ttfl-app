@@ -19,7 +19,7 @@ export default async function CeSoirPage() {
   const supabase = await createClient();
 
   const { data: run } = await supabase
-    .from("ttfl_runs")
+    .from("ttfl_latest_run")
     .select("*")
     .order("computed_at", { ascending: false })
     .limit(1)
