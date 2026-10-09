@@ -19,7 +19,7 @@ function pick(p: Partial<TtflPick>): TtflPick {
 
 async function renderPage(mode: string, picks: TtflPick[]) {
   createClient.mockResolvedValue(fakeSupabase({ ttfl_picks: picks, ttfl_runs: [] }));
-  render(await PicksPage({ searchParams: Promise.resolve({ mode }) }));
+  render(await PicksPage({ searchParams: Promise.resolve({ mode, vue: "historique" }) }));
 }
 
 // Tuile de stat (valeur + libellé) à partir de son libellé.
