@@ -10,11 +10,11 @@ type Onglet = "importer" | "copier" | "supprimer";
 type Verification = { cle: string; res: ResultatAdmin } | null;
 
 const champ =
-  "mt-1 block w-full rounded-xl border border-ink-700 bg-ink-850 px-3 py-2 text-sm text-white focus:border-court-500 focus:outline-none";
+  "field mt-1 block w-full";
 const principal =
-  "w-full rounded-xl bg-court-500 py-2.5 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-40";
+  "btn btn-primary w-full";
 const secondaire =
-  "w-full rounded-xl border border-court-600/40 py-2.5 text-sm font-semibold text-court-400 transition active:scale-[0.98] disabled:opacity-40";
+  "btn btn-secondary w-full";
 
 // Importer / copier / supprimer des picks sur plusieurs comptes. Chaque opération a un « Vérifier » qui montre ce qui
 // serait fait SANS rien écrire ; le bouton d'écriture ne s'active qu'après une vérification réussie des mêmes données.
@@ -27,23 +27,21 @@ export function PicksEnMasse({ aujourdhui }: { aujourdhui: string }) {
   ];
   return (
     <section className="space-y-3">
-      <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-ink-600">Picks en masse</h2>
-      <div className="flex gap-1 rounded-xl bg-ink-850 p-1" role="tablist" aria-label="Opération">
+      <h2 className="section-label">Picks en masse</h2>
+      <div className="seg" role="tablist" aria-label="Opération">
         {onglets.map((o) => (
           <button
             key={o.id}
             role="tab"
             aria-selected={onglet === o.id}
             onClick={() => setOnglet(o.id)}
-            className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${
-              onglet === o.id ? "bg-court-500 text-white" : "text-ink-600 active:text-white"
-            }`}
+            className={`seg-item ${onglet === o.id ? "seg-item-on" : ""}`}
           >
             {o.label}
           </button>
         ))}
       </div>
-      <div className="rounded-2xl border border-ink-800 bg-ink-900 p-4">
+      <div className="card p-4">
         {onglet === "importer" && <Importer aujourdhui={aujourdhui} />}
         {onglet === "copier" && <Copier aujourdhui={aujourdhui} />}
         {onglet === "supprimer" && <Supprimer aujourdhui={aujourdhui} />}
@@ -54,9 +52,9 @@ export function PicksEnMasse({ aujourdhui }: { aujourdhui: string }) {
 
 function Resultat({ res }: { res: ResultatAdmin | null }) {
   if (!res) return null;
-  if (!res.ok) return <p className="mt-3 rounded-lg bg-out/10 px-3 py-2 text-xs text-out">{res.error}</p>;
+  if (!res.ok) return <p className="mt-3 rounded-[10px] bg-out/10 px-3 py-2 text-[13px] text-out">{res.error}</p>;
   return (
-    <div className="mt-3 rounded-lg bg-avail/10 px-3 py-2 text-xs text-avail">
+    <div className="mt-3 rounded-[10px] bg-avail/10 px-3 py-2 text-[13px] text-avail">
       <p>{res.message}</p>
       {res.details.length > 0 && (
         <ul className="mt-1.5 space-y-0.5 text-quest">
@@ -97,7 +95,7 @@ function Importer({ aujourdhui }: { aujourdhui: string }) {
 
   return (
     <div>
-      <label className="block text-xs text-ink-600">
+      <label className="block text-[13px] text-fg-muted">
         Un pick par ligne : la date, puis le joueur
         <textarea
           value={texte}
@@ -108,12 +106,12 @@ function Importer({ aujourdhui }: { aujourdhui: string }) {
           className={`${champ} font-mono`}
         />
       </label>
-      <p className="mt-1.5 text-xs text-ink-600">
-        <span className="font-semibold text-white">{analyse.lignes.length}</span> pick(s) reconnu(s)
+      <p className="mt-1.5 text-[13px] text-fg-muted">
+        <span className="font-semibold text-fg">{analyse.lignes.length}</span> pick(s) reconnu(s)
         {analyse.erreurs.length > 0 && <span className="text-out"> · {analyse.erreurs.length} ligne(s) à corriger</span>}
       </p>
       {analyse.erreurs.length > 0 && (
-        <ul className="mt-1 space-y-0.5 text-xs text-out">
+        <ul className="mt-1 space-y-0.5 text-[13px] text-out">
           {analyse.erreurs.slice(0, 8).map((e) => (
             <li key={e.n}>
               Ligne {e.n} : {e.raison}
@@ -165,8 +163,8 @@ function Copier({ aujourdhui }: { aujourdhui: string }) {
 
   return (
     <div>
-      <p className="text-xs text-ink-600">Recopie les picks d&apos;un compte vers d&apos;autres, sur une période.</p>
-      <label className="mt-3 block text-xs text-ink-600">
+      <p className="text-[13px] text-fg-muted">Recopie les picks d&apos;un compte vers d&apos;autres, sur une période.</p>
+      <label className="mt-3 block text-[13px] text-fg-muted">
         Compte source
         <select value={source} onChange={(e) => setSource(e.target.value)} aria-label="Compte source" className={champ}>
           {["01", "02", ...COMPTES_EQUIPE].map((c) => (
@@ -176,11 +174,11 @@ function Copier({ aujourdhui }: { aujourdhui: string }) {
       </label>
       <SelecteurComptes valeur={destinations} onChange={setDestinations} legende="Copier vers" />
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <label className="block text-xs text-ink-600">
+        <label className="block text-[13px] text-fg-muted">
           Du
           <input type="date" value={debut} onChange={(e) => setDebut(e.target.value)} aria-label="Du" className={champ} />
         </label>
-        <label className="block text-xs text-ink-600">
+        <label className="block text-[13px] text-fg-muted">
           Au
           <input type="date" value={fin} onChange={(e) => setFin(e.target.value)} aria-label="Au" className={champ} />
         </label>
@@ -226,17 +224,17 @@ function Supprimer({ aujourdhui }: { aujourdhui: string }) {
 
   return (
     <div>
-      <p className="text-xs leading-relaxed text-ink-600">
-        Retire des picks <span className="font-semibold text-white">à venir</span> de l&apos;application. Les picks passés sont
+      <p className="text-[13px] leading-relaxed text-fg-muted">
+        Retire des picks <span className="font-semibold text-fg">à venir</span> de l&apos;application. Les picks passés sont
         protégés (ils portent les scores) et rien n&apos;est retiré sur le site TTFL.
       </p>
       <SelecteurComptes valeur={comptes} onChange={setComptes} legende="Supprimer sur" />
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <label className="block text-xs text-ink-600">
+        <label className="block text-[13px] text-fg-muted">
           Du
           <input type="date" value={debut} min={aujourdhui} onChange={(e) => setDebut(e.target.value)} aria-label="Du" className={champ} />
         </label>
-        <label className="block text-xs text-ink-600">
+        <label className="block text-[13px] text-fg-muted">
           Au
           <input type="date" value={fin} onChange={(e) => setFin(e.target.value)} aria-label="Au" className={champ} />
         </label>
@@ -246,7 +244,7 @@ function Supprimer({ aujourdhui }: { aujourdhui: string }) {
           {pending ? "…" : "Vérifier"}
         </button>
         {verifie && (
-          <label className="block text-xs text-ink-600">
+          <label className="block text-[13px] text-fg-muted">
             Pour confirmer, tape <span className="font-bold text-out">{MOT_CONFIRMATION}</span>
             <input
               value={confirmation}
@@ -261,7 +259,7 @@ function Supprimer({ aujourdhui }: { aujourdhui: string }) {
         <button
           onClick={supprimer}
           disabled={!verifie || confirmation.trim() !== MOT_CONFIRMATION || pending}
-          className="w-full rounded-xl bg-out py-2.5 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-40"
+          className="btn btn-danger w-full"
         >
           Supprimer
         </button>

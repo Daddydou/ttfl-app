@@ -12,6 +12,8 @@ import {
   type Masque,
 } from "@/lib/conseilles";
 import { frDate } from "@/lib/format";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Icon } from "@/components/ui/Icon";
 import {
   JOURS_CYCLE,
   ajouterJours,
@@ -104,21 +106,23 @@ export default async function PicksConseillesPage({
     <div className="space-y-4">
       <RealtimeRuns />
 
-      <header>
-        <h1 className="text-xl font-extrabold text-white">Picks conseillés</h1>
-        <p className="mt-0.5 text-sm text-ink-600">
-          <span className="font-semibold capitalize text-white">{jourComplet(date)}</span>
-          {matchs > 0 ? ` · ${matchs} match${matchs > 1 ? "s" : ""}` : ""}
-        </p>
-      </header>
+      <PageHeader
+        titre="Picks conseillés"
+        sousTitre={
+          <>
+            <span className="font-semibold capitalize text-fg">{jourComplet(date)}</span>
+            {matchs > 0 ? ` · ${matchs} match${matchs > 1 ? "s" : ""}` : ""}
+          </>
+        }
+      />
 
       <JoursConseilles jours={jours} courant={date} pour={zone.id} aujourdhui={aujourdhui} />
       <ZonesConseilles courant={zone.id} date={date} />
 
       {ancien && (
-        <div className="rounded-xl border border-quest/40 bg-quest/10 px-4 py-3">
+        <div className="rounded-[20px] bg-quest/10 px-4 py-3">
           <p className="text-sm font-semibold text-quest">Aucun calcul pour ce soir</p>
-          <p className="mt-0.5 text-xs text-quest/80">
+          <p className="mt-0.5 text-[13px] text-quest/80">
             Lance le push sur ton PC. Ci-dessous, le dernier classement connu ({frDate(date)}).
           </p>
         </div>
@@ -127,18 +131,18 @@ export default async function PicksConseillesPage({
       {soiree.runSoir ? (
         <FreshnessBanner computedAt={soiree.runSoir.computed_at} injuryFresh={soiree.runSoir.injury_report_fresh} />
       ) : (
-        <p className="rounded-xl bg-quest/10 px-3 py-2 text-xs text-quest">
+        <p className="rounded-[14px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
           Projections calculées à l&apos;avance : les blessures ne sont pas encore connues. Le classement du soir (avec
           les blessures) les remplace le jour J.
         </p>
       )}
 
-      {erreur && <p className="rounded-xl bg-out/10 px-3 py-2 text-xs text-out">{erreur}</p>}
+      {erreur && <p className="rounded-[14px] bg-out/10 px-3 py-2 text-[13px] text-out">{erreur}</p>}
 
       {conseilles.length === 0 ? (
-        <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-8 text-center">
-          <p className="text-sm font-semibold text-white">Aucun joueur à conseiller pour cette soirée.</p>
-          <p className="mt-1 text-xs text-ink-600">
+        <div className="card px-4 py-8 text-center">
+          <p className="text-sm font-semibold text-fg">Aucun joueur à conseiller pour cette soirée.</p>
+          <p className="mt-1 text-[13px] text-fg-muted">
             Pas de projection pour {frDate(date)}, ou tous les joueurs sont déjà pickés ou absents.
           </p>
         </div>
@@ -159,15 +163,15 @@ export default async function PicksConseillesPage({
       )}
 
       {masques.length > 0 && (
-        <details className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-3">
-          <summary className="cursor-pointer text-xs font-medium text-ink-600">
+        <details className="card px-4 py-3">
+          <summary className="cursor-pointer text-[13px] font-medium text-fg-muted">
             {masques.length} joueur{masques.length > 1 ? "s" : ""} masqué{masques.length > 1 ? "s" : ""} (déjà pickés,
             absents ou Out)
           </summary>
-          <ul className="mt-2 space-y-1 text-xs text-ink-600">
+          <ul className="mt-2 space-y-1 text-[13px] text-fg-muted">
             {masques.map((m) => (
               <li key={m.player} className="flex justify-between gap-2">
-                <span className="truncate text-white">{m.player}</span>
+                <span className="truncate text-fg">{m.player}</span>
                 <span className="shrink-0">{RAISONS[m.raison]}</span>
               </li>
             ))}
@@ -175,7 +179,7 @@ export default async function PicksConseillesPage({
         </details>
       )}
 
-      <p className="px-1 text-xs text-ink-600">
+      <p className="px-1 text-[13px] text-fg-muted">
         Classement pour {zone.label.toLowerCase()} : les joueurs pickés à {JOURS_CYCLE} jours ou moins (passé comme futur) et
         les absents n&apos;apparaissent pas.
       </p>
@@ -186,12 +190,12 @@ export default async function PicksConseillesPage({
 function AucunCalcul() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <div className="mb-4 text-5xl">🏀</div>
-      <h1 className="text-xl font-bold text-white">Aucun calcul pour ce soir</h1>
-      <p className="mt-2 max-w-xs text-sm text-ink-600">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[18px] bg-court-500 text-on-accent"><Icon name="ballon" size={34} strokeWidth={1.8} /></div>
+      <h1 className="title-2">Aucun calcul pour ce soir</h1>
+      <p className="mt-2 max-w-xs text-sm text-fg-muted">
         Lance le push sur ton PC pour voir apparaître les picks conseillés ici :
       </p>
-      <code className="mt-3 rounded-lg bg-ink-850 px-3 py-2 text-xs text-court-400">python push_to_supabase.py</code>
+      <code className="mt-3 rounded-[10px] bg-surface-2 px-3 py-2 text-[13px] text-court-400">python push_to_supabase.py</code>
     </div>
   );
 }

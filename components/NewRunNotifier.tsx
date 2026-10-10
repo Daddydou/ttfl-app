@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { frDate } from "@/lib/format";
 import type { TtflRun } from "@/lib/types";
+import { Icon } from "@/components/ui/Icon";
 
 // Prévient quand le PC pousse de nouvelles projections (INSERT dans ttfl_runs),
 // quel que soit l'écran ouvert : bandeau dans l'app, plus une notification
@@ -39,29 +40,29 @@ export function NewRunNotifier() {
   if (!run) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-40 mx-auto flex max-w-md px-4">
-      <div className="flex flex-1 items-center gap-3 rounded-xl border border-court-600/40 bg-ink-900 px-4 py-3 shadow-lg">
+    <div className="fixed inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md px-4">
+      <div className="glass flex flex-1 items-center gap-3 rounded-[20px] px-4 py-3" style={{ boxShadow: "var(--shadow-float)" }}>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-fg">
             Nouvelles projections
           </p>
-          <p className="text-xs text-ink-600">
+          <p className="text-[13px] text-fg-muted">
             Poussées par le PC pour le {frDate(run.game_date)}.
           </p>
         </div>
         <Link
           href="/ce-soir"
           onClick={() => setRun(null)}
-          className="shrink-0 rounded-lg bg-court-500 px-3 py-1.5 text-sm font-semibold text-white"
+          className="btn btn-primary btn-sm shrink-0"
         >
           Voir
         </Link>
         <button
           onClick={() => setRun(null)}
           aria-label="Fermer"
-          className="shrink-0 px-1 text-ink-600 active:text-white"
+          className="shrink-0 px-1 text-fg-muted active:text-fg"
         >
-          ✕
+          <Icon name="fermer" size={18} />
         </button>
       </div>
     </div>

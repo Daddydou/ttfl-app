@@ -138,7 +138,7 @@ describe("Picks conseillés", () => {
   it("indique « pické » quand le joueur est déjà validé pour cette soirée", async () => {
     await rendre({ ...base(), ttfl_picks: [{ pick_date: "2026-10-20", player: "Joueur 1", compte: "01" }] });
     // Un pick du même jour bloque pas le joueur lui-même : il reste affiché, marqué comme pické.
-    expect(screen.getByText("✓ Pické")).toBeInTheDocument();
+    expect(screen.getByText("Pické")).toBeInTheDocument();
   });
 
   it("affiche les cotes quand elles existent, jamais un vide ambigu", async () => {

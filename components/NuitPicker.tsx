@@ -107,7 +107,7 @@ export function NuitPicker({
       <div className="mt-3 flex items-center gap-2">
         <button
           onClick={() => setOuvert(true)}
-          className="flex-1 rounded-xl bg-court-500 py-2.5 text-sm font-bold text-white transition active:scale-[0.98]"
+          className="btn btn-primary flex-1 !min-h-[44px] !text-[16px]"
         >
           {aUnPick ? "Changer" : "Choisir un joueur"}
         </button>
@@ -116,7 +116,7 @@ export function NuitPicker({
             <button
               onClick={retirer}
               disabled={pending}
-              className="rounded-xl bg-out/15 px-3 py-2.5 text-sm font-semibold text-out disabled:opacity-50"
+              className="btn !min-h-[44px] !text-[15px] bg-out/15 text-out"
             >
               {pending ? "…" : dejaPose ? "Retirer ici seulement ?" : "Retirer ?"}
             </button>
@@ -124,39 +124,39 @@ export function NuitPicker({
             <button
               onClick={() => setRetraitArme(true)}
               aria-label={`Retirer le pick du ${frDate(date)}`}
-              className="rounded-xl border border-ink-700 px-3 py-2.5 text-sm text-ink-600 transition active:text-out"
+              className="btn btn-plain !min-h-[44px] !text-[15px]"
             >
               Retirer
             </button>
           ))}
       </div>
       {erreur && !ouvert && (
-        <p className="mt-2 rounded-lg bg-out/10 px-3 py-2 text-xs text-out">{erreur}</p>
+        <p className="mt-2 rounded-[10px] bg-out/10 px-3 py-2 text-[13px] text-out">{erreur}</p>
       )}
 
       {ouvert && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4"
+          className="sheet-backdrop"
           onClick={fermer}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label={`Choisir le pick du ${frDate(date)}`}
-            className="flex max-h-[88vh] w-full max-w-md flex-col rounded-t-3xl border border-ink-800 bg-ink-900 p-5 pb-6 sm:rounded-3xl"
+            className="sheet flex max-h-[88vh] flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold text-white">Pick du {frDate(date)}</h3>
-            <p className="mt-0.5 text-sm text-ink-600">
+            <h3 className="title-2">Pick du {frDate(date)}</h3>
+            <p className="mt-0.5 text-sm text-fg-muted">
               {zoneLabel} · {comptes.length} compte{comptes.length > 1 ? "s" : ""}
             </p>
             {avanceSeule && (
-              <p className="mt-2 rounded-lg bg-quest/10 px-3 py-2 text-xs text-quest">
+              <p className="mt-2 rounded-[10px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
                 Projections calculées à l&apos;avance : les blessures ne sont pas encore connues.
               </p>
             )}
             {dejaPose && (
-              <p className="mt-2 rounded-lg bg-quest/10 px-3 py-2 text-xs text-quest">
+              <p className="mt-2 rounded-[10px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
                 Déjà posé sur le site TTFL : changer ici ne modifie pas le site, le robot
                 signalera un conflit.
               </p>
@@ -168,20 +168,20 @@ export function NuitPicker({
               onChange={(e) => setRecherche(e.target.value)}
               placeholder="Rechercher un joueur ou une équipe"
               aria-label="Rechercher un joueur"
-              className="mt-3 w-full rounded-xl border border-ink-700 bg-ink-850 px-3 py-2.5 text-sm text-white placeholder:text-ink-600 focus:border-court-500 focus:outline-none"
+              className="field mt-3 w-full placeholder:text-fg-faint"
             />
 
-            <div className="mt-3 min-h-[8rem] flex-1 overflow-y-auto rounded-xl border border-ink-800">
+            <div className="mt-3 min-h-[8rem] flex-1 overflow-y-auto rounded-[16px] bg-surface-2">
               {joueurs === null && !erreur && (
-                <p className="px-4 py-8 text-center text-sm text-ink-600">Chargement…</p>
+                <p className="px-4 py-8 text-center text-sm text-fg-muted">Chargement…</p>
               )}
               {joueurs !== null && joueurs.length === 0 && (
-                <p className="px-4 py-8 text-center text-sm text-ink-600">
+                <p className="px-4 py-8 text-center text-sm text-fg-muted">
                   Aucune projection pour cette soirée.
                 </p>
               )}
               {joueurs !== null && joueurs.length > 0 && visibles.length === 0 && (
-                <p className="px-4 py-8 text-center text-sm text-ink-600">Aucun résultat.</p>
+                <p className="px-4 py-8 text-center text-sm text-fg-muted">Aucun résultat.</p>
               )}
               {visibles.map((j) => {
                 const blocage = bloques[normaliserNom(j.player)];
@@ -193,19 +193,19 @@ export function NuitPicker({
                     disabled={desactive}
                     onClick={() => setChoisi(j.player)}
                     aria-pressed={selection}
-                    className={`flex w-full items-center gap-3 border-b border-ink-800 px-3 py-2.5 text-left last:border-0 ${
-                      selection ? "bg-court-500/15" : "active:bg-ink-850"
+                    className={`flex w-full items-center gap-3 border-b border-line px-3 py-2.5 text-left last:border-0 ${
+                      selection ? "bg-court-500/15" : "active:bg-fill"
                     } ${desactive ? "cursor-not-allowed opacity-40" : ""}`}
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="truncate font-semibold text-white">{j.player}</div>
-                      <div className="text-xs text-ink-600">
+                      <div className="truncate font-semibold text-fg">{j.player}</div>
+                      <div className="text-[13px] text-fg-muted">
                         {j.team ?? "—"} <span className="text-court-400">vs</span> {j.opponent ?? "—"}
                         {desactive ? ` · bloqué (compte${blocage.length > 1 ? "s" : ""} ${blocage.join(", ")})` : ""}
                       </div>
                     </div>
                     <StatusBadge status={j.status} />
-                    <div className="w-10 shrink-0 text-right font-bold tabular-nums text-white">
+                    <div className="w-10 shrink-0 text-right font-bold tabular-nums text-fg">
                       {fmtNum(j.projection)}
                     </div>
                   </button>
@@ -214,21 +214,21 @@ export function NuitPicker({
             </div>
 
             {erreur && (
-              <p className="mt-3 rounded-lg bg-out/10 px-3 py-2 text-sm text-out">{erreur}</p>
+              <p className="mt-3 rounded-[10px] bg-out/10 px-3 py-2 text-sm text-out">{erreur}</p>
             )}
 
-            <div className="mt-4 flex gap-3">
+            <div className="mt-5 flex flex-col-reverse gap-2">
               <button
                 onClick={fermer}
                 disabled={pending}
-                className="flex-1 rounded-xl border border-ink-700 py-3 font-semibold text-ink-600 active:bg-ink-800 disabled:opacity-50"
+                className="btn btn-plain w-full"
               >
                 Annuler
               </button>
               <button
                 onClick={valider}
                 disabled={pending || !choisi}
-                className="flex-1 rounded-xl bg-court-500 py-3 font-bold text-white active:scale-[0.98] disabled:opacity-40"
+                className="btn btn-primary w-full"
               >
                 {pending ? "…" : choisi ? "Valider" : "Choisis un joueur"}
               </button>

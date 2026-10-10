@@ -9,7 +9,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-2 w-full rounded-xl bg-court-500 py-3.5 text-base font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
+      className="btn btn-primary mt-2 w-full"
     >
       {pending ? "Connexion…" : "Se connecter"}
     </button>
@@ -22,7 +22,7 @@ export function LoginForm() {
   return (
     <form action={formAction} className="space-y-3">
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm text-ink-600">
+        <label htmlFor="email" className="mb-1 block text-sm text-fg-muted">
           Email
         </label>
         <input
@@ -31,11 +31,11 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          className="w-full rounded-xl border border-ink-700 bg-ink-850 px-4 py-3 text-white outline-none focus:border-court-500"
+          className="field w-full !border-line !bg-surface"
         />
       </div>
       <div>
-        <label htmlFor="password" className="mb-1 block text-sm text-ink-600">
+        <label htmlFor="password" className="mb-1 block text-sm text-fg-muted">
           Mot de passe
         </label>
         <input
@@ -44,11 +44,11 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="w-full rounded-xl border border-ink-700 bg-ink-850 px-4 py-3 text-white outline-none focus:border-court-500"
+          className="field w-full !border-line !bg-surface"
         />
       </div>
       {error && (
-        <p className="rounded-lg bg-out/10 px-3 py-2 text-sm text-out">
+        <p className="rounded-[12px] bg-out/10 px-3 py-2 text-sm text-out">
           {error}
         </p>
       )}

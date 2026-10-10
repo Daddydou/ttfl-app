@@ -45,11 +45,9 @@ export function ScoreInput({
           if (e.key === "Enter") (e.target as HTMLInputElement).blur();
         }}
         placeholder="—"
-        className={`w-16 rounded-lg border bg-ink-850 px-2 py-1.5 text-center text-base font-bold tabular-nums text-white outline-none transition ${
-          saved ? "border-avail" : "border-ink-700 focus:border-court-500"
-        } ${pending ? "opacity-60" : ""}`}
+        className={`field !w-[72px] !px-2 !py-2 text-center font-semibold num ${saved ? "!border-avail" : ""} ${pending ? "opacity-60" : ""}`}
       />
-      <span className="text-xs text-ink-600">pts</span>
+      <span className="text-[13px] text-fg-muted">pts</span>
     </div>
   );
 }

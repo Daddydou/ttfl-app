@@ -12,6 +12,7 @@ import {
   versusLastNights,
 } from "@/lib/stats";
 import { frDate } from "@/lib/format";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { Mode, TtflBenchmark, TtflPick } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -88,9 +89,10 @@ export default async function StatsPage({
   if (scored.length === 0) {
     return (
       <div className="space-y-4">
+        <PageHeader titre="Stats" sousTitre="Tes scores, comparés aux repères du moteur" />
         <ModeTabs base="/stats" current={mode} />
-        <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-10 text-center">
-          <p className="text-sm text-ink-600">
+        <div className="card px-4 py-10 text-center">
+          <p className="text-sm text-fg-muted">
             Pas encore de score saisi en{" "}
             {mode === "playoffs" ? "playoffs" : "saison régulière"}. Saisis tes
             scores dans « Mes picks » pour voir tes stats.
@@ -105,6 +107,7 @@ export default async function StatsPage({
 
   return (
     <div className="space-y-5">
+      <PageHeader titre="Stats" sousTitre="Tes scores, comparés aux repères du moteur" />
       <ModeTabs base="/stats" current={mode} />
 
       {/* Tuiles résumé */}
@@ -147,28 +150,28 @@ export default async function StatsPage({
       )}
 
       {/* Courbe du cumul / épuisement */}
-      <section className="rounded-2xl border border-ink-800 bg-ink-900 p-4">
-        <h2 className="mb-1 text-sm font-semibold text-white">
+      <section className="card p-4">
+        <h2 className="headline mb-1">
           {mode === "playoffs" ? "Courbe d'épuisement" : "Progression"}
         </h2>
-        <p className="mb-3 text-xs text-ink-600">
+        <p className="mb-3 text-[13px] text-fg-muted">
           Barres : score de chaque pick. Ligne : moyenne cumulée.
         </p>
         <CumulativeChart points={curve} />
       </section>
 
       {/* Distribution */}
-      <section className="rounded-2xl border border-ink-800 bg-ink-900 p-4">
-        <h2 className="mb-3 text-sm font-semibold text-white">
+      <section className="card p-4">
+        <h2 className="headline mb-3">
           Distribution ({scored.length} picks)
         </h2>
         <div className="space-y-2">
           {buckets.map((b) => (
             <div key={b.label} className="flex items-center gap-3">
-              <span className="w-12 shrink-0 text-right text-xs font-medium text-ink-600">
+              <span className="w-12 shrink-0 text-right text-[13px] font-medium text-fg-muted">
                 {b.label}
               </span>
-              <div className="h-5 flex-1 overflow-hidden rounded-md bg-ink-850">
+              <div className="h-5 flex-1 overflow-hidden rounded-md bg-surface-2">
                 <div
                   className="h-full rounded-md transition-all"
                   style={{
@@ -178,7 +181,7 @@ export default async function StatsPage({
                   }}
                 />
               </div>
-              <span className="w-6 shrink-0 text-right text-sm font-bold tabular-nums text-white">
+              <span className="w-6 shrink-0 text-right text-sm font-bold tabular-nums text-fg">
                 {b.count}
               </span>
             </div>
@@ -188,26 +191,26 @@ export default async function StatsPage({
 
       {/* Playoffs : moyenne par tour */}
       {mode === "playoffs" && rounds.length > 0 && (
-        <section className="rounded-2xl border border-ink-800 bg-ink-900 p-4">
-          <h2 className="mb-1 text-sm font-semibold text-white">
+        <section className="card p-4">
+          <h2 className="headline mb-1">
             Moyenne par tour
           </h2>
-          <p className="mb-3 text-xs text-ink-600">
+          <p className="mb-3 text-[13px] text-fg-muted">
             Tours estimés d&apos;après les trous du calendrier.
           </p>
           <div className="space-y-2.5">
             {rounds.map((r) => (
               <div key={r.label} className="flex items-center gap-3">
-                <span className="w-24 shrink-0 text-xs font-medium text-ink-600">
+                <span className="w-24 shrink-0 text-[13px] font-medium text-fg-muted">
                   {r.label}
-                  <span className="text-ink-700"> ·{r.n}</span>
+                  <span className="text-fg-faint"> ·{r.n}</span>
                 </span>
-                <div className="h-6 flex-1 overflow-hidden rounded-md bg-ink-850">
+                <div className="h-6 flex-1 overflow-hidden rounded-md bg-surface-2">
                   <div
                     className="flex h-full items-center justify-end rounded-md bg-court-500 px-2"
                     style={{ width: `${(r.avg / maxRound) * 100}%` }}
                   >
-                    <span className="text-xs font-bold text-white">
+                    <span className="text-[13px] font-bold text-on-accent">
                       {r.avg.toFixed(1)}
                     </span>
                   </div>
@@ -219,7 +222,7 @@ export default async function StatsPage({
       )}
 
       {curve.length > 0 && (
-        <p className="px-1 text-xs text-ink-600">
+        <p className="px-1 text-[13px] text-fg-muted">
           Dernier pick : {curve[curve.length - 1].player} (
           {frDate(curve[curve.length - 1].date)}).
         </p>
@@ -238,15 +241,15 @@ function BigStat({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-3">
+    <div className="card px-4 py-3">
       <div
-        className={`text-3xl font-black tabular-nums ${
-          accent ? "text-court-400" : "text-white"
+        className={`text-[32px] font-bold leading-tight tracking-[-0.02em] num ${
+          accent ? "text-court-400" : "text-fg"
         }`}
       >
         {value}
       </div>
-      <div className="text-xs uppercase tracking-wide text-ink-600">{label}</div>
+      <div className="text-[13px] uppercase tracking-wide text-fg-muted">{label}</div>
     </div>
   );
 }
@@ -265,23 +268,23 @@ function SmallStat({
   tone: "good" | "bad";
 }) {
   return (
-    <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-3">
+    <div className="card px-4 py-3">
       <div className="flex items-baseline justify-between">
-        <span className="text-xs uppercase tracking-wide text-ink-600">
+        <span className="text-[13px] uppercase tracking-wide text-fg-muted">
           {label}
         </span>
         <span
-          className={`text-xl font-black tabular-nums ${
+          className={`text-xl font-bold tabular-nums ${
             tone === "good" ? "text-avail" : "text-out"
           }`}
         >
           {value ?? "—"}
         </span>
       </div>
-      <div className="mt-0.5 truncate text-sm font-semibold text-white">
+      <div className="mt-0.5 truncate text-sm font-semibold text-fg">
         {player}
       </div>
-      {date && <div className="text-[11px] text-ink-600">{frDate(date)}</div>}
+      {date && <div className="text-[11px] text-fg-muted">{frDate(date)}</div>}
     </div>
   );
 }

@@ -5,15 +5,16 @@ import { PicksEnMasse } from "@/components/admin/PicksEnMasse";
 import { etatExecuteur } from "@/lib/admin";
 import { ageMs, humanAge } from "@/lib/format";
 import { aujourdhuiNY } from "@/lib/planning";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin — TTFL" };
 
 const PILULES = {
-  en_ligne: { classe: "border-avail/40 bg-avail/10 text-avail", titre: "PC en ligne" },
-  lent: { classe: "border-quest/40 bg-quest/10 text-quest", titre: "PC lent à répondre" },
-  hors_ligne: { classe: "border-out/40 bg-out/10 text-out", titre: "PC hors ligne" },
-  inconnu: { classe: "border-ink-700 bg-ink-900 text-ink-600", titre: "Aucun passage reçu" },
+  en_ligne: { classe: "bg-avail/10 text-avail", titre: "PC en ligne" },
+  lent: { classe: "bg-quest/10 text-quest", titre: "PC lent à répondre" },
+  hors_ligne: { classe: "bg-out/10 text-out", titre: "PC hors ligne" },
+  inconnu: { classe: "bg-surface text-fg-muted", titre: "Aucun passage reçu" },
 } as const;
 
 export default async function AdminPage() {
@@ -35,14 +36,11 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-xl font-extrabold text-white">Admin</h1>
-        <p className="mt-0.5 text-sm text-ink-600">Actions à distance sur ton PC et opérations en masse sur les picks.</p>
-      </header>
+      <PageHeader titre="Admin" sousTitre="Actions à distance sur ton PC et opérations en masse sur les picks." />
 
-      <section className={`rounded-2xl border px-4 py-3 ${pilule.classe}`}>
+      <section className={`rounded-[20px] px-4 py-3.5 ${pilule.classe}`}>
         <p className="text-sm font-semibold">{pilule.titre}</p>
-        <p className="mt-0.5 text-xs opacity-80">
+        <p className="mt-0.5 text-[13px] opacity-80">
           {etat === "inconnu"
             ? "L'exécuteur du PC n'a encore jamais répondu."
             : etat === "en_ligne"
@@ -52,7 +50,7 @@ export default async function AdminPage() {
       </section>
 
       {commandesRes.error && (
-        <p className="rounded-xl bg-out/10 px-3 py-2 text-xs text-out">{commandesRes.error.message}</p>
+        <p className="rounded-[14px] bg-out/10 px-3 py-2 text-[13px] text-out">{commandesRes.error.message}</p>
       )}
 
       <ActionsPC actives={actives} />

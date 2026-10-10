@@ -89,37 +89,37 @@ export function RepartitionEquipe({
     <>
       <button
         onClick={() => setOuvert(true)}
-        className="mt-2 w-full rounded-xl border border-court-600/40 py-2.5 text-sm font-semibold text-court-400 transition active:scale-[0.98]"
+        className="btn btn-secondary mt-2 w-full !min-h-[44px] !text-[16px]"
       >
         Répartir l&apos;équipe
       </button>
 
       {ouvert && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4"
+          className="sheet-backdrop"
           onClick={fermer}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label={`Répartition de l'équipe du ${frDate(date)}`}
-            className="flex max-h-[88vh] w-full max-w-md flex-col rounded-t-3xl border border-ink-800 bg-ink-900 p-5 pb-6 sm:rounded-3xl"
+            className="sheet flex max-h-[88vh] flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold text-white">Répartition du {frDate(date)}</h3>
-            <p className="mt-0.5 text-sm text-ink-600">
+            <h3 className="title-2">Répartition du {frDate(date)}</h3>
+            <p className="mt-0.5 text-sm text-fg-muted">
               Joueurs à moins de {MARGE_BRUIT} points du meilleur, {Math.round(PART_MAX * 100)} % des comptes au plus
               par joueur.
             </p>
 
             {avanceSeule && (
-              <p className="mt-2 rounded-lg bg-quest/10 px-3 py-2 text-xs text-quest">
+              <p className="mt-2 rounded-[10px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
                 Projections calculées à l&apos;avance : les blessures ne sont pas encore connues (elles sont vérifiées
                 à 23 h 30).
               </p>
             )}
             {aUnPick && (
-              <p className="mt-2 rounded-lg bg-quest/10 px-3 py-2 text-xs text-quest">
+              <p className="mt-2 rounded-[10px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
                 Cette soirée a déjà des picks : la répartition les remplace.
                 {dejaPose
                   ? " Certains sont déjà posés sur le site TTFL : le robot les y remplacera dans les minutes qui suivent (jusqu'à minuit)."
@@ -127,24 +127,24 @@ export function RepartitionEquipe({
               </p>
             )}
 
-            <div className="mt-3 min-h-[8rem] flex-1 overflow-y-auto rounded-xl border border-ink-800">
+            <div className="mt-3 min-h-[8rem] flex-1 overflow-y-auto rounded-[16px] bg-surface-2">
               {proposition === null && !erreur && (
-                <p className="px-4 py-8 text-center text-sm text-ink-600">Chargement…</p>
+                <p className="px-4 py-8 text-center text-sm text-fg-muted">Chargement…</p>
               )}
               {proposition !== null && proposition.groupes.length === 0 && (
-                <p className="px-4 py-8 text-center text-sm text-ink-600">
+                <p className="px-4 py-8 text-center text-sm text-fg-muted">
                   Aucun joueur disponible pour cette soirée.
                 </p>
               )}
               {proposition?.groupes.map((g) => (
-                <div key={g.player} className="flex items-center gap-3 border-b border-ink-800 px-3 py-3 last:border-0">
+                <div key={g.player} className="flex items-center gap-3 border-b border-line px-3 py-3 last:border-0">
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-semibold text-white">{g.player}</div>
-                    <div className="text-xs text-ink-600">
+                    <div className="truncate font-semibold text-fg">{g.player}</div>
+                    <div className="text-[13px] text-fg-muted">
                       {g.comptes.length} compte{g.comptes.length > 1 ? "s" : ""} : {g.comptes.join(", ")}
                     </div>
                   </div>
-                  <div className="w-10 shrink-0 text-right font-bold tabular-nums text-white">
+                  <div className="w-10 shrink-0 text-right font-bold tabular-nums text-fg">
                     {fmtNum(g.projection)}
                   </div>
                 </div>
@@ -152,36 +152,43 @@ export function RepartitionEquipe({
             </div>
 
             {proposition !== null && proposition.groupes.length > 0 && (
-              <p className="mt-3 text-xs text-ink-600">
+              <p className="mt-3 text-[13px] text-fg-muted">
                 {proposition.coutProjection > 0
                   ? `Coût attendu : −${fmtNum(proposition.coutProjection)} points de projection pour l'équipe, contre chaque compte sur son meilleur joueur — en échange, bien moins de risque si un joueur manque.`
                   : "Aucun coût : un seul joueur est dans la marge, tous les comptes le prennent."}
               </p>
             )}
             {proposition !== null && proposition.sansPick.length > 0 && (
-              <p className="mt-2 rounded-lg bg-out/10 px-3 py-2 text-xs text-out">
+              <p className="mt-2 rounded-[10px] bg-out/10 px-3 py-2 text-[13px] text-out">
                 Aucun joueur disponible pour le(s) compte(s) {proposition.sansPick.join(", ")}.
               </p>
             )}
-            {erreur && <p className="mt-3 rounded-lg bg-out/10 px-3 py-2 text-sm text-out">{erreur}</p>}
+            {erreur && <p className="mt-3 rounded-[10px] bg-out/10 px-3 py-2 text-sm text-out">{erreur}</p>}
 
-            <div className="mt-4 flex gap-3">
+            <div className="mt-5 flex flex-col-reverse gap-2">
               <button
                 onClick={fermer}
                 disabled={pending}
-                className="flex-1 rounded-xl border border-ink-700 py-3 font-semibold text-ink-600 active:bg-ink-800 disabled:opacity-50"
+                className="btn btn-plain w-full"
               >
                 Annuler
               </button>
               <button
                 onClick={valider}
                 disabled={pending || !proposition || proposition.groupes.length === 0}
-                className="flex-1 rounded-xl bg-court-500 py-3 font-bold text-white active:scale-[0.98] disabled:opacity-40"
+                className="btn btn-primary w-full"
               >
                 {pending
                   ? "…"
                   : proposition && proposition.groupes.length > 0
-                    ? `Valider la répartition (${proposition.groupes.length} joueur${proposition.groupes.length > 1 ? "s" : ""}, ${nbComptes} comptes)`
+                    ? (
+                      <span className="flex flex-col items-center leading-tight">
+                        <span>Valider la répartition</span>{" "}
+                        <span className="text-[13px] font-medium opacity-80">
+                          {`(${proposition.groupes.length} joueur${proposition.groupes.length > 1 ? "s" : ""}, ${nbComptes} comptes)`}
+                        </span>
+                      </span>
+                    )
                     : "Valider la répartition"}
               </button>
             </div>

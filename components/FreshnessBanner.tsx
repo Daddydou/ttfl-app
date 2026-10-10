@@ -5,19 +5,19 @@ import { freshness } from "@/lib/format";
 
 const TONE = {
   fresh: {
-    bg: "bg-avail/15 border-avail/30",
+    bg: "bg-avail/10",
     text: "text-avail",
     dot: "bg-avail",
     icon: "✓",
   },
   aging: {
-    bg: "bg-quest/15 border-quest/30",
+    bg: "bg-quest/10",
     text: "text-quest",
     dot: "bg-quest",
     icon: "•",
   },
   stale: {
-    bg: "bg-out/15 border-out/40",
+    bg: "bg-out/10",
     text: "text-out",
     dot: "bg-out",
     icon: "!",
@@ -45,7 +45,7 @@ export function FreshnessBanner({
 
   return (
     <div
-      className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 ${t.bg}`}
+      className={`flex items-center gap-3 rounded-[16px] px-4 py-3 ${t.bg}`}
     >
       <span className="relative flex h-2.5 w-2.5">
         {f.tone === "fresh" && (
@@ -53,9 +53,9 @@ export function FreshnessBanner({
         )}
         <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${t.dot}`} />
       </span>
-      <div className={`flex-1 text-sm font-medium ${t.text}`}>
+      <div className={`flex-1 text-[14px] font-medium ${t.text}`}>
         Calculé {f.label}
-        <span className="text-white/50"> · </span>
+        <span className="text-fg/40"> · </span>
         {injuryFresh ? (
           <span>injury report frais</span>
         ) : (

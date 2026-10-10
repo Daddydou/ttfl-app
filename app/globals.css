@@ -2,18 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------
+   Jetons de design (clair / sombre automatique, comme iOS).
+   Les valeurs sont des triplets RGB pour que Tailwind puisse appliquer
+   l'opacité (bg-out/10, text-fg/40…). Aucune couleur en dur ailleurs.
+   ------------------------------------------------------------------ */
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
+
+  --c-canvas: 242 242 247; /* fond de page (systemGroupedBackground) */
+  --c-surface: 255 255 255; /* cartes */
+  --c-surface-2: 242 242 247; /* tuile en creux dans une carte */
+  --c-fill: 229 229 234; /* pastilles, états pressés */
+  --c-thumb: 255 255 255; /* curseur du contrôle segmenté */
+  --c-line: 224 224 229; /* filets */
+  --c-line-strong: 199 199 204;
+  --c-fg: 17 17 19;
+  --c-fg-muted: 108 108 112; /* 5:1 sur blanc */
+  --c-fg-faint: 142 142 147; /* placeholders, éléments désactivés */
+  --c-accent: 194 65 12; /* texte / liens : orange foncé lisible */
+  --c-accent-fill: 207 69 16; /* boutons pleins (texte blanc ≥ 4,5:1) */
+  --c-accent-press: 178 56 10;
+  --c-on-accent: 255 255 255;
+  --c-avail: 36 138 61;
+  --c-quest: 156 90 0;
+  --c-doubt: 190 80 0;
+  --c-out: 215 0 21;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 20px rgb(0 0 0 / 0.05);
+  --shadow-float: 0 8px 32px rgb(0 0 0 / 0.16), 0 1px 0 rgb(255 255 255 / 0.6) inset;
+  --glass: rgb(255 255 255 / 0.82);
+  --glass-border: rgb(0 0 0 / 0.06);
+  --scrim: rgb(0 0 0 / 0.38);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-canvas: 0 0 0;
+    --c-surface: 28 28 30;
+    --c-surface-2: 44 44 46;
+    --c-fill: 58 58 60;
+    --c-thumb: 99 99 102;
+    --c-line: 56 56 58;
+    --c-line-strong: 72 72 74;
+    --c-fg: 245 245 247;
+    --c-fg-muted: 152 152 159;
+    --c-fg-faint: 99 99 102;
+    --c-accent: 255 159 67;
+    --c-accent-fill: 255 140 26;
+    --c-accent-press: 232 120 10;
+    --c-on-accent: 28 14 0;
+    --c-avail: 48 209 88;
+    --c-quest: 255 214 10;
+    --c-doubt: 255 159 10;
+    --c-out: 255 69 58;
+
+    --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
+    --shadow-float: 0 8px 32px rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.08) inset;
+    --glass: rgb(34 34 36 / 0.8);
+    --glass-border: rgb(255 255 255 / 0.08);
+    --scrim: rgb(0 0 0 / 0.6);
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
 }
 
 html,
 body {
-  background-color: #0a0e14;
-  color: #e5e9f0;
+  background-color: rgb(var(--c-canvas));
+  color: rgb(var(--c-fg));
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Zone de sécurité iOS (encoche + barre home) pour la nav du bas. */
+::selection {
+  background: rgb(var(--c-accent-fill) / 0.25);
+}
+
+/* Zones de sécurité iOS (encoche + barre home). */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -21,7 +89,7 @@ body {
   padding-top: env(safe-area-inset-top);
 }
 
-/* Empêche le zoom au focus sur les inputs iOS (<16px déclenche le zoom). */
+/* 16 px mini sur les champs : iOS ne zoome pas au focus (le zoom manuel reste permis). */
 input,
 select,
 textarea,
@@ -29,9 +97,187 @@ button {
   font-size: 16px;
 }
 
-/* Masque la molette des inputs number sans casser la saisie. */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* Focus clavier visible, sans anneau au toucher. */
+:focus-visible {
+  outline: 2px solid rgb(var(--c-accent-fill));
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* Typographie (échelle iOS) */
+  .title-large {
+    @apply text-[34px] font-bold leading-[1.08] tracking-[-0.022em] text-fg;
+  }
+  .title-2 {
+    @apply text-[22px] font-bold leading-tight tracking-[-0.014em] text-fg;
+  }
+  .headline {
+    @apply text-[17px] font-semibold leading-snug tracking-[-0.01em] text-fg;
+  }
+  .subhead {
+    @apply text-[15px] leading-snug text-fg-muted;
+  }
+  .footnote {
+    @apply text-[13px] leading-snug text-fg-muted;
+  }
+  .section-label {
+    @apply px-4 text-[13px] font-medium uppercase tracking-[0.04em] text-fg-muted;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Surfaces */
+  .card {
+    @apply rounded-[20px] bg-surface;
+    box-shadow: var(--shadow-card);
+  }
+  .glass {
+    background: var(--glass);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    backdrop-filter: saturate(180%) blur(28px);
+    border: 0.5px solid var(--glass-border);
+  }
+
+  /* Boutons : 48 px de haut, rayon généreux, retour de pression discret */
+  .btn {
+    @apply inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-[14px] px-5 text-[17px] font-semibold tracking-[-0.01em] transition duration-150 ease-out;
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+  .btn-primary {
+    @apply bg-court-500 text-on-accent;
+  }
+  .btn-primary:active:not(:disabled) {
+    @apply bg-court-600;
+  }
+  .btn-secondary {
+    @apply bg-court-500/10 text-court-400;
+  }
+  .btn-secondary:active:not(:disabled) {
+    @apply bg-court-500/20;
+  }
+  .btn-danger {
+    @apply bg-out text-on-accent;
+  }
+  .btn-plain {
+    @apply bg-fill text-fg;
+  }
+  .btn-sm {
+    @apply min-h-[36px] rounded-full px-3.5 text-[14px];
+  }
+
+  /* Champs */
+  .field {
+    @apply w-full rounded-[12px] bg-surface-2 px-4 py-3 text-[17px] text-fg outline-none transition;
+    border: 1.5px solid transparent;
+  }
+  .field::placeholder {
+    color: rgb(var(--c-fg-faint));
+  }
+  .field:focus {
+    border-color: rgb(var(--c-accent-fill));
+    background: rgb(var(--c-surface));
+  }
+
+  /* Contrôle segmenté */
+  .seg {
+    @apply flex gap-0.5 rounded-[11px] bg-fill/70 p-0.5;
+  }
+  .seg-item {
+    @apply flex-1 rounded-[9px] px-2 py-[7px] text-center text-[14px] font-semibold text-fg-muted transition duration-150;
+  }
+  .seg-item-on {
+    @apply bg-thumb text-fg;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.16), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+  }
+
+  /* Pastilles de sélection (jours, mois) */
+  .chip {
+    @apply shrink-0 rounded-full bg-fill/80 px-3.5 py-1.5 text-center text-[13px] font-semibold capitalize text-fg transition duration-150;
+  }
+  .chip-on {
+    @apply bg-court-500 text-on-accent;
+  }
+
+  /* Feuille modale (bottom sheet) */
+  .sheet-backdrop {
+    @apply fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4;
+    background: var(--scrim);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    animation: fade-in 200ms ease-out;
+  }
+  .sheet {
+    @apply relative w-full max-w-md rounded-t-[28px] bg-surface px-5 pb-8 pt-7 sm:rounded-[28px];
+    box-shadow: var(--shadow-float);
+    animation: sheet-up 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+  }
+  .sheet::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 36px;
+    height: 5px;
+    margin-left: -18px;
+    border-radius: 3px;
+    background: rgb(var(--c-line-strong));
+  }
+
+  /* Liste groupée « inset » : lignes séparées par un filet inséré */
+  .list-row {
+    @apply relative flex items-center gap-3 px-4 py-3;
+  }
+  .list-row + .list-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 1rem;
+    right: 0;
+    height: 0.5px;
+    background: rgb(var(--c-line));
+  }
+}
+
+.page-enter {
+  animation: page-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(32px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
 }

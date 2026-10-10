@@ -1,5 +1,9 @@
 import type { Config } from "tailwindcss";
 
+// Les couleurs viennent de variables CSS (voir app/globals.css) : clair et
+// sombre se règlent à un seul endroit, et l'opacité (bg-out/10) fonctionne.
+const v = (name: string) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
@@ -9,28 +13,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Palette sombre (usage nocturne, matchs NBA la nuit).
-        ink: {
-          950: "#0a0e14",
-          900: "#0f1520",
-          850: "#141c2b",
-          800: "#1a2536",
-          700: "#25334a",
-          600: "#33445f",
-        },
-        // Accent = orange ballon de basket.
-        court: {
-          400: "#ff9f43",
-          500: "#f97316",
-          600: "#ea580c",
-        },
-        avail: "#22c55e",
-        quest: "#f59e0b",
-        doubt: "#fb923c",
-        out: "#ef4444",
+        canvas: v("canvas"),
+        surface: { DEFAULT: v("surface"), 2: v("surface-2") },
+        fill: v("fill"),
+        thumb: v("thumb"),
+        line: { DEFAULT: v("line"), strong: v("line-strong") },
+        fg: { DEFAULT: v("fg"), muted: v("fg-muted"), faint: v("fg-faint") },
+        "on-accent": v("on-accent"),
+        // Accent = orange ballon de basket. 400 = texte, 500 = fond plein.
+        court: { 400: v("accent"), 500: v("accent-fill"), 600: v("accent-press") },
+        avail: v("avail"),
+        quest: v("quest"),
+        doubt: v("doubt"),
+        out: v("out"),
       },
       fontFamily: {
-        sans: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "var(--font-inter)",
+          "Segoe UI",
+          "Roboto",
+          "system-ui",
+          "sans-serif",
+        ],
       },
       keyframes: {
         "pulse-ring": {

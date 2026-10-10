@@ -106,16 +106,16 @@ export default async function DashboardPage() {
         {run ? (
           <FreshnessBanner computedAt={run.computed_at} injuryFresh={run.injury_report_fresh} />
         ) : (
-          <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-8 text-center">
-            <p className="text-sm font-semibold text-white">Aucun calcul — lance le push sur ton PC</p>
-            <code className="mt-3 inline-block rounded-lg bg-ink-850 px-3 py-2 text-xs text-court-400">
+          <div className="card px-4 py-8 text-center">
+            <p className="text-sm font-semibold text-fg">Aucun calcul — lance le push sur ton PC</p>
+            <code className="mt-3 inline-block rounded-[10px] bg-surface-2 px-3 py-2 text-[13px] text-court-400">
               python push_to_supabase.py
             </code>
           </div>
         )}
         <Link
           href="/ce-soir"
-          className="block text-center text-xs font-medium text-ink-600 active:text-court-400"
+          className="block text-center text-[13px] font-medium text-fg-muted active:text-court-400"
         >
           Picks conseillés des 7 prochains jours →
         </Link>
@@ -173,10 +173,10 @@ async function BenchmarksBlock({ mode }: { mode: Mode }) {
 
 function BlockSkeleton() {
   return (
-    <div className="rounded-2xl border border-ink-800 bg-ink-900 p-4">
-      <div className="h-4 w-32 animate-pulse rounded bg-ink-850" />
-      <div className="mt-3 h-3 w-full animate-pulse rounded bg-ink-850" />
-      <div className="mt-2 h-3 w-2/3 animate-pulse rounded bg-ink-850" />
+    <div className="card p-4">
+      <div className="h-4 w-32 animate-pulse rounded bg-surface-2" />
+      <div className="mt-3 h-3 w-full animate-pulse rounded bg-surface-2" />
+      <div className="mt-2 h-3 w-2/3 animate-pulse rounded bg-surface-2" />
     </div>
   );
 }

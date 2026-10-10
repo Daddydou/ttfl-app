@@ -41,11 +41,11 @@ export function CumulativeChart({ points }: { points: CumPoint[] }) {
             x2={W - padR}
             y1={y(v)}
             y2={y(v)}
-            stroke="#25334a"
+            className="stroke-line-strong"
             strokeWidth="1"
             strokeDasharray="2 3"
           />
-          <text x={padL} y={y(v) - 2} fill="#33445f" fontSize="8">
+          <text x={padL} y={y(v) - 2} className="fill-fg-faint" fontSize="8">
             {v}
           </text>
         </g>
@@ -60,14 +60,14 @@ export function CumulativeChart({ points }: { points: CumPoint[] }) {
           width={barW}
           height={padT + ih - y(p.score)}
           rx={Math.min(3, barW / 2)}
-          fill={p.score === 0 ? "#ef4444" : "#f9731688"}
+          className={p.score === 0 ? "fill-out" : "fill-court-500/50"}
         />
       ))}
 
       {/* ligne de moyenne cumulée */}
-      <path d={line} fill="none" stroke="#ff9f43" strokeWidth="2" />
+      <path d={line} fill="none" className="stroke-court-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       {points.map((p, i) => (
-        <circle key={i} cx={x(i)} cy={y(p.cumAvg)} r="2" fill="#ff9f43" />
+        <circle key={i} cx={x(i)} cy={y(p.cumAvg)} r="2" className="fill-court-400" />
       ))}
     </svg>
   );

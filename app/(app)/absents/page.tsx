@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AbsentForm } from "@/components/AbsentForm";
 import { DeleteAbsentButton } from "@/components/DeleteAbsentButton";
 import { frDate, todayISO } from "@/lib/format";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { TtflManualAbsent } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -26,10 +27,11 @@ export default async function AbsentsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-ink-800 bg-ink-850/60 px-4 py-3">
-        <p className="text-xs leading-relaxed text-ink-600">
+      <PageHeader titre="Absents" sousTitre="Joueurs à exclure du classement" />
+      <div className="card px-4 py-3">
+        <p className="text-[13px] leading-relaxed text-fg-muted">
           Ces absents sont pris en compte au{" "}
-          <span className="font-semibold text-white">
+          <span className="font-semibold text-fg">
             prochain calcul du PC
           </span>{" "}
           (ils sont exclus du classement). Sers-t&apos;en pour ce que
@@ -41,11 +43,11 @@ export default async function AbsentsPage() {
       <AbsentForm today={today} />
 
       <section>
-        <h2 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-ink-600">
+        <h2 className="section-label mb-2">
           Absents en cours ({active.length})
         </h2>
         {active.length === 0 ? (
-          <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-8 text-center text-sm text-ink-600">
+          <div className="card px-4 py-8 text-center text-sm text-fg-muted">
             Aucun absent manuel actif.
           </div>
         ) : (
@@ -59,7 +61,7 @@ export default async function AbsentsPage() {
 
       {scheduled.length > 0 && (
         <section>
-          <h2 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-ink-600">
+          <h2 className="section-label mb-2">
             Programmés / passés ({scheduled.length})
           </h2>
           <div className="space-y-2 opacity-70">
@@ -75,10 +77,10 @@ export default async function AbsentsPage() {
 
 function AbsentRow({ a }: { a: TtflManualAbsent }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-ink-800 bg-ink-900 px-4 py-3">
+    <div className="card flex items-center gap-3 px-4 py-3">
       <div className="min-w-0 flex-1">
-        <div className="truncate font-semibold text-white">{a.player}</div>
-        <div className="text-xs text-ink-600">
+        <div className="truncate font-semibold text-fg">{a.player}</div>
+        <div className="text-[13px] text-fg-muted">
           {frDate(a.date_debut)}
           {a.date_fin ? ` → ${frDate(a.date_fin)}` : " → sans fin"}
           {a.raison ? ` · ${a.raison}` : ""}

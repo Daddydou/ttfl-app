@@ -32,12 +32,10 @@ export function JoursConseilles({
             href={hrefConseilles(j, pour)}
             role="tab"
             aria-selected={actif}
-            className={`shrink-0 rounded-xl px-3 py-2 text-center text-xs font-semibold capitalize transition ${
-              actif ? "bg-court-500 text-white" : "border border-ink-700 text-ink-600 active:text-white"
-            }`}
+            className={`chip !rounded-[20px] !px-3.5 !py-2 ${actif ? "chip-on" : ""}`}
           >
             <span className="block">{e.court}</span>
-            {e.relatif && <span className="block text-[10px] font-medium normal-case opacity-80">{e.relatif}</span>}
+            {e.relatif && <span className="block text-[11px] font-medium normal-case opacity-80">{e.relatif}</span>}
           </Link>
         );
       })}
@@ -48,16 +46,14 @@ export function JoursConseilles({
 // Pour quels comptes : le cycle de 30 jours est propre à chaque compte, donc le classement change selon la zone.
 export function ZonesConseilles({ courant, date }: { courant: ZoneId; date: string | null }) {
   return (
-    <div className="flex gap-1 rounded-xl bg-ink-850 p-1" role="tablist" aria-label="Comptes">
+    <div className="seg" role="tablist" aria-label="Comptes">
       {ZONES.map((z) => (
         <Link
           key={z.id}
           href={hrefConseilles(date, z.id)}
           role="tab"
           aria-selected={courant === z.id}
-          className={`flex-1 rounded-lg py-2 text-center text-sm font-semibold transition ${
-            courant === z.id ? "bg-court-500 text-white" : "text-ink-600 active:text-white"
-          }`}
+          className={`seg-item ${courant === z.id ? "seg-item-on" : ""}`}
         >
           {z.label}
         </Link>

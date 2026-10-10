@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { pickPlayerComptes } from "@/app/actions";
 import { frDate } from "@/lib/format";
+import { Icon } from "@/components/ui/Icon";
 import type { Mode } from "@/lib/types";
 
 // Valide un joueur pour une soirée sur les comptes d'une zone (Compte 1, Compte 2 ou les comptes libres de
@@ -29,7 +30,7 @@ export function PickZoneButton({
   const [pending, start] = useTransition();
 
   if (dejaPicke) {
-    return <span className="text-xs font-semibold text-avail">✓ Pické</span>;
+    return <span className="inline-flex items-center gap-1 text-[14px] font-semibold text-avail"><Icon name="coche" size={16} strokeWidth={2.4} />Pické</span>;
   }
 
   function valider() {
@@ -49,41 +50,41 @@ export function PickZoneButton({
     <>
       <button
         onClick={() => setConfirmer(true)}
-        className="rounded-xl bg-court-500 px-4 py-2 text-sm font-bold text-white transition active:scale-[0.97]"
+        className="btn btn-primary btn-sm"
       >
         Picker
       </button>
       {confirmer && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4"
+          className="sheet-backdrop"
           onClick={() => setConfirmer(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label={`Confirmer le pick de ${player}`}
-            className="w-full max-w-md rounded-t-3xl border border-ink-800 bg-ink-900 p-5 pb-8 sm:rounded-3xl"
+            className="sheet"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold text-white">Confirmer le pick</h3>
-            <p className="mt-1 text-sm text-ink-600">
-              Enregistrer <span className="font-semibold text-white">{player}</span> pour le{" "}
+            <h3 className="title-2">Confirmer le pick</h3>
+            <p className="mt-1 text-sm text-fg-muted">
+              Enregistrer <span className="font-semibold text-fg">{player}</span> pour le{" "}
               {frDate(date)} — {zoneLabel}
               {comptes.length > 1 ? ` (${comptes.length} comptes)` : ""}. Il sera bloqué 30 jours.
             </p>
-            {erreur && <p className="mt-3 rounded-lg bg-out/10 px-3 py-2 text-sm text-out">{erreur}</p>}
+            {erreur && <p className="mt-3 rounded-[10px] bg-out/10 px-3 py-2 text-sm text-out">{erreur}</p>}
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() => setConfirmer(false)}
                 disabled={pending}
-                className="flex-1 rounded-xl border border-ink-700 py-3 font-semibold text-ink-600 active:bg-ink-800 disabled:opacity-50"
+                className="btn btn-plain w-full"
               >
                 Annuler
               </button>
               <button
                 onClick={valider}
                 disabled={pending}
-                className="flex-1 rounded-xl bg-court-500 py-3 font-bold text-white active:scale-[0.98] disabled:opacity-50"
+                className="btn btn-primary w-full"
               >
                 {pending ? "…" : "Confirmer"}
               </button>

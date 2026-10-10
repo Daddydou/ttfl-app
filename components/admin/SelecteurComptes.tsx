@@ -24,8 +24,8 @@ export function SelecteurComptes({
   ];
   return (
     <fieldset className="mt-3">
-      <legend className="text-xs text-ink-600">
-        {legende} <span className="text-white">({valeur.length})</span>
+      <legend className="text-[13px] text-fg-muted">
+        {legende} <span className="text-fg">({valeur.length})</span>
       </legend>
       <div className="mt-1.5 flex flex-wrap gap-1.5">
         {TOUS.map((c) => (
@@ -35,15 +35,15 @@ export function SelecteurComptes({
             onClick={() => basculer(c)}
             aria-pressed={valeur.includes(c)}
             aria-label={`Compte ${c}`}
-            className={`h-9 w-11 rounded-lg text-sm font-bold tabular-nums transition ${
-              valeur.includes(c) ? "bg-court-500 text-white" : "border border-ink-700 text-ink-600 active:text-white"
+            className={`h-10 w-12 rounded-[12px] text-[15px] font-semibold tabular-nums transition ${
+              valeur.includes(c) ? "bg-court-500 text-on-accent" : "bg-fill/80 text-fg"
             }`}
           >
             {c}
           </button>
         ))}
       </div>
-      <div className="mt-2 flex flex-wrap gap-3 text-xs">
+      <div className="mt-2 flex flex-wrap gap-3 text-[13px]">
         {raccourcis.map((r) => (
           <button key={r.label} type="button" onClick={() => onChange(r.comptes)} className="font-semibold text-court-400">
             {r.label}

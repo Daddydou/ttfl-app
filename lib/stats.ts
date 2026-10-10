@@ -11,12 +11,12 @@ export interface Bucket {
 // Tranches demandées : zéros, <20, 20-30, 30-40, 40-50, >50.
 export function distribution(scores: number[]): Bucket[] {
   const defs: Omit<Bucket, "count">[] = [
-    { label: "> 50", min: 50, max: Infinity, color: "#22c55e" },
-    { label: "40–50", min: 40, max: 50, color: "#84cc16" },
-    { label: "30–40", min: 30, max: 40, color: "#f59e0b" },
-    { label: "20–30", min: 20, max: 30, color: "#fb923c" },
-    { label: "< 20", min: 1, max: 20, color: "#f97316" },
-    { label: "Zéros", min: 0, max: 1, color: "#ef4444" },
+    { label: "> 50", min: 50, max: Infinity, color: "rgb(var(--c-avail))" },
+    { label: "40–50", min: 40, max: 50, color: "rgb(var(--c-avail) / 0.6)" },
+    { label: "30–40", min: 30, max: 40, color: "rgb(var(--c-quest))" },
+    { label: "20–30", min: 20, max: 30, color: "rgb(var(--c-doubt))" },
+    { label: "< 20", min: 1, max: 20, color: "rgb(var(--c-accent-fill))" },
+    { label: "Zéros", min: 0, max: 1, color: "rgb(var(--c-out))" },
   ];
   return defs.map((d) => ({
     ...d,

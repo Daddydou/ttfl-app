@@ -19,9 +19,9 @@ export function hrefPicks(p: ParamsPicks): string {
   return `/picks?${q.toString()}`;
 }
 
-const base = "flex-1 rounded-lg py-2 text-center text-sm font-semibold transition";
-const actif = "bg-court-500 text-white";
-const inactif = "text-ink-600 active:text-white";
+const base = "seg-item";
+const actif = "seg-item-on";
+const inactif = "";
 
 // Planning (picks à l'avance, par soirée) / Historique (scores et stats du compte 1).
 export function VueTabs({ courant }: { courant: ParamsPicks }) {
@@ -30,7 +30,7 @@ export function VueTabs({ courant }: { courant: ParamsPicks }) {
     { vue: "historique", label: "Historique" },
   ];
   return (
-    <div className="flex gap-1 rounded-xl bg-ink-850 p-1">
+    <div className="seg">
       {onglets.map((o) => (
         <Link
           key={o.vue}
@@ -47,7 +47,7 @@ export function VueTabs({ courant }: { courant: ParamsPicks }) {
 // Compte 1 / Compte 2 / Équipe (10 comptes).
 export function ZoneTabs({ courant }: { courant: ParamsPicks }) {
   return (
-    <div className="flex gap-1 rounded-xl bg-ink-850 p-1">
+    <div className="seg">
       {ZONES.map((z) => (
         <Link
           key={z.id}
@@ -69,11 +69,7 @@ export function MoisTabs({ courant, mois }: { courant: ParamsPicks; mois: string
         <Link
           key={m}
           href={hrefPicks({ ...courant, vue: "planning", mois: m })}
-          className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold capitalize transition ${
-            courant.mois === m
-              ? "bg-court-500 text-white"
-              : "border border-ink-700 text-ink-600 active:text-white"
-          }`}
+          className={`chip ${courant.mois === m ? "chip-on" : ""}`}
         >
           {libelleMois(m)}
         </Link>

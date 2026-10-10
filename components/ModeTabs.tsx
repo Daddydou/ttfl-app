@@ -14,16 +14,13 @@ export function ModeTabs({
     { mode: "playoffs", label: "Playoffs" },
   ];
   return (
-    <div className="flex gap-1 rounded-xl bg-ink-850 p-1">
+    <div className="seg">
       {tabs.map((t) => (
         <Link
           key={t.mode}
           href={`${base}?mode=${t.mode}`}
-          className={`flex-1 rounded-lg py-2 text-center text-sm font-semibold transition ${
-            current === t.mode
-              ? "bg-court-500 text-white"
-              : "text-ink-600 active:text-white"
-          }`}
+          className={`seg-item ${current === t.mode ? "seg-item-on" : ""}`}
+          aria-current={current === t.mode ? "page" : undefined}
         >
           {t.label}
         </Link>

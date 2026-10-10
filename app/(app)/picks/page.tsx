@@ -8,6 +8,7 @@ import { RepartitionEquipe } from "@/components/RepartitionEquipe";
 import { EditionComptes } from "@/components/EditionComptes";
 import { MoisTabs, VueTabs, ZoneTabs, type ParamsPicks } from "@/components/PlanningTabs";
 import { frDate } from "@/lib/format";
+import { PageHeader } from "@/components/ui/PageHeader";
 import {
   aDesProjections,
   aujourdhuiNY,
@@ -159,6 +160,7 @@ export default async function PicksPage({
     const params: ParamsPicks = { mode, vue, zone: data.zone.id, mois: data.moisCourant };
     return (
       <div className="space-y-4">
+        <PageHeader titre="Mes picks" sousTitre="Planning et historique de tes comptes" />
         <ModeTabs base="/picks" current={mode} />
         <VueTabs courant={params} />
         <PlanningVue params={params} data={data} mode={mode} />
@@ -170,6 +172,7 @@ export default async function PicksPage({
   const params: ParamsPicks = { mode, vue, zone: zoneDe(zoneParam).id };
   return (
     <div className="space-y-4">
+      <PageHeader titre="Mes picks" sousTitre="Historique du compte 1" />
       <ModeTabs base="/picks" current={mode} />
       {mode === "regular" && <VueTabs courant={params} />}
       <HistoriqueVue rows={rows} mode={mode} />
@@ -214,15 +217,15 @@ function PlanningVue({
       <MoisTabs courant={params} mois={mois} />
 
       {erreur && (
-        <p className="rounded-xl bg-out/10 px-4 py-3 text-sm text-out">
+        <p className="rounded-[14px] bg-out/10 px-4 py-3 text-sm text-out">
           Lecture impossible : {erreur}
         </p>
       )}
 
       {nuits.length === 0 ? (
-        <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-10 text-center">
-          <p className="text-sm text-ink-600">Aucune soirée connue ce mois-ci.</p>
-          <p className="mt-1 text-xs text-ink-600">
+        <div className="card px-4 py-10 text-center">
+          <p className="text-sm text-fg-muted">Aucune soirée connue ce mois-ci.</p>
+          <p className="mt-1 text-[13px] text-fg-muted">
             Les soirées à venir apparaissent après{" "}
             <code className="text-court-400">python -m pont.push_avance</code> sur le PC.
           </p>
@@ -232,12 +235,12 @@ function PlanningVue({
           {nuits.map((n) => (
             <section
               key={n.date}
-              className={`rounded-2xl border border-ink-800 bg-ink-900 p-4 ${n.passee ? "opacity-60" : ""}`}
+              className={`card p-4 ${n.passee ? "opacity-60" : ""}`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h2 className="font-bold capitalize text-white">{frDate(n.date)}</h2>
-                  <p className="text-xs text-ink-600">
+                  <h2 className="text-[19px] font-bold capitalize tracking-[-0.01em] text-fg">{frDate(n.date)}</h2>
+                  <p className="text-[13px] text-fg-muted">
                     {!n.nuit
                       ? "Soirée sans projection"
                       : avanceSeule(n.nuit)
@@ -247,7 +250,7 @@ function PlanningVue({
                 </div>
                 {n.envoi.label && (
                   <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${STYLES_ENVOI[n.envoi.etat]}`}
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[13px] font-semibold ${STYLES_ENVOI[n.envoi.etat]}`}
                   >
                     {n.envoi.label}
                   </span>
@@ -255,11 +258,11 @@ function PlanningVue({
               </div>
 
               <p
-                className={`mt-2 text-sm ${n.resume.etat === "aucun" ? "text-ink-600" : "font-semibold text-white"}`}
+                className={`mt-2 text-sm ${n.resume.etat === "aucun" ? "text-fg-muted" : "font-semibold text-fg"}`}
               >
                 {libellePick(n.resume)}
               </p>
-              {n.envoi.detail && <p className="mt-1 text-xs text-out">{n.envoi.detail}</p>}
+              {n.envoi.detail && <p className="mt-1 text-[13px] text-out">{n.envoi.detail}</p>}
 
               {!n.passee && (
                 <NuitPicker
@@ -297,7 +300,7 @@ function PlanningVue({
         </div>
       )}
 
-      <p className="px-1 text-xs text-ink-600">
+      <p className="px-1 text-[13px] text-fg-muted">
         Ce que tu choisis ici est l&apos;état voulu : le robot du PC l&apos;envoie ensuite sur le site
         TTFL et signale « Conflit » si le site dit autre chose. Un joueur pické à 30 jours ou moins
         sur un compte de la zone est grisé.
@@ -322,12 +325,12 @@ function HistoriqueVue({ rows, mode }: { rows: TtflPick[]; mode: Mode }) {
       </div>
 
       {mode === "playoffs" && (
-        <div className="rounded-xl border border-court-600/30 bg-court-500/[0.06] px-4 py-3">
+        <div className="rounded-[20px] bg-court-500/10 px-4 py-3">
           <div className="flex items-baseline justify-between">
             <span className="text-sm font-semibold text-court-400">Usage unique</span>
-            <span className="text-2xl font-black tabular-nums text-white">{rows.length}</span>
+            <span className="text-2xl font-bold tabular-nums text-fg">{rows.length}</span>
           </div>
-          <p className="mt-0.5 text-xs text-ink-600">
+          <p className="mt-0.5 text-[13px] text-fg-muted">
             joueur(s) consommé(s) sur l&apos;ensemble des playoffs — chacun ne peut être pické
             qu&apos;une fois.
           </p>
@@ -335,22 +338,22 @@ function HistoriqueVue({ rows, mode }: { rows: TtflPick[]; mode: Mode }) {
       )}
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-10 text-center">
-          <p className="text-sm text-ink-600">
+        <div className="card px-4 py-10 text-center">
+          <p className="text-sm text-fg-muted">
             Aucun pick en {mode === "playoffs" ? "playoffs" : "saison régulière"} pour
             l&apos;instant.
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-ink-800 bg-ink-900">
+        <div className="card overflow-hidden">
           {rows.map((p) => (
             <div
               key={p.id}
-              className="flex items-center gap-3 border-b border-ink-800 px-3 py-3 last:border-0"
+              className="list-row"
             >
               <div className="min-w-0 flex-1">
-                <div className="truncate font-semibold text-white">{p.player}</div>
-                <div className="text-xs text-ink-600">{frDate(p.pick_date)}</div>
+                <div className="truncate font-semibold text-fg">{p.player}</div>
+                <div className="text-[13px] text-fg-muted">{frDate(p.pick_date)}</div>
               </div>
               <ScoreInput pickId={p.id} score={p.score} />
               <DeletePickButton pickId={p.id} player={p.player} />
@@ -359,7 +362,7 @@ function HistoriqueVue({ rows, mode }: { rows: TtflPick[]; mode: Mode }) {
         </div>
       )}
 
-      <p className="px-1 text-xs text-ink-600">
+      <p className="px-1 text-[13px] text-fg-muted">
         Historique du compte 1. Saisis le score réel après la soirée : touche le champ, tape le
         total TTFL, valide. Il alimente tes stats et confirme le blocage du joueur.
       </p>
@@ -369,11 +372,11 @@ function HistoriqueVue({ rows, mode }: { rows: TtflPick[]; mode: Mode }) {
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-xl border border-ink-800 bg-ink-900 px-3 py-2.5 text-center">
-      <div className={`text-2xl font-black tabular-nums ${accent ? "text-court-400" : "text-white"}`}>
+    <div className="card px-3 py-3 text-center">
+      <div className={`text-2xl font-bold tabular-nums ${accent ? "text-court-400" : "text-fg"}`}>
         {value}
       </div>
-      <div className="text-[11px] uppercase tracking-wide text-ink-600">{label}</div>
+      <div className="text-[11px] uppercase tracking-wide text-fg-muted">{label}</div>
     </div>
   );
 }

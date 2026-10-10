@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addAbsent } from "@/app/actions";
+import { Icon } from "@/components/ui/Icon";
 
 export function AbsentForm({ today }: { today: string }) {
   const router = useRouter();
@@ -35,42 +36,43 @@ export function AbsentForm({ today }: { today: string }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-xl border border-dashed border-ink-700 py-3.5 text-sm font-semibold text-ink-600 transition active:border-court-500 active:text-court-400"
+        className="btn btn-secondary w-full"
       >
-        + Ajouter un absent
+        <Icon name="plus" size={20} strokeWidth={2.2} />
+        Ajouter un absent
       </button>
     );
   }
 
   return (
-    <div className="space-y-3 rounded-2xl border border-ink-800 bg-ink-900 p-4">
+    <div className="card space-y-3 p-4">
       <input
         autoFocus
         value={player}
         onChange={(e) => setPlayer(e.target.value)}
         placeholder="Nom du joueur (ex. Jayson Tatum)"
-        className="w-full rounded-xl border border-ink-700 bg-ink-850 px-3.5 py-3 text-white outline-none focus:border-court-500"
+        className="field w-full"
       />
       <div className="flex gap-3">
         <label className="flex-1">
-          <span className="mb-1 block text-xs text-ink-600">Début</span>
+          <span className="mb-1 block text-[13px] text-fg-muted">Début</span>
           <input
             type="date"
             value={debut}
             onChange={(e) => setDebut(e.target.value)}
-            className="w-full rounded-xl border border-ink-700 bg-ink-850 px-3 py-2.5 text-white outline-none focus:border-court-500"
+            className="field w-full"
           />
         </label>
         <label className="flex-1">
-          <span className="mb-1 block text-xs text-ink-600">
-            Fin <span className="text-ink-700">(option.)</span>
+          <span className="mb-1 block text-[13px] text-fg-muted">
+            Fin <span className="text-fg-faint">(option.)</span>
           </span>
           <input
             type="date"
             value={fin}
             min={debut}
             onChange={(e) => setFin(e.target.value)}
-            className="w-full rounded-xl border border-ink-700 bg-ink-850 px-3 py-2.5 text-white outline-none focus:border-court-500"
+            className="field w-full"
           />
         </label>
       </div>
@@ -78,10 +80,10 @@ export function AbsentForm({ today }: { today: string }) {
         value={raison}
         onChange={(e) => setRaison(e.target.value)}
         placeholder="Raison (ex. repos annoncé en conférence)"
-        className="w-full rounded-xl border border-ink-700 bg-ink-850 px-3.5 py-3 text-white outline-none focus:border-court-500"
+        className="field w-full"
       />
       {error && (
-        <p className="rounded-lg bg-out/10 px-3 py-2 text-sm text-out">{error}</p>
+        <p className="rounded-[10px] bg-out/10 px-3 py-2 text-sm text-out">{error}</p>
       )}
       <div className="flex gap-3 pt-1">
         <button
@@ -90,14 +92,14 @@ export function AbsentForm({ today }: { today: string }) {
             setError(null);
           }}
           disabled={pending}
-          className="flex-1 rounded-xl border border-ink-700 py-3 font-semibold text-ink-600 active:bg-ink-800 disabled:opacity-50"
+          className="btn btn-plain w-full"
         >
           Annuler
         </button>
         <button
           onClick={submit}
           disabled={pending || !player.trim()}
-          className="flex-1 rounded-xl bg-court-500 py-3 font-bold text-white active:scale-[0.98] disabled:opacity-50"
+          className="btn btn-primary w-full"
         >
           {pending ? "…" : "Ajouter"}
         </button>

@@ -46,51 +46,51 @@ export function EditionComptes({
     <>
       <button
         onClick={() => setOuvert(true)}
-        className="mt-2 w-full rounded-xl border border-ink-700 py-2.5 text-sm font-semibold text-ink-600 transition active:scale-[0.98] active:text-white"
+        className="btn btn-plain mt-2 w-full !min-h-[44px] !text-[15px]"
       >
         Modifier certains comptes
       </button>
 
       {ouvert && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4"
+          className="sheet-backdrop"
           onClick={fermer}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label={`Modifier des comptes pour le ${frDate(date)}`}
-            className="flex max-h-[88vh] w-full max-w-md flex-col rounded-t-3xl border border-ink-800 bg-ink-900 p-5 pb-6 sm:rounded-3xl"
+            className="sheet flex max-h-[88vh] flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold text-white">Comptes du {frDate(date)}</h3>
-            <p className="mt-0.5 text-sm text-ink-600">
+            <h3 className="title-2">Comptes du {frDate(date)}</h3>
+            <p className="mt-0.5 text-sm text-fg-muted">
               Coche les comptes à modifier : les autres ne changent pas.
             </p>
 
-            <div className="mt-3 flex items-center justify-between text-xs">
-              <span className="text-ink-600">
+            <div className="mt-3 flex items-center justify-between text-[13px]">
+              <span className="text-fg-muted">
                 {selection.length} sélectionné{selection.length > 1 ? "s" : ""}
               </span>
               <span className="flex gap-3">
                 <button onClick={() => setSelection([...comptes])} className="font-semibold text-court-400">
                   Tout sélectionner
                 </button>
-                <button onClick={() => setSelection([])} className="font-semibold text-ink-600">
+                <button onClick={() => setSelection([])} className="font-semibold text-fg-muted">
                   Aucun
                 </button>
               </span>
             </div>
 
-            <ul className="mt-2 min-h-[8rem] flex-1 overflow-y-auto rounded-xl border border-ink-800">
+            <ul className="mt-2 min-h-[8rem] flex-1 overflow-y-auto rounded-[16px] bg-surface-2">
               {comptes.map((c) => {
                 const coche = selection.includes(c);
                 const joueur = parCompte[c];
                 return (
-                  <li key={c} className="border-b border-ink-800 last:border-0">
+                  <li key={c} className="border-b border-line last:border-0">
                     <label
                       className={`flex cursor-pointer items-center gap-3 px-3 py-2.5 ${
-                        coche ? "bg-court-500/15" : "active:bg-ink-850"
+                        coche ? "bg-court-500/15" : "active:bg-fill"
                       }`}
                     >
                       <input
@@ -98,10 +98,10 @@ export function EditionComptes({
                         checked={coche}
                         onChange={() => basculer(c)}
                         aria-label={`Compte ${c}`}
-                        className="h-5 w-5 accent-court-500"
+                        className="h-6 w-6 shrink-0 accent-court-500"
                       />
-                      <span className="w-16 shrink-0 text-sm font-semibold text-white">Compte {c}</span>
-                      <span className={`min-w-0 flex-1 truncate text-right text-sm ${joueur ? "text-white" : "text-ink-600"}`}>
+                      <span className="w-24 shrink-0 whitespace-nowrap text-[16px] font-semibold text-fg">Compte {c}</span>
+                      <span className={`min-w-0 flex-1 truncate text-right text-sm ${joueur ? "text-fg" : "text-fg-muted"}`}>
                         {joueur ?? "aucun pick"}
                       </span>
                     </label>
@@ -122,12 +122,12 @@ export function EditionComptes({
                 bloques={bloquesSelection}
               />
             ) : (
-              <p className="mt-3 text-center text-xs text-ink-600">Coche au moins un compte pour choisir un joueur.</p>
+              <p className="mt-3 text-center text-[13px] text-fg-muted">Coche au moins un compte pour choisir un joueur.</p>
             )}
 
             <button
               onClick={fermer}
-              className="mt-3 w-full rounded-xl border border-ink-700 py-3 font-semibold text-ink-600 active:bg-ink-800"
+              className="btn btn-plain mt-3 w-full"
             >
               Fermer
             </button>

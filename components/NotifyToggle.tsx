@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 type Perm = NotificationPermission | "unsupported";
 
@@ -29,9 +30,9 @@ export function NotifyToggle() {
       onClick={() => Notification.requestPermission().finally(() => setAsked(true))}
       aria-label="Activer les notifications de nouvelles projections"
       title="Me prévenir des nouvelles projections"
-      className="text-base leading-none text-ink-600 transition active:text-white"
+      className="flex h-8 w-8 items-center justify-center rounded-full text-fg-muted transition active:bg-fill active:text-fg"
     >
-      🔔
+      <Icon name="cloche" size={20} />
     </button>
   );
 }

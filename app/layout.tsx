@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { RegisterSW } from "@/components/RegisterSW";
+
+// Inter sert de repli hors Apple : sur iPhone/Mac, la police système (SF) passe devant.
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
   title: "TTFL — Le pick du soir",
@@ -17,12 +21,15 @@ export const metadata: Metadata = {
   },
 };
 
+// Pas de maximumScale : le zoom reste possible (accessibilité). Les champs en 16 px évitent le zoom auto d'iOS.
 export const viewport: Viewport = {
-  themeColor: "#0a0e14",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f2f2f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+  colorScheme: "light dark",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
 };
 
@@ -32,8 +39,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
-      <body className="min-h-screen bg-ink-950 antialiased">
+    <html lang="fr" className={inter.variable}>
+      <body className="min-h-screen bg-canvas font-sans antialiased">
         {children}
         <RegisterSW />
       </body>

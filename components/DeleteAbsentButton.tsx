@@ -28,7 +28,7 @@ export function DeleteAbsentButton({
     return (
       <button
         onClick={() => setArmed(true)}
-        className="shrink-0 rounded-lg border border-ink-700 px-3 py-1.5 text-xs font-medium text-ink-600 transition active:border-avail active:text-avail"
+        className="btn btn-plain btn-sm shrink-0"
       >
         De retour
       </button>
@@ -39,7 +39,7 @@ export function DeleteAbsentButton({
     <button
       onClick={remove}
       disabled={pending}
-      className="shrink-0 rounded-lg bg-avail/15 px-3 py-1.5 text-xs font-semibold text-avail disabled:opacity-50"
+      className="btn btn-sm shrink-0 bg-avail/15 text-avail"
       aria-label={`Retirer ${player} des absents`}
     >
       {pending ? "…" : "Confirmer"}
