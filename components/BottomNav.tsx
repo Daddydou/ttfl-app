@@ -9,6 +9,7 @@ const TABS = [
   { href: "/picks", label: "Mes picks", icon: "📋" },
   { href: "/stats", label: "Stats", icon: "📊" },
   { href: "/absents", label: "Absents", icon: "🚑" },
+  { href: "/admin", label: "Admin", icon: "⚙️" },
 ];
 
 export function BottomNav() {
@@ -26,12 +27,12 @@ export function BottomNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition ${
+              className={`flex flex-1 flex-col items-center gap-0.5 px-0.5 py-2.5 text-[10px] font-medium transition ${
                 active ? "text-court-400" : "text-ink-600"
               }`}
             >
               <span className="text-xl leading-none">{tab.icon}</span>
-              <span>{tab.label}</span>
+              <span className="text-center leading-tight">{tab.label}</span>
             </Link>
           );
         })}
