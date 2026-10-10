@@ -5,6 +5,7 @@ import { ModeTabs } from "@/components/ModeTabs";
 import { DeletePickButton } from "@/components/DeletePickButton";
 import { NuitPicker } from "@/components/NuitPicker";
 import { RepartitionEquipe } from "@/components/RepartitionEquipe";
+import { EditionComptes } from "@/components/EditionComptes";
 import { MoisTabs, VueTabs, ZoneTabs, type ParamsPicks } from "@/components/PlanningTabs";
 import { frDate } from "@/lib/format";
 import {
@@ -53,6 +54,7 @@ interface NuitVue {
   envoi: ResumeEnvoi;
   dejaPose: boolean; // au moins un compte a ce pick posé sur le site TTFL
   bloques: Record<string, string[]>;
+  parCompte: Record<string, string>; // compte → joueur pické pour cette soirée
   passee: boolean;
 }
 
@@ -117,6 +119,7 @@ async function chargerPlanning(
         envoi: resumeEnvois(envoisDuSoir, resume.nPicks),
         dejaPose: envoisDuSoir.some((e) => e.statut === "confirme"),
         bloques: bloquesPourSoiree(picks, zone.comptes, date),
+        parCompte: Object.fromEntries(picks.filter((p) => p.pick_date === date).map((p) => [p.compte, p.player])),
         passee: date < aujourdhui,
       };
     });
@@ -276,6 +279,16 @@ function PlanningVue({
                   comptes={zone.comptes}
                   bloques={n.bloques}
                   aUnPick={n.resume.nPicks > 0}
+                  dejaPose={n.dejaPose}
+                />
+              )}
+              {!n.passee && zone.comptes.length > 1 && (
+                <EditionComptes
+                  mode={mode}
+                  date={n.date}
+                  comptes={zone.comptes}
+                  parCompte={n.parCompte}
+                  bloques={n.bloques}
                   dejaPose={n.dejaPose}
                 />
               )}

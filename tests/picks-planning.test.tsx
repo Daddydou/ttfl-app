@@ -135,6 +135,12 @@ describe("Page « Mes picks » — planning", () => {
   it("ne propose pas la répartition pour un compte seul (Compte 1)", async () => {
     await renderPage({ zone: "c01" }, { ttfl_nuits: [nuit("2026-10-20")] });
     expect(screen.queryByRole("button", { name: "Répartir l'équipe" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Modifier certains comptes" })).not.toBeInTheDocument();
+  });
+
+  it("propose « Modifier certains comptes » pour l'Équipe (soirée à venir seulement)", async () => {
+    await renderPage({ zone: "equipe" }, { ttfl_nuits: [nuit("2026-10-05"), nuit("2026-10-20")] });
+    expect(screen.getAllByRole("button", { name: "Modifier certains comptes" })).toHaveLength(1);
   });
 
   it("explique comment alimenter le planning quand le mois est vide", async () => {

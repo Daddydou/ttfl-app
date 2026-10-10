@@ -69,6 +69,27 @@ export interface TtflManualAbsent {
   created_at: string;
 }
 
+// Cotes de paris (The Odds API), import manuel côté PC (pont/import_cotes.py)
+// -- jamais automatique. Une ligne par joueur du Top 10 du soir ; une ligne
+// absente ou un champ ligne_* à null = pas encore importé ou marché
+// indisponible (présaison, pas encore ouvert, etc.) -- toujours afficher
+// "cote indispo" dans ce cas, jamais un vide ambigu avec 0.
+export interface TtflCotes {
+  id: number;
+  game_date: string;
+  mode: Mode;
+  player: string;
+  team: string | null;
+  opponent: string | null;
+  projection: number | null;
+  ligne_points: number | null;
+  ligne_rebonds: number | null;
+  ligne_passes: number | null;
+  score_reel: number | null;
+  bookmaker: string | null;
+  recupere_le: string;
+}
+
 // Repères modèle par tournoi (compute_benchmarks.py, côté PC). L'app ne
 // calcule rien : elle lit `total`/`avg`/`detail_json` tels que poussés.
 export type BenchmarkStrategy = "greedy" | "plan_by_round" | "doctrine";

@@ -4,32 +4,24 @@ import { createClient } from "@/lib/supabase/server";
 import { COMPTE_REF } from "@/lib/compte";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
-import { PickCard } from "@/components/PickCard";
 import { AlertsBanner, type Alert } from "@/components/AlertsBanner";
 import { BenchmarksCard } from "@/components/BenchmarksCard";
-import { ageMs, frDate, todayISO } from "@/lib/format";
-import { cycleBlocked, type CycleBlockedPlayer } from "@/lib/dashboard";
-import type {
-  Mode,
-  TtflBenchmark,
-  TtflManualAbsent,
-  TtflPick,
-  TtflProjection,
-  TtflRun,
-  TtflSeasonStats,
-} from "@/lib/types";
+import { PicksValidesCard } from "@/components/PicksValidesCard";
+import { picksAVenir } from "@/lib/conseilles";
+import { aujourdhuiNY } from "@/lib/planning";
+import { ageMs, todayISO } from "@/lib/format";
+import type { Mode, TtflBenchmark, TtflRun, TtflSeasonStats } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Tableau de bord — TTFL" };
+export const metadata = { title: "Tableau de bord - TTFL" };
 
-// LECTURE SEULE : cette page ne calcule ni score ni projection. Le
-// cycle-restant et les compteurs ci-dessous sont de la présentation pure
-// (soustraction de dates, comptage de lignes) à partir de ce que le moteur a
-// déjà écrit dans Supabase — voir lib/dashboard.ts.
+// LECTURE SEULE : cette page ne calcule ni score ni projection. Elle montre les picks validés à venir (compte 1),
+// les alertes et les repères ; le classement conseillé est dans l'onglet « Picks conseillés ».
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const today = todayISO();
+  const aujourdhui = aujourdhuiNY(); // une soirée NBA se date à New York
 
   // --- Ce qui doit peindre en premier : le run + les alertes qui en dépendent.
   const [{ data: run }, { data: expiredAbsents }] = await Promise.all([
@@ -47,33 +39,31 @@ export default async function DashboardPage() {
       .returns<{ id: number }[]>(),
   ]);
 
-  let recommended: TtflProjection | null = null;
-  let pickedPlayer: string | null = null;
-  if (run) {
-    const [{ data: projections }, { data: pick }] = await Promise.all([
-      supabase
-        .from("ttfl_projections")
-        .select("*")
-        .eq("run_id", run.id)
-        .order("rank", { ascending: true })
-        .returns<TtflProjection[]>(),
-      supabase
-        .from("ttfl_picks")
-        .select("player")
-        .eq("mode", run.mode)
-        .eq("pick_date", run.game_date)
-        .eq("compte", COMPTE_REF)
-        .maybeSingle<{ player: string }>(),
-    ]);
-    const rows = projections ?? [];
-    // JAMAIS supposer que le pick est rank=1 : on lit is_pick, comme partout
-    // ailleurs dans l'app (le plancher de qualité playoffs retient parfois un
-    // rang moins bien projeté).
-    recommended = rows.find((r) => r.is_pick) ?? rows[0] ?? null;
-    pickedPlayer = pick?.player ?? null;
-  }
-
   const mode: Mode = run?.mode ?? "regular";
+
+  const [pickRes, aVenirRes] = await Promise.all([
+    run
+      ? supabase
+          .from("ttfl_picks")
+          .select("player")
+          .eq("mode", run.mode)
+          .eq("pick_date", run.game_date)
+          .eq("compte", COMPTE_REF)
+          .maybeSingle<{ player: string }>()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("ttfl_picks")
+      .select("pick_date,player")
+      .eq("mode", mode)
+      .eq("compte", COMPTE_REF)
+      .gte("pick_date", aujourdhui)
+      .order("pick_date", { ascending: true })
+      .limit(60)
+      .returns<{ pick_date: string; player: string }[]>(),
+  ]);
+  const pickedPlayer = pickRes.data?.player ?? null;
+  const picksValides = picksAVenir(aVenirRes.data ?? [], aujourdhui);
+
   const runIsToday = run?.game_date === today;
 
   // --- Alertes, non bloquantes -------------------------------------------
@@ -108,74 +98,38 @@ export default async function DashboardPage() {
       <RealtimeRuns />
       <AlertsBanner alerts={alerts} />
 
-      {/* Bloc 1 — le pick du soir + fraîcheur ---------------------------- */}
+      {/* Bloc 1 — mes picks validés (compte 1) : une ligne par soirée, avec sa date ---- */}
+      <PicksValidesCard picks={picksValides} aujourdhui={aujourdhui} />
+
+      {/* Bloc 2 — fraîcheur du dernier calcul + accès aux picks conseillés ------------- */}
       <section className="space-y-3">
         {run ? (
-          <>
-            {!runIsToday && (
-              <div className="rounded-xl border border-quest/40 bg-quest/10 px-4 py-3">
-                <p className="text-sm font-semibold text-quest">
-                  Aucun calcul pour ce soir
-                </p>
-                <p className="mt-0.5 text-xs text-quest/80">
-                  Lance le push sur ton PC. Ci-dessous, le dernier classement
-                  connu ({frDate(run.game_date)}).
-                </p>
-              </div>
-            )}
-            <FreshnessBanner
-              computedAt={run.computed_at}
-              injuryFresh={run.injury_report_fresh}
-            />
-            {recommended && (
-              <PickCard
-                run={run}
-                pick={recommended}
-                alreadyPicked={pickedPlayer === recommended.player}
-              />
-            )}
-          </>
+          <FreshnessBanner computedAt={run.computed_at} injuryFresh={run.injury_report_fresh} />
         ) : (
           <div className="rounded-2xl border border-ink-800 bg-ink-900 px-4 py-8 text-center">
-            <p className="text-sm font-semibold text-white">
-              Aucun calcul — lance le push sur ton PC
-            </p>
+            <p className="text-sm font-semibold text-white">Aucun calcul — lance le push sur ton PC</p>
             <code className="mt-3 inline-block rounded-lg bg-ink-850 px-3 py-2 text-xs text-court-400">
               python push_to_supabase.py
             </code>
           </div>
         )}
-        {run && (
-          <Link
-            href="/ce-soir"
-            className="block text-center text-xs font-medium text-ink-600 active:text-court-400"
-          >
-            Voir le classement complet →
-          </Link>
-        )}
+        <Link
+          href="/ce-soir"
+          className="block text-center text-xs font-medium text-ink-600 active:text-court-400"
+        >
+          Picks conseillés des 7 prochains jours →
+        </Link>
       </section>
 
-      {/* Bloc 2 — toi vs les repères modèle ------------------------------ */}
+      {/* Bloc 3 — toi vs les repères modèle ------------------------------ */}
       <Suspense fallback={<BlockSkeleton />}>
         <BenchmarksBlock mode={mode} />
       </Suspense>
-
-      {/* Bloc 3 — cycle/usage + absents actifs --------------------------- */}
-      <Suspense fallback={<BlockSkeleton />}>
-        <CycleAbsentsBlock mode={mode} today={today} />
-      </Suspense>
-
-      {/* Emplacement réservé : prévision multi-jours (pas encore livrée) */}
-      <section className="rounded-2xl border border-dashed border-ink-800 px-4 py-5 text-center">
-        <p className="text-xs text-ink-600">
-          Bientôt : aperçu des prochains soirs
-        </p>
-      </section>
     </div>
   );
 }
 
-// --- Bloc 2 : repères modèle (streaming indépendant) ------------------------
+// --- Repères modèle (streaming indépendant) ---------------------------------
 
 async function BenchmarksBlock({ mode }: { mode: Mode }) {
   const supabase = await createClient();
@@ -214,142 +168,6 @@ async function BenchmarksBlock({ mode }: { mode: Mode }) {
       userTotal={stats?.total ?? 0}
       userAvg={stats?.avg ?? null}
     />
-  );
-}
-
-// --- Bloc 3 : cycle/usage + absents (streaming indépendant) -----------------
-
-async function CycleAbsentsBlock({
-  mode,
-  today,
-}: {
-  mode: Mode;
-  today: string;
-}) {
-  const supabase = await createClient();
-
-  const { data: absents } = await supabase
-    .from("ttfl_manual_absents")
-    .select("*")
-    .order("date_debut", { ascending: false })
-    .returns<TtflManualAbsent[]>();
-  const active = (absents ?? []).filter(
-    (a) => !a.date_fin || a.date_fin >= today,
-  );
-
-  let cycleOrUsage: React.ReactNode;
-  if (mode === "regular") {
-    // Le blocage dure 30 jours au plus : inutile de remonter plus loin.
-    const since = new Date(today + "T00:00:00Z");
-    since.setUTCDate(since.getUTCDate() - 30);
-    const { data: picks } = await supabase
-      .from("ttfl_picks")
-      .select("*")
-      .eq("mode", "regular")
-      .eq("compte", COMPTE_REF)
-      .gte("pick_date", since.toISOString().slice(0, 10))
-      .returns<TtflPick[]>();
-    cycleOrUsage = <CycleList blocked={cycleBlocked(picks ?? [], today)} />;
-  } else {
-    const { count } = await supabase
-      .from("ttfl_picks")
-      .select("id", { count: "exact", head: true })
-      .eq("mode", "playoffs")
-      .eq("compte", COMPTE_REF);
-    cycleOrUsage = <UsageCounter count={count ?? 0} />;
-  }
-
-  return (
-    <section className="space-y-3">
-      {cycleOrUsage}
-      <AbsentsSummary active={active} />
-    </section>
-  );
-}
-
-function CycleList({ blocked }: { blocked: CycleBlockedPlayer[] }) {
-  return (
-    <section className="rounded-2xl border border-ink-800 bg-ink-900 p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-white">Cycle 30 jours</h2>
-        <span className="rounded-full bg-ink-850 px-2.5 py-1 text-xs font-bold text-ink-600">
-          {blocked.length} bloqué{blocked.length > 1 ? "s" : ""}
-        </span>
-      </div>
-      {blocked.length === 0 ? (
-        <p className="text-xs text-ink-600">Aucun joueur bloqué actuellement.</p>
-      ) : (
-        <div className="space-y-1.5">
-          {blocked.slice(0, 8).map((b) => (
-            <div
-              key={b.player}
-              className="flex items-center justify-between gap-2 text-sm"
-            >
-              <span className="truncate text-white">{b.player}</span>
-              <span className="shrink-0 text-xs text-ink-600">
-                libre dans {b.daysLeft} j ({frDate(b.freeOn)})
-              </span>
-            </div>
-          ))}
-          {blocked.length > 8 && (
-            <p className="pt-1 text-xs text-ink-600">
-              +{blocked.length - 8} autre(s)
-            </p>
-          )}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function UsageCounter({ count }: { count: number }) {
-  return (
-    <section className="rounded-2xl border border-court-600/30 bg-court-500/[0.06] p-4">
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold text-court-400">
-          Usage unique — playoffs
-        </span>
-        <span className="text-2xl font-black tabular-nums text-white">
-          {count}
-        </span>
-      </div>
-      <p className="mt-0.5 text-xs text-ink-600">
-        joueur(s) consommé(s) sur l&apos;ensemble des playoffs.
-      </p>
-    </section>
-  );
-}
-
-function AbsentsSummary({ active }: { active: TtflManualAbsent[] }) {
-  return (
-    <section className="rounded-2xl border border-ink-800 bg-ink-900 p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-white">Absents actifs</h2>
-        <Link
-          href="/absents"
-          className="text-xs font-medium text-court-400 active:text-court-500"
-        >
-          Gérer →
-        </Link>
-      </div>
-      {active.length === 0 ? (
-        <p className="text-xs text-ink-600">Aucun absent manuel actif.</p>
-      ) : (
-        <div className="space-y-1.5">
-          {active.map((a) => (
-            <div
-              key={a.id}
-              className="flex items-center justify-between gap-2 text-sm"
-            >
-              <span className="truncate text-white">{a.player}</span>
-              <span className="shrink-0 truncate text-xs text-ink-600">
-                {a.raison ?? "—"}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
   );
 }
 
