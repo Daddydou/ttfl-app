@@ -4,6 +4,7 @@ import { ScoreInput } from "@/components/ScoreInput";
 import { ModeTabs } from "@/components/ModeTabs";
 import { DeletePickButton } from "@/components/DeletePickButton";
 import { NuitPicker } from "@/components/NuitPicker";
+import { RepartitionEquipe } from "@/components/RepartitionEquipe";
 import { MoisTabs, VueTabs, ZoneTabs, type ParamsPicks } from "@/components/PlanningTabs";
 import { frDate } from "@/lib/format";
 import {
@@ -266,6 +267,16 @@ function PlanningVue({
                   aUnPick={n.resume.nPicks > 0}
                   dejaPose={n.dejaPose}
                   bloques={n.bloques}
+                />
+              )}
+              {!n.passee && zone.comptes.length > 1 && (
+                <RepartitionEquipe
+                  mode={mode}
+                  date={n.date}
+                  comptes={zone.comptes}
+                  bloques={n.bloques}
+                  aUnPick={n.resume.nPicks > 0}
+                  dejaPose={n.dejaPose}
                 />
               )}
             </section>

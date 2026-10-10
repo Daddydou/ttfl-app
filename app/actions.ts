@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Mode, PlayerStatus } from "@/lib/types";
 import { COMPTE_REF } from "@/lib/compte";
+import { validerAffectations } from "@/lib/repartition";
 import {
   COMPTE_VALIDE,
   JOURS_CYCLE,
@@ -252,6 +253,59 @@ export async function retirerPickComptes(
   revalidatePath("/picks");
   revalidatePath("/stats");
   return { ok: true };
+}
+
+// Enregistre une RÉPARTITION de la soirée : plusieurs joueurs, chacun sur son groupe de comptes
+// (état VOULU, comme pickPlayerComptes). Le cycle de 30 jours est revérifié côté serveur, compte par compte,
+// car l'écran qui a calculé la proposition peut être périmé.
+export async function pickRepartition(
+  mode: Mode,
+  pickDate: string,
+  groupes: { player: string; comptes: string[] }[],
+): Promise<ActionResult> {
+  if (mode !== "regular") {
+    return { ok: false, error: "Le planning est disponible en saison régulière." };
+  }
+  if (!DATE_ISO.test(pickDate)) return { ok: false, error: "Date invalide." };
+  const liste = [...new Set(groupes.flatMap((g) => g.comptes))].filter((c) => COMPTE_VALIDE.test(c));
+  if (liste.length === 0) return { ok: false, error: "Comptes invalides." };
+
+  const supabase = await createClient();
+  const { data: voisins, error: errVoisins } = await supabase
+    .from("ttfl_picks")
+    .select("pick_date,player,compte")
+    .eq("mode", mode)
+    .in("compte", liste)
+    .gte("pick_date", ajouterJours(pickDate, -JOURS_CYCLE))
+    .lte("pick_date", ajouterJours(pickDate, JOURS_CYCLE))
+    .returns<PickLigne[]>();
+  if (errVoisins) return { ok: false, error: errVoisins.message };
+
+  const probleme = validerAffectations(groupes, voisins ?? [], pickDate);
+  if (probleme) return { ok: false, error: probleme };
+
+  const { error } = await supabase.from("ttfl_picks").upsert(
+    groupes.flatMap((g) =>
+      g.comptes.map((compte) => ({
+        mode,
+        pick_date: pickDate,
+        player: g.player.trim(),
+        compte,
+        source: "app",
+      })),
+    ),
+    { onConflict: "mode,pick_date,compte" },
+  );
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/");
+  revalidatePath("/ce-soir");
+  revalidatePath("/picks");
+  revalidatePath("/stats");
+  return {
+    ok: true,
+    message: `Répartition enregistrée le ${pickDate} : ${groupes.length} joueur(s) pour ${liste.length} compte(s).`,
+  };
 }
 
 // --- Absents manuels ---------------------------------------------------------

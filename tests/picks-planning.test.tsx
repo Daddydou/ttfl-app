@@ -9,6 +9,7 @@ vi.mock("@/app/actions", () => ({
   deletePick: vi.fn(),
   listerJoueursDuSoir: vi.fn(),
   pickPlayerComptes: vi.fn(),
+  pickRepartition: vi.fn(),
   retirerPickComptes: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
@@ -122,6 +123,18 @@ describe("Page « Mes picks » — planning", () => {
     // Une seule soirée (20/10) est encore modifiable.
     expect(screen.getAllByRole("button", { name: "Choisir un joueur" })).toHaveLength(1);
     expect(screen.getByText("Jamal Murray")).toBeInTheDocument(); // la passée reste affichée
+  });
+
+  it("propose « Répartir l'équipe » seulement pour une zone de plusieurs comptes et une soirée à venir", async () => {
+    const tables = { ttfl_nuits: [nuit("2026-10-05"), nuit("2026-10-20")] };
+    await renderPage({ zone: "equipe" }, tables);
+    // 20/10 à venir → un bouton ; 05/10 passée → aucun
+    expect(screen.getAllByRole("button", { name: "Répartir l'équipe" })).toHaveLength(1);
+  });
+
+  it("ne propose pas la répartition pour un compte seul (Compte 1)", async () => {
+    await renderPage({ zone: "c01" }, { ttfl_nuits: [nuit("2026-10-20")] });
+    expect(screen.queryByRole("button", { name: "Répartir l'équipe" })).not.toBeInTheDocument();
   });
 
   it("explique comment alimenter le planning quand le mois est vide", async () => {
