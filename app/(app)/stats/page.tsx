@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { COMPTE_REF } from "@/lib/compte";
 import { ModeTabs } from "@/components/ModeTabs";
@@ -107,7 +108,11 @@ export default async function StatsPage({
 
   return (
     <div className="space-y-5">
-      <PageHeader titre="Stats" sousTitre="Tes scores, comparés aux repères du moteur" />
+      <PageHeader
+        titre="Stats"
+        sousTitre="Tes scores, comparés aux repères du moteur"
+        action={<Link href="/absents" className="text-[13px] font-semibold text-court-400">Absents →</Link>}
+      />
       <ModeTabs base="/stats" current={mode} />
 
       {/* Tuiles résumé */}

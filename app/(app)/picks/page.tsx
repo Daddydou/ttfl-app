@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { COMPTE_REF } from "@/lib/compte";
 import { ScoreInput } from "@/components/ScoreInput";
@@ -160,7 +161,11 @@ export default async function PicksPage({
     const params: ParamsPicks = { mode, vue, zone: data.zone.id, mois: data.moisCourant };
     return (
       <div className="space-y-4">
-        <PageHeader titre="Mes picks" sousTitre="Planning et historique de tes comptes" />
+        <PageHeader
+          titre="Mes picks"
+          sousTitre="Planning et historique de tes comptes"
+          action={<Link href="/equipe" className="text-[13px] font-semibold text-court-400">Semaine équipe →</Link>}
+        />
         <ModeTabs base="/picks" current={mode} />
         <VueTabs courant={params} />
         <PlanningVue params={params} data={data} mode={mode} />
