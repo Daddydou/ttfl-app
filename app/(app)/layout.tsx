@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import { NewRunNotifier } from "@/components/NewRunNotifier";
 import { NotifyToggle } from "@/components/NotifyToggle";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { Icon } from "@/components/ui/Icon";
 import { modeLabel } from "@/lib/format";
 import { signOut } from "@/app/login/actions";
@@ -61,6 +62,7 @@ export default async function AppLayout({
       <main className="flex-1 px-4 pb-32 pt-3">{children}</main>
 
       <NewRunNotifier />
+      <PullToRefresh />
 
       <BottomNav />
     </div>
