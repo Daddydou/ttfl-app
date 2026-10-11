@@ -9,6 +9,7 @@ import { BenchmarksCard } from "@/components/BenchmarksCard";
 import { PicksValidesCard } from "@/components/PicksValidesCard";
 import { alerteCookies, alertePcSilencieux, type EtatCookies } from "@/lib/etat-robot";
 import { AlertesPicks } from "@/components/AlertesPicks";
+import { SauvegardeHorsLigne } from "@/components/SauvegardeHorsLigne";
 import { alertesPicksDuSoir, type AlertePick } from "@/lib/alertes-picks";
 import { chargerSoiree } from "@/lib/conseilles-data";
 import { fusionnerSoiree } from "@/lib/conseilles";
@@ -141,6 +142,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-5">
       <RealtimeRuns />
+      <SauvegardeHorsLigne soiree={run?.game_date ?? null} pickDuSoir={pickedPlayer} aVenir={picksValides} />
       <AlertsBanner alerts={alerts} />
       {run && <AlertesPicks alertes={alertesPicks} mode={run.mode} date={run.game_date} />}
 

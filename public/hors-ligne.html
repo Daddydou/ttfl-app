@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Hors ligne — TTFL</title>
+<style>
+  :root { --bg:#000; --fg:#f5f5f7; --muted:#9a9aa1; --card:#1c1c1e; --accent:#ff8a3d; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f2f2f7; --fg:#111; --muted:#6b6b72; --card:#fff; --accent:#d9631a; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+         padding:max(24px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom)); }
+  main { max-width:28rem; margin:0 auto; }
+  h1 { font-size:28px; margin:8px 0 4px; }
+  p { color:var(--muted); margin:4px 0 16px; }
+  .card { background:var(--card); border-radius:16px; padding:16px; margin:12px 0; }
+  .label { font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .pick { font-size:24px; font-weight:700; margin-top:4px; }
+  ul { list-style:none; margin:8px 0 0; padding:0; }
+  li { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px solid rgba(128,128,128,.25); }
+  li:first-child { border-top:0; }
+  button { width:100%; font:inherit; font-weight:600; color:#fff; background:var(--accent); border:0; border-radius:14px; padding:14px; margin-top:8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Pas de connexion</h1>
+  <p>Voici le dernier pick enregistré sur cet appareil.</p>
+  <section id="photo"></section>
+  <button type="button" id="reessayer">Réessayer</button>
+</main>
+<script>
+(function () {
+  var zone = document.getElementById("photo");
+  function carte(titre, contenu) {
+    var c = document.createElement("div"); c.className = "card";
+    var l = document.createElement("div"); l.className = "label"; l.textContent = titre;
+    c.appendChild(l); c.appendChild(contenu); zone.appendChild(c);
+  }
+  function texte(classe, t) { var d = document.createElement("div"); if (classe) d.className = classe; d.textContent = t; return d; }
+  function jour(iso) {
+    try { return new Date(iso + "T00:00:00Z").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }); }
+    catch (e) { return iso; }
+  }
+  var photo = null;
+  try { photo = JSON.parse(localStorage.getItem("ttfl:hors-ligne") || "null"); } catch (e) {}
+  if (!photo || !Array.isArray(photo.aVenir)) {
+    carte("Aucune donnée", texte("", "Ouvre l'appli une fois avec du réseau pour qu'elle garde le dernier pick ici."));
+  } else {
+    if (photo.pickDuSoir) carte("Pick du soir" + (photo.soiree ? " — " + jour(photo.soiree) : ""), texte("pick", String(photo.pickDuSoir)));
+    if (photo.aVenir.length) {
+      var ul = document.createElement("ul");
+      photo.aVenir.forEach(function (p) {
+        var li = document.createElement("li");
+        li.appendChild(texte("", jour(String(p.date)))); li.appendChild(texte("", String(p.joueur))); ul.appendChild(li);
+      });
+      carte("Picks validés à venir", ul);
+    }
+    var quand = new Date(photo.enregistreLe);
+    if (!isNaN(quand)) {
+      var p = document.createElement("p");
+      p.textContent = "Enregistré le " + quand.toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " — peut être périmé.";
+      zone.appendChild(p);
+    }
+  }
+  document.getElementById("reessayer").addEventListener("click", function () { location.href = "/"; });
+})();
+</script>
+</body>
+</html>

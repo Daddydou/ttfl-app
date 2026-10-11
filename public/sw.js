@@ -1,11 +1,12 @@
-// Service worker minimaliste : rend l'app installable et met en cache la
-// coquille statique (icônes, manifest). Il NE MET JAMAIS en cache les pages
+// Service worker minimaliste : rend l'app installable, met en cache la
+// coquille statique (icônes, manifest, page hors ligne). Il NE MET JAMAIS en cache les pages
 // HTML ni les appels Supabase — les données doivent rester fraîches (fraîcheur
 // d'avant-lock) et l'authentification ne doit jamais être servie depuis un cache.
 
-const CACHE = "ttfl-shell-v1";
+const CACHE = "ttfl-shell-v2";
 const SHELL = [
   "/manifest.webmanifest",
+  "/hors-ligne.html",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/icons/apple-touch-icon.png",
@@ -50,8 +51,19 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Tout le reste (pages, données) : réseau d'abord, sans mise en cache HTML.
-  // On laisse passer tel quel : pas de fallback stale sur des pages authentifiées.
+  // Pages : réseau d'abord. Si le réseau est coupé (échec de la requête), on affiche la page
+  // statique « hors ligne » qui relit la dernière photo du pick gardée dans le navigateur.
+  // Aucune page authentifiée n'est jamais mise en cache : on ne sert QUE cette page statique.
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request).catch(() =>
+        caches.match("/hors-ligne.html").then((r) => r || Response.error()),
+      ),
+    );
+    return;
+  }
+
+  // Tout le reste (données) : réseau tel quel, sans mise en cache.
 });
 
 // Clic sur la notification "nouvelles projections" (NewRunNotifier) : ramène

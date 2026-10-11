@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/LoginForm";
+import { EffacerHorsLigne } from "@/components/SauvegardeHorsLigne";
 import { Icon } from "@/components/ui/Icon";
 
 export const metadata = { title: "Connexion — TTFL" };
@@ -6,6 +7,7 @@ export const metadata = { title: "Connexion — TTFL" };
 export default function LoginPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6">
+      <EffacerHorsLigne />
       <div className="w-full max-w-sm">
         <div className="mb-10 text-center">
           <div

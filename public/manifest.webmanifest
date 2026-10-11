@@ -9,7 +9,9 @@
   "background_color": "#000000",
   "theme_color": "#000000",
   "lang": "fr",
-  "categories": ["sports"],
+  "categories": [
+    "sports"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -28,6 +30,26 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pick du soir",
+      "short_name": "Pick du soir",
+      "url": "/",
+      "description": "Le pick validé et les alertes"
+    },
+    {
+      "name": "Picks conseillés",
+      "short_name": "Conseillés",
+      "url": "/ce-soir",
+      "description": "Classement des 7 prochains jours"
+    },
+    {
+      "name": "Semaine de l'équipe",
+      "short_name": "Équipe",
+      "url": "/equipe",
+      "description": "10 comptes × 7 soirées"
     }
   ]
 }
