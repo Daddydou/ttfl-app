@@ -7,6 +7,7 @@ import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { AlertsBanner, type Alert } from "@/components/AlertsBanner";
 import { BenchmarksCard } from "@/components/BenchmarksCard";
 import { PicksValidesCard } from "@/components/PicksValidesCard";
+import { alerteCookies, alertePcSilencieux, type EtatCookies } from "@/lib/etat-robot";
 import { AlertesPicks } from "@/components/AlertesPicks";
 import { alertesPicksDuSoir, type AlertePick } from "@/lib/alertes-picks";
 import { chargerSoiree } from "@/lib/conseilles-data";
@@ -30,7 +31,7 @@ export default async function DashboardPage() {
   const aujourdhui = aujourdhuiNY(); // une soirée NBA se date à New York
 
   // --- Ce qui doit peindre en premier : le run + les alertes qui en dépendent.
-  const [{ data: run }, { data: expiredAbsents }] = await Promise.all([
+  const [{ data: run }, { data: expiredAbsents }, { data: etatsRobot }] = await Promise.all([
     supabase
       .from("ttfl_latest_run")
       .select("*")
@@ -43,6 +44,11 @@ export default async function DashboardPage() {
       .not("date_fin", "is", null)
       .lt("date_fin", today)
       .returns<{ id: number }[]>(),
+    supabase
+      .from("ttfl_robot_etat")
+      .select("cle,valeur,maj_le")
+      .in("cle", ["cookies", "commandes"])
+      .returns<{ cle: string; valeur: Record<string, unknown> | null; maj_le: string }[]>(),
   ]);
 
   const mode: Mode = run?.mode ?? "regular";
@@ -123,6 +129,14 @@ export default async function DashboardPage() {
       runDuSoirDisponible: !!soiree.runSoir,
     });
   }
+
+  // --- Santé du robot : cookies TTFL à renouveler, PC silencieux.
+  const cookiesEtat = etatsRobot?.find((e) => e.cle === "cookies");
+  const alerteCk = alerteCookies(cookiesEtat ? { ...(cookiesEtat.valeur as EtatCookies | null), le: (cookiesEtat.valeur as EtatCookies | null)?.le ?? cookiesEtat.maj_le } : null);
+  if (alerteCk) alerts.push(alerteCk);
+  const pouls = etatsRobot?.find((e) => e.cle === "commandes");
+  const alertePc = alertePcSilencieux((pouls?.valeur as { dernier_passage?: string } | null)?.dernier_passage ?? pouls?.maj_le);
+  if (alertePc) alerts.push(alertePc);
 
   return (
     <div className="space-y-5">
