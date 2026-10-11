@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { ActionsPC } from "@/components/admin/ActionsPC";
 import { HistoriqueCommandes, type Commande } from "@/components/admin/HistoriqueCommandes";
+import { JournalEnvois, type EntreeJournal } from "@/components/admin/JournalEnvois";
 import { PicksEnMasse } from "@/components/admin/PicksEnMasse";
 import { etatExecuteur } from "@/lib/admin";
 import { ageMs, humanAge } from "@/lib/format";
@@ -19,13 +20,19 @@ const PILULES = {
 
 export default async function AdminPage() {
   const supabase = await createClient();
-  const [commandesRes, poulsRes] = await Promise.all([
+  const [commandesRes, poulsRes, journalRes] = await Promise.all([
     supabase.from("ttfl_commandes").select("*").order("id", { ascending: false }).limit(30).returns<Commande[]>(),
     supabase
       .from("ttfl_robot_etat")
       .select("valeur,maj_le")
       .eq("cle", "commandes")
       .maybeSingle<{ valeur: { dernier_passage?: string } | null; maj_le: string }>(),
+    supabase
+      .from("ttfl_envois_journal")
+      .select("id,le,pick_date,compte,joueur,statut,message")
+      .order("id", { ascending: false })
+      .limit(40)
+      .returns<EntreeJournal[]>(),
   ]);
 
   const commandes = commandesRes.data ?? [];
@@ -55,6 +62,7 @@ export default async function AdminPage() {
 
       <ActionsPC actives={actives} />
       <HistoriqueCommandes commandes={commandes} />
+      <JournalEnvois entrees={journalRes.data ?? []} disponible={!journalRes.error} />
       <PicksEnMasse aujourdhui={aujourdhuiNY()} />
     </div>
   );
