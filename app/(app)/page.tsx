@@ -7,6 +7,12 @@ import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { AlertsBanner, type Alert } from "@/components/AlertsBanner";
 import { BenchmarksCard } from "@/components/BenchmarksCard";
 import { PicksValidesCard } from "@/components/PicksValidesCard";
+import { AlertesPicks } from "@/components/AlertesPicks";
+import { alertesPicksDuSoir, type AlertePick } from "@/lib/alertes-picks";
+import { chargerSoiree } from "@/lib/conseilles-data";
+import { fusionnerSoiree } from "@/lib/conseilles";
+import { JOURS_CYCLE, ajouterJours, type PickLigne } from "@/lib/planning";
+import type { TtflManualAbsent } from "@/lib/types";
 import { picksAVenir } from "@/lib/conseilles";
 import { aujourdhuiNY } from "@/lib/planning";
 import { ageMs, todayISO } from "@/lib/format";
@@ -93,10 +99,36 @@ export default async function DashboardPage() {
     });
   }
 
+  // --- Alertes avant matchs : picks de ce soir devenus Out / incertains, comptes sans pick, remplaçant proposé.
+  let alertesPicks: AlertePick[] = [];
+  if (run && run.mode === "regular" && run.game_date >= aujourdhui) {
+    const [soiree, voisinsRes, absentsRes] = await Promise.all([
+      chargerSoiree(supabase, run.mode, run.game_date),
+      supabase
+        .from("ttfl_picks")
+        .select("pick_date,player,compte")
+        .eq("mode", run.mode)
+        .gte("pick_date", ajouterJours(run.game_date, -JOURS_CYCLE))
+        .lte("pick_date", ajouterJours(run.game_date, JOURS_CYCLE))
+        .returns<PickLigne[]>(),
+      supabase.from("ttfl_manual_absents").select("*").returns<TtflManualAbsent[]>(),
+    ]);
+    const voisins = voisinsRes.data ?? [];
+    alertesPicks = alertesPicksDuSoir({
+      date: run.game_date,
+      picksDuSoir: voisins.filter((p) => p.pick_date === run.game_date),
+      voisins,
+      lignes: fusionnerSoiree(soiree.avance, soiree.soir),
+      absents: absentsRes.data ?? [],
+      runDuSoirDisponible: !!soiree.runSoir,
+    });
+  }
+
   return (
     <div className="space-y-5">
       <RealtimeRuns />
       <AlertsBanner alerts={alerts} />
+      {run && <AlertesPicks alertes={alertesPicks} mode={run.mode} date={run.game_date} />}
 
       {/* Bloc 1 — mes picks validés (compte 1) : une ligne par soirée, avec sa date ---- */}
       <PicksValidesCard picks={picksValides} aujourdhui={aujourdhui} />
