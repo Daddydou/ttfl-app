@@ -73,5 +73,5 @@ poussé dans Supabase.
 
 \- Décidé : pas de Web Push (notification app fermée), la version actuelle suffit.
 - Centre de surveillance TTFL (https://fantasy.trashtalk.co/?tpl=followers) : noter et garder en mémoire les picks validés par des joueurs suivis. À cadrer plus tard (l'utilisateur dit « on verra ce qu'on en fera »).
-- Matchup à ×1.00 en début de saison (table défense/poste vide) : tester dans le moteur un repli sur la saison précédente ou une comparaison joueur / équipe adverse (attaque, défense), avec backtest avant toute activation.
+- Matchup à ×1.00 en début de saison (table défense/poste vide) : TESTÉ le 15/10/2026 (ttfl : recherche/matchup_saison_precedente.py, 4 saisons, 33 variantes) → pas de gain démontré avec la saison précédente, le rythme ou le profil statistique ; l'historique contre l'adversaire DEGRADE le classement. Seule piste à surveiller : mélange saison précédente/courante K=20, poids 0.6 (+0.1 pt/soirée sur le top 10, non significatif). Rien à activer.
 - Stats : grande partie « Adversaires » à définir avec l'utilisateur.
