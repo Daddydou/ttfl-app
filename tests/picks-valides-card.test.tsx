@@ -3,14 +3,22 @@ import { render, screen, within } from "@testing-library/react";
 import { PicksValidesCard } from "@/components/PicksValidesCard";
 
 describe("PicksValidesCard", () => {
-  it("affiche chaque pick validé avec sa date : 6 joueurs validés = 6 lignes datées", () => {
+  it("n'affiche que les 5 prochaines dates", () => {
+    const picks = ["20", "21", "22", "23", "24", "25", "26"].map((j) => ({ pick_date: `2026-10-${j}`, player: `Joueur ${j}` }));
+    render(<PicksValidesCard picks={picks} aujourdhui="2026-10-20" />);
+    expect(screen.getAllByRole("listitem")).toHaveLength(5);
+    expect(screen.getByText("sur 7")).toBeInTheDocument();
+    expect(screen.queryByText("Joueur 25")).not.toBeInTheDocument();
+  });
+
+  it("affiche chaque pick validé avec sa date : 6 joueurs validés = 5 lignes datées (les 5 prochaines)", () => {
     const picks = [
       ["2026-10-20", "Nikola Jokic"], ["2026-10-21", "Luka Doncic"], ["2026-10-23", "Jayson Tatum"],
       ["2026-10-24", "Shai Gilgeous-Alexander"], ["2026-10-27", "Giannis Antetokounmpo"], ["2026-10-30", "Jalen Brunson"],
     ].map(([pick_date, player]) => ({ pick_date, player }));
     render(<PicksValidesCard picks={picks} aujourdhui="2026-10-20" />);
-    expect(screen.getAllByRole("listitem")).toHaveLength(6);
-    expect(screen.getByText("6")).toBeInTheDocument(); // compteur
+    expect(screen.getAllByRole("listitem")).toHaveLength(5);
+    expect(screen.getByText("sur 6")).toBeInTheDocument();
     const premiere = screen.getAllByRole("listitem")[0];
     expect(within(premiere).getByText("Nikola Jokic")).toBeInTheDocument();
     expect(premiere).toHaveTextContent(/20 oct/);

@@ -20,6 +20,8 @@ function Tuile({ iso }: { iso: string }) {
   );
 }
 
+const MAX_DATES = 5;
+
 export interface PickCompte {
   pick_date: string;
   player: string;
@@ -46,9 +48,10 @@ export function PicksValidesCard({
   autres?: PickCompte[];
   aujourdhui: string;
 }) {
-  const dates = autres
+  const toutes = autres
     ? [...new Set([...picks.map((p) => p.pick_date), ...autres.map((p) => p.pick_date)])].sort()
     : picks.map((p) => p.pick_date);
+  const dates = toutes.slice(0, MAX_DATES); // les 5 prochaines soirées ; le reste est dans « Gérer »
   const joueurC1 = new Map(picks.map((p) => [p.pick_date, p.player]));
   const parDateCompte = new Map<string, string>();
   for (const a of autres ?? []) parDateCompte.set(`${a.pick_date}|${a.compte}`, a.player);
@@ -60,6 +63,9 @@ export function PicksValidesCard({
           <span className="ml-2 align-middle rounded-full bg-fill px-2.5 py-0.5 text-[13px] font-semibold num text-fg-muted">
             {dates.length}
           </span>
+          {toutes.length > dates.length && (
+            <span className="ml-1.5 align-middle text-[12px] font-normal text-fg-faint">sur {toutes.length}</span>
+          )}
         </h2>
         <Link href="/picks" className="text-[15px] font-medium text-court-400 active:opacity-60">
           Gérer
