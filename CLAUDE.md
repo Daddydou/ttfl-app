@@ -72,3 +72,6 @@ poussé dans Supabase.
 \- Avis de l'agent IA sous le pick du soir (PickCard) : à faire une fois les bugs du projet Agents IA (mes-agents) corrigés.
 
 \- Décidé : pas de Web Push (notification app fermée), la version actuelle suffit.
+- Centre de surveillance TTFL (https://fantasy.trashtalk.co/?tpl=followers) : noter et garder en mémoire les picks validés par des joueurs suivis. À cadrer plus tard (l'utilisateur dit « on verra ce qu'on en fera »).
+- Matchup à ×1.00 en début de saison (table défense/poste vide) : tester dans le moteur un repli sur la saison précédente ou une comparaison joueur / équipe adverse (attaque, défense), avec backtest avant toute activation.
+- Stats : grande partie « Adversaires » à définir avec l'utilisateur.

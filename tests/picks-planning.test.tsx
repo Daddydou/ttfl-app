@@ -112,7 +112,7 @@ describe("Page « Mes picks » — planning", () => {
     expect(screen.getByText(/le site a « LeBron James »/)).toBeInTheDocument();
   });
 
-  it("propose le choix seulement pour les soirées à venir, pas pour les passées", async () => {
+  it("ne montre que les soirées à venir : le passé est masqué du planning", async () => {
     await renderPage(
       {},
       {
@@ -122,7 +122,7 @@ describe("Page « Mes picks » — planning", () => {
     );
     // Une seule soirée (20/10) est encore modifiable.
     expect(screen.getAllByRole("button", { name: "Choisir un joueur" })).toHaveLength(1);
-    expect(screen.getByText("Jamal Murray")).toBeInTheDocument(); // la passée reste affichée
+    expect(screen.queryByText("Jamal Murray")).not.toBeInTheDocument(); // le passé n'est plus dans le planning
   });
 
   it("propose « Répartir l'équipe » seulement pour une zone de plusieurs comptes et une soirée à venir", async () => {

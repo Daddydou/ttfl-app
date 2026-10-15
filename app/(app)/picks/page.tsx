@@ -100,7 +100,10 @@ async function chargerPlanning(
   const picks = (picksRes.data ?? []).filter((p) => zone.comptes.includes(p.compte));
   const envois = (envoisRes.data ?? []).filter((e) => zone.comptes.includes(e.compte));
 
-  const dates = new Set<string>([...nuits.map((n) => n.game_date), ...picks.map((p) => p.pick_date)]);
+  // Le planning ne montre que les soirées à venir (aujourd'hui compris) : le passé est dans « Historique ».
+  const dates = new Set<string>(
+    [...nuits.map((n) => n.game_date), ...picks.map((p) => p.pick_date)].filter((d) => d >= aujourdhui),
+  );
   const mois = moisDisponibles([...dates], aujourdhui);
   const moisCourant = estMoisValide(moisParam)
     ? moisParam

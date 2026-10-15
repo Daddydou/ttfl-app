@@ -30,3 +30,31 @@ describe("PicksValidesCard", () => {
     expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
   });
 });
+
+describe("PicksValidesCard — comptes", () => {
+  const picks = [{ pick_date: "2026-10-20", player: "Shai Gilgeous-Alexander" }];
+  const autres = [
+    { pick_date: "2026-10-20", player: "Jalen Brunson", compte: "02" },
+    { pick_date: "2026-10-20", player: "Nikola Jokic", compte: "03" },
+    { pick_date: "2026-10-20", player: "Luka Doncic", compte: "04" },
+    { pick_date: "2026-10-21", player: "Jayson Tatum", compte: "05" },
+  ];
+
+  it("affiche toujours les comptes 1 et 2, et replie les 10 comptes de l'équipe", () => {
+    const { container } = render(<PicksValidesCard picks={picks} autres={autres} aujourdhui="2026-10-20" />);
+    const items = screen.getAllByRole("listitem");
+    expect(items).toHaveLength(2); // 20/10 et 21/10 (picks d'équipe seuls)
+    expect(items[0]).toHaveTextContent("Shai Gilgeous-Alexander");
+    expect(items[0]).toHaveTextContent("Jalen Brunson");
+    expect(items[1]).toHaveTextContent("pas de pick"); // 21/10 : comptes 1 et 2 vides
+    const details = container.querySelectorAll("details");
+    expect(details).toHaveLength(2);
+    expect(details[0]).not.toHaveAttribute("open"); // replié par défaut
+    expect(details[0]).toHaveTextContent("Équipe · 2/10 comptes");
+    expect(details[0].querySelectorAll("div > div > span").length).toBeGreaterThan(0);
+    expect(details[0]).toHaveTextContent("Cpt 03");
+    expect(details[0]).toHaveTextContent("Nikola Jokic");
+    expect(details[0]).toHaveTextContent("Cpt 12"); // les 10 comptes sont listés, même sans pick
+    expect(details[1]).toHaveTextContent("Équipe · 1/10 comptes");
+  });
+});

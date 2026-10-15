@@ -6,9 +6,10 @@ import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { AlertsBanner, type Alert } from "@/components/AlertsBanner";
 import { BenchmarksCard } from "@/components/BenchmarksCard";
-import { PicksValidesCard } from "@/components/PicksValidesCard";
+import { PicksValidesCard, type PickCompte } from "@/components/PicksValidesCard";
 import { alerteCookies, alertePcSilencieux, type EtatCookies } from "@/lib/etat-robot";
 import { AlertesPicks } from "@/components/AlertesPicks";
+import { InstallerApp } from "@/components/InstallerApp";
 import { SauvegardeHorsLigne } from "@/components/SauvegardeHorsLigne";
 import { alertesPicksDuSoir, type AlertePick } from "@/lib/alertes-picks";
 import { chargerSoiree } from "@/lib/conseilles-data";
@@ -66,16 +67,17 @@ export default async function DashboardPage() {
       : Promise.resolve({ data: null }),
     supabase
       .from("ttfl_picks")
-      .select("pick_date,player")
+      .select("pick_date,player,compte")
       .eq("mode", mode)
-      .eq("compte", COMPTE_REF)
       .gte("pick_date", aujourdhui)
       .order("pick_date", { ascending: true })
-      .limit(60)
-      .returns<{ pick_date: string; player: string }[]>(),
+      .limit(800)
+      .returns<PickCompte[]>(),
   ]);
   const pickedPlayer = pickRes.data?.player ?? null;
-  const picksValides = picksAVenir(aVenirRes.data ?? [], aujourdhui);
+  const tousPicks = picksAVenir(aVenirRes.data ?? [], aujourdhui);
+  const picksValides = tousPicks.filter((p) => p.compte === COMPTE_REF); // compte 1 : alertes et photo hors-ligne
+  const picksAutres = tousPicks.filter((p) => p.compte !== COMPTE_REF);
 
   const runIsToday = run?.game_date === today;
 
@@ -83,11 +85,19 @@ export default async function DashboardPage() {
   const alerts: Alert[] = [];
   if (run && runIsToday) {
     const ageHours = ageMs(run.computed_at) / 3600000;
-    if (ageHours > 2 || !run.injury_report_fresh) {
+    if (!run.injury_report_fresh) {
       alerts.push({
         id: "stale-report",
         tone: "danger",
-        message: "Report périmé — relance le push avant de picker.",
+        message:
+          "Report des blessures NBA indisponible : aucun blessé n'est exclu des picks conseillés. Vérifie le statut des joueurs avant de picker.",
+      });
+    }
+    if (ageHours > 2) {
+      alerts.push({
+        id: "stale-calcul",
+        tone: "danger",
+        message: `Dernier calcul il y a ${Math.floor(ageHours)} h : le PC n'a pas poussé depuis. Vérifie qu'il est allumé et que la tâche « TTFL push » tourne.`,
       });
     }
     if (!pickedPlayer) {
@@ -144,10 +154,11 @@ export default async function DashboardPage() {
       <RealtimeRuns />
       <SauvegardeHorsLigne soiree={run?.game_date ?? null} pickDuSoir={pickedPlayer} aVenir={picksValides} />
       <AlertsBanner alerts={alerts} />
+      <InstallerApp />
       {run && <AlertesPicks alertes={alertesPicks} mode={run.mode} date={run.game_date} />}
 
-      {/* Bloc 1 — mes picks validés (compte 1) : une ligne par soirée, avec sa date ---- */}
-      <PicksValidesCard picks={picksValides} aujourdhui={aujourdhui} />
+      {/* Bloc 1 — mes picks validés (comptes 1 et 2 visibles, équipe dépliable) : une ligne par soirée, avec sa date ---- */}
+      <PicksValidesCard picks={picksValides} autres={picksAutres} aujourdhui={aujourdhui} />
 
       {/* Bloc 2 — fraîcheur du dernier calcul + accès aux picks conseillés ------------- */}
       <section className="space-y-3">
