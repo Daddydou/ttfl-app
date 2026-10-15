@@ -31,6 +31,15 @@ async function resolveMode(explicit?: string): Promise<Mode> {
   return (data?.mode as Mode) ?? "regular";
 }
 
+function LiensStats() {
+  return (
+    <div className="flex gap-3">
+      <Link href="/adversaires" className="text-[13px] font-semibold text-court-400">Adversaires →</Link>
+      <Link href="/absents" className="text-[13px] font-semibold text-court-400">Absents →</Link>
+    </div>
+  );
+}
+
 export default async function StatsPage({
   searchParams,
 }: {
@@ -90,7 +99,11 @@ export default async function StatsPage({
   if (scored.length === 0) {
     return (
       <div className="space-y-4">
-        <PageHeader titre="Stats" sousTitre="Tes scores, comparés aux repères du moteur" />
+        <PageHeader
+          titre="Stats"
+          sousTitre="Tes scores, comparés aux repères du moteur"
+          action={<LiensStats />}
+        />
         <ModeTabs base="/stats" current={mode} />
         <div className="card px-4 py-10 text-center">
           <p className="text-sm text-fg-muted">
@@ -111,7 +124,7 @@ export default async function StatsPage({
       <PageHeader
         titre="Stats"
         sousTitre="Tes scores, comparés aux repères du moteur"
-        action={<Link href="/absents" className="text-[13px] font-semibold text-court-400">Absents →</Link>}
+        action={<LiensStats />}
       />
       <ModeTabs base="/stats" current={mode} />
 

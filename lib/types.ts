@@ -123,3 +123,23 @@ export interface TtflSeasonStats {
   worst_score: number | null;
   updated_at: string;
 }
+
+// --- Centre de surveillance TTFL : joueurs suivis par le compte 01, relevés par le robot du PC.
+export interface TtflSuivi {
+  users_id: number;
+  pseudo: string;
+  equipe: string | null;
+  rang: number | null;
+  points: number | null;
+  moyenne: number | null;
+  best_picks: number | null;
+  x2: number | null;
+  suivi: boolean;
+  maj_le: string;
+}
+
+export interface TtflSuiviPick {
+  users_id: number;
+  pick_date: string;
+  joueur: string;
+}
