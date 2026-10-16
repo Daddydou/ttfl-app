@@ -272,6 +272,62 @@ export async function deverrouillerPickManuel(pickDate: string): Promise<ActionR
   return { ok: true, message: "Verrou retiré : le compte 02 suit de nouveau le plan." };
 }
 
+// --- Jeu « vainqueur de chaque match » ---------------------------------------------
+// Le PC propose le favori des bookmakers (source « auto »). Un choix posé ici est « manuel » : le moteur ne l'écrase
+// jamais. Plus aucun changement possible une fois le match commencé (règle du jeu : jusqu'au coup d'envoi).
+async function matchNonCommence(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  eventId: string,
+): Promise<{ ok: true; favori: "dom" | "ext" | null } | { ok: false; error: string }> {
+  const { data, error } = await supabase
+    .from("ttfl_vainqueurs_matchs")
+    .select("commence_time,favori")
+    .eq("event_id", eventId)
+    .maybeSingle<{ commence_time: string; favori: "dom" | "ext" | null }>();
+  if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: false, error: "Match inconnu." };
+  if (new Date(data.commence_time).getTime() <= Date.now()) {
+    return { ok: false, error: "Le match a commencé : le pronostic est fermé." };
+  }
+  return { ok: true, favori: data.favori };
+}
+
+export async function choisirVainqueur(eventId: string, choix: "dom" | "ext"): Promise<ActionResult> {
+  if (!eventId || eventId.length > 80 || (choix !== "dom" && choix !== "ext")) {
+    return { ok: false, error: "Choix invalide." };
+  }
+  const supabase = await createClient();
+  const match = await matchNonCommence(supabase, eventId);
+  if (!match.ok) return match;
+  const { error } = await supabase
+    .from("ttfl_vainqueurs_choix")
+    .upsert(
+      { event_id: eventId, choix, source: "manuel", maj_le: new Date().toISOString() },
+      { onConflict: "event_id" },
+    );
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/vainqueurs");
+  return { ok: true };
+}
+
+// Redonne la main au moteur : le choix redevient le favori (source « auto »).
+export async function revenirAuFavori(eventId: string): Promise<ActionResult> {
+  if (!eventId || eventId.length > 80) return { ok: false, error: "Match invalide." };
+  const supabase = await createClient();
+  const match = await matchNonCommence(supabase, eventId);
+  if (!match.ok) return match;
+  if (!match.favori) return { ok: false, error: "Pas encore de favori pour ce match." };
+  const { error } = await supabase
+    .from("ttfl_vainqueurs_choix")
+    .upsert(
+      { event_id: eventId, choix: match.favori, source: "auto", maj_le: new Date().toISOString() },
+      { onConflict: "event_id" },
+    );
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/vainqueurs");
+  return { ok: true };
+}
+
 // Retire le pick d'une soirée pour une liste de comptes. Ne retire RIEN sur le site TTFL :
 // si le pick y est déjà posé, le robot le signalera comme conflit.
 export async function retirerPickComptes(

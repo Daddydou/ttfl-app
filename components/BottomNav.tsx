@@ -8,6 +8,7 @@ const TABS: { href: string; label: string; icon: NomIcone }[] = [
   { href: "/", label: "Accueil", icon: "accueil" },
   { href: "/ce-soir", label: "Conseillés", icon: "ballon" },
   { href: "/picks", label: "Mes picks", icon: "picks" },
+  { href: "/vainqueurs", label: "Vainqueurs", icon: "trophee" },
   { href: "/stats", label: "Stats", icon: "stats" },
   { href: "/admin", label: "Admin", icon: "reglages" },
 ];

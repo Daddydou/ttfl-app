@@ -23,6 +23,13 @@ const CHEMINS = {
       <path d="m9 12.5 2 2 4-4.5M9 17.5h6" />
     </>
   ),
+  trophee: (
+    <>
+      <path d="M8 4h8v5a4 4 0 0 1-8 0z" />
+      <path d="M8 5.5H5.5V7a3 3 0 0 0 3 3M16 5.5h2.5V7a3 3 0 0 1-3 3" />
+      <path d="M12 13v4M9 20h6M10 17h4" />
+    </>
+  ),
   stats: (
     <>
       <path d="M5 20v-8M12 20V4M19 20v-5" />

@@ -1,0 +1,170 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { choisirVainqueur, revenirAuFavori } from "@/app/actions";
+import { frDate, humanAge } from "@/lib/format";
+import {
+  bilanSoiree,
+  choixEffectif,
+  commence,
+  heureParis,
+  nomEquipe,
+  parSoiree,
+  pourcent,
+  probabilite,
+  type ChoixVainqueur,
+  type Cote,
+  type MatchVainqueur,
+} from "@/lib/vainqueurs";
+
+// Liste des matchs avec le favori des bookmakers déjà choisi. Un choix posé ici est « manuel » : le moteur ne l'écrase
+// jamais. Plus de changement possible dès que le match a commencé.
+export function VainqueursListe({
+  matchs,
+  choix,
+  maintenantMs,
+}: {
+  matchs: MatchVainqueur[];
+  choix: ChoixVainqueur[];
+  maintenantMs: number;
+}) {
+  const router = useRouter();
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const parMatch = new Map(choix.map((c) => [c.event_id, c]));
+  const soirees = parSoiree(matchs);
+  const dernierReleve = matchs.map((m) => m.releve_le).filter((x): x is string => !!x).sort().pop() ?? null;
+
+  function agir(fn: () => Promise<{ ok: true } | { ok: false; error: string }>) {
+    setErreur(null);
+    start(async () => {
+      const res = await fn();
+      if (res.ok) router.refresh();
+      else setErreur(res.error);
+    });
+  }
+
+  if (soirees.length === 0) {
+    return (
+      <section className="card space-y-2 px-4 py-4" aria-label="Vainqueurs">
+        <p className="text-sm font-semibold text-fg">Aucun match relevé pour l&apos;instant.</p>
+        <p className="text-[13px] text-fg-muted">
+          Le PC relève les cotes de victoire une fois par soirée. Pour forcer un relevé : <code className="text-court-400">python -m pont.vainqueurs --forcer</code>.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {erreur && <p className="rounded-[10px] bg-out/10 px-3 py-2 text-[13px] text-out">{erreur}</p>}
+      {soirees.map((s) => {
+        const b = bilanSoiree(s.matchs, parMatch);
+        return (
+          <section key={s.date} className="card space-y-3 px-4 py-4" aria-label={`Soirée du ${s.date}`}>
+            <div>
+              <p className="section-label capitalize">{frDate(s.date)}</p>
+              <p className="mt-0.5 text-[13px] text-fg-muted">
+                {b.nbMatchs} match{b.nbMatchs > 1 ? "s" : ""}
+                {b.nbSerres > 0 ? ` · ${b.nbSerres} serré${b.nbSerres > 1 ? "s" : ""}` : ""}
+                {b.nbManuels > 0 ? ` · ${b.nbManuels} choisi${b.nbManuels > 1 ? "s" : ""} à la main` : ""}
+                {b.nbJuges > 0 ? ` · ${b.nbBons}/${b.nbJuges} bon${b.nbBons > 1 ? "s" : ""}` : ""}
+              </p>
+            </div>
+            <ul className="space-y-3">
+              {s.matchs.map((m) => {
+                const c = parMatch.get(m.event_id);
+                const effectif = choixEffectif(m, c);
+                const ferme = commence(m, maintenantMs);
+                return (
+                  <li key={m.event_id} className="space-y-1.5 rounded-[14px] bg-surface-2 px-3 py-2.5">
+                    <div className="flex items-center justify-between text-[12px] text-fg-muted">
+                      <span>
+                        {heureParis(m.commence_time)}
+                        {ferme ? " · commencé" : ""}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        {m.serre && <span className="rounded-full bg-quest/15 px-2 py-0.5 font-semibold text-quest">serré</span>}
+                        {c?.source === "manuel" && <span className="rounded-full bg-court-500/15 px-2 py-0.5 font-semibold text-court-400">manuel</span>}
+                        {m.resultat && effectif && (
+                          <span className={`font-semibold ${effectif === m.resultat ? "text-avail" : "text-out"}`}>
+                            {effectif === m.resultat ? "bon" : "raté"}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(["ext", "dom"] as Cote[]).map((cote) => (
+                        <EquipeBouton
+                          key={cote}
+                          nom={nomEquipe(m, cote)}
+                          domicile={cote === "dom"}
+                          proba={probabilite(m, cote)}
+                          choisie={effectif === cote}
+                          gagnante={m.resultat === cote}
+                          desactive={ferme || pending}
+                          onClick={() => {
+                            if (effectif !== cote) agir(() => choisirVainqueur(m.event_id, cote));
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {c?.source === "manuel" && m.favori && c.choix !== m.favori && !ferme && (
+                      <button
+                        className="text-[12px] font-medium text-court-400"
+                        disabled={pending}
+                        onClick={() => agir(() => revenirAuFavori(m.event_id))}
+                      >
+                        Revenir au favori ({nomEquipe(m, m.favori)})
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
+      <p className="px-1 text-[12px] text-fg-muted">
+        Favori = cote la plus basse (médiane des bookmakers, marge retirée). 1 point par bon vainqueur, pronostic possible
+        jusqu&apos;au coup d&apos;envoi. {dernierReleve ? `Dernier relevé il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(dernierReleve)) / 60000)))}.` : ""}
+      </p>
+    </div>
+  );
+}
+
+function EquipeBouton({
+  nom,
+  domicile,
+  proba,
+  choisie,
+  gagnante,
+  desactive,
+  onClick,
+}: {
+  nom: string;
+  domicile: boolean;
+  proba: number | null;
+  choisie: boolean;
+  gagnante: boolean;
+  desactive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={desactive}
+      aria-pressed={choisie}
+      className={`rounded-[12px] px-2.5 py-2 text-left transition ${
+        choisie ? "bg-court-500/20 ring-2 ring-court-500" : "bg-surface-1 ring-1 ring-line"
+      } ${desactive && !choisie ? "opacity-60" : ""}`}
+    >
+      <span className="block truncate text-[14px] font-semibold text-fg">{nom}</span>
+      <span className="flex items-baseline justify-between text-[12px] text-fg-muted">
+        <span>{domicile ? "à domicile" : "à l'extérieur"}</span>
+        <span className={`num font-semibold ${gagnante ? "text-avail" : "text-fg"}`}>{pourcent(proba)}</span>
+      </span>
+    </button>
+  );
+}
