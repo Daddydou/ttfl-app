@@ -29,10 +29,17 @@ describe("nettoyerParams — rien de libre n'arrive jusqu'à l'exécuteur", () =
     expect(nettoyerParams(action("push_soir"), { date: 20261020 })).toHaveProperty("error");
   });
 
-  it("nuits : entier de 1 à 21", () => {
+  it("plan30 : action de calcul sans paramètre, tout paramètre reçu est ignoré", () => {
+    const a = action("plan30");
+    expect(a.groupe).toBe("calculs");
+    expect(a.param).toBeUndefined();
+    expect(nettoyerParams(a, { nuits: 5, date: "2026-10-20; calc" })).toEqual({ params: {} });
+  });
+
+  it("nuits : entier de 1 à 31", () => {
     expect(nettoyerParams(action("push_avance"), { nuits: 7 })).toEqual({ params: { nuits: 7 } });
     expect(nettoyerParams(action("push_avance"), { nuits: "7" })).toEqual({ params: { nuits: 7 } });
-    for (const n of [0, 22, 1.5, "abc", "7; x"]) expect(nettoyerParams(action("push_avance"), { nuits: n }), String(n)).toHaveProperty("error");
+    for (const n of [0, 32, 1.5, "abc", "7; x"]) expect(nettoyerParams(action("push_avance"), { nuits: n }), String(n)).toHaveProperty("error");
   });
 
   it("une action sans paramètre ignore tout ce qu'on lui passe", () => {

@@ -3,7 +3,9 @@ import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { CarteConseille } from "@/components/CarteConseille";
 import { JoursConseilles, ZonesConseilles } from "@/components/ConseillesNav";
+import { PlanTrenteJours } from "@/components/PlanTrenteJours";
 import { chargerSoiree } from "@/lib/conseilles-data";
+import { maintenantMs, type TtflPlan30 } from "@/lib/plan30";
 import {
   construireConseilles,
   fusionnerSoiree,
@@ -70,7 +72,10 @@ export default async function PicksConseillesPage({
 
   const date = dateParam && jours.includes(dateParam) ? dateParam : jours[0];
 
-  const [soiree, picksRes, absentsRes] = await Promise.all([
+  // Plan glissant de 30 jours : seulement pour les comptes 01 et 02, pas pour la zone « Équipe ».
+  const avecPlan = zone.id === "c01" || zone.id === "c02";
+
+  const [soiree, picksRes, absentsRes, planRes] = await Promise.all([
     chargerSoiree(supabase, mode, date),
     supabase
       .from("ttfl_picks")
@@ -81,6 +86,9 @@ export default async function PicksConseillesPage({
       .lte("pick_date", ajouterJours(date, JOURS_CYCLE))
       .returns<PickLigne[]>(),
     supabase.from("ttfl_manual_absents").select("*").returns<TtflManualAbsent[]>(),
+    avecPlan
+      ? supabase.from("ttfl_plan30").select("*").eq("compte", zone.comptes[0]).returns<TtflPlan30[]>()
+      : Promise.resolve({ data: [] as TtflPlan30[], error: null }),
   ]);
 
   const picks = picksRes.data ?? [];
@@ -118,6 +126,17 @@ export default async function PicksConseillesPage({
 
       <JoursConseilles jours={jours} courant={date} pour={zone.id} aujourdhui={aujourdhui} />
       <ZonesConseilles courant={zone.id} date={date} />
+
+      {avecPlan && (
+        <PlanTrenteJours
+          plans={(planRes.data ?? []).filter((p) => p.compte === zone.comptes[0])}
+          compte={zone.comptes[0]}
+          zoneLabel={zone.label}
+          mode={mode}
+          aujourdhui={aujourdhui}
+          maintenantMs={maintenantMs()}
+        />
+      )}
 
       {ancien && (
         <div className="rounded-[20px] bg-quest/10 px-4 py-3">

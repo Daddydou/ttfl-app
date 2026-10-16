@@ -30,6 +30,8 @@ export const ACTIONS_PC: ActionPC[] = [
     detail: "Relance le calcul des projections du soir (blessures à jour) et les statistiques de saison." },
   { id: "push_avance", groupe: "calculs", libelle: "Recalculer les prochaines soirées", param: "nuits",
     detail: "Projections à l'avance (blessures inconnues) pour les prochains jours. Peut durer plusieurs minutes." },
+  { id: "plan30", groupe: "calculs", libelle: "Recalculer le plan 30 jours",
+    detail: "Recalcule le plan glissant de 30 jours des comptes 01 et 02 (blessures du soir, absents saisis, picks du jour). Quelques secondes." },
   { id: "benchmarks", groupe: "calculs", libelle: "Mettre à jour les repères",
     detail: "Recalcule « Moi vs les repères mobiles » du tableau de bord. Long : plusieurs minutes." },
   { id: "capture_resultats", groupe: "donnees", libelle: "Capturer les scores réels d'un soir", param: "date",
@@ -76,7 +78,7 @@ export function nettoyerParams(
     const n = params.nuits;
     if (n === undefined || n === null || n === "") return { params: {} };
     const v = Number(n);
-    if (!Number.isInteger(v) || v < 1 || v > 21) return { error: "Nombre de soirées invalide (1 à 21)." };
+    if (!Number.isInteger(v) || v < 1 || v > 31) return { error: "Nombre de soirées invalide (1 à 31)." };
     return { params: { nuits: v } };
   }
   return { params: {} };
