@@ -4,6 +4,8 @@ import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { CarteConseille } from "@/components/CarteConseille";
 import { JoursConseilles, ZonesConseilles } from "@/components/ConseillesNav";
 import { PlanTrenteJours } from "@/components/PlanTrenteJours";
+import { SuiviFormules } from "@/components/SuiviFormules";
+import type { LigneSuivi } from "@/lib/suivi-formules";
 import { chargerSoiree } from "@/lib/conseilles-data";
 import { maintenantMs, type TtflPlan30 } from "@/lib/plan30";
 import {
@@ -75,7 +77,7 @@ export default async function PicksConseillesPage({
   // Plan glissant de 30 jours : seulement pour les comptes 01 et 02, pas pour la zone « Équipe ».
   const avecPlan = zone.id === "c01" || zone.id === "c02";
 
-  const [soiree, picksRes, absentsRes, planRes] = await Promise.all([
+  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes] = await Promise.all([
     chargerSoiree(supabase, mode, date),
     supabase
       .from("ttfl_picks")
@@ -89,7 +91,24 @@ export default async function PicksConseillesPage({
     avecPlan
       ? supabase.from("ttfl_plan30").select("*").eq("compte", zone.comptes[0]).returns<TtflPlan30[]>()
       : Promise.resolve({ data: [] as TtflPlan30[], error: null }),
+    // « Picks manuels validés » du compte 02 (rien ne les remplace) et suivi des formules (comptes virtuels du PC).
+    zone.id === "c02"
+      ? supabase
+          .from("ttfl_verrous_pick")
+          .select("pick_date,joueur")
+          .eq("compte", "02")
+          .gte("pick_date", aujourdhui)
+          .returns<{ pick_date: string; joueur: string }[]>()
+      : Promise.resolve({ data: [] as { pick_date: string; joueur: string }[], error: null }),
+    avecPlan
+      ? supabase
+          .from("ttfl_plan30_suivi")
+          .select("profil,pick_date,joueur,projection,score_reel")
+          .order("pick_date")
+          .returns<LigneSuivi[]>()
+      : Promise.resolve({ data: [] as LigneSuivi[], error: null }),
   ]);
+  const verrous = Object.fromEntries((verrousRes.data ?? []).map((v) => [String(v.pick_date).slice(0, 10), v.joueur]));
 
   const picks = picksRes.data ?? [];
   const lignes = fusionnerSoiree(soiree.avance, soiree.soir);
@@ -135,8 +154,10 @@ export default async function PicksConseillesPage({
           mode={mode}
           aujourdhui={aujourdhui}
           maintenantMs={maintenantMs()}
+          verrous={verrous}
         />
       )}
+      {avecPlan && <SuiviFormules lignes={suiviRes.data ?? []} />}
 
       {ancien && (
         <div className="rounded-[20px] bg-quest/10 px-4 py-3">

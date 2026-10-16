@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { lancerCommande } from "@/app/(app)/admin/actions";
+import { deverrouillerPickManuel, verrouillerPickManuel } from "@/app/actions";
+import { normaliserNom } from "@/lib/planning";
 import { PickZoneButton } from "@/components/PickZoneButton";
 import { frDate, fmtNum, humanAge } from "@/lib/format";
 import {
@@ -31,6 +33,7 @@ export function PlanTrenteJours({
   mode,
   aujourdhui,
   maintenantMs,
+  verrous,
 }: {
   plans: TtflPlan30[];
   compte: string;
@@ -38,6 +41,7 @@ export function PlanTrenteJours({
   mode: Mode;
   aujourdhui: string;
   maintenantMs: number;
+  verrous?: Record<string, string>; // « picks manuels validés » du compte 02 : { date: joueur }
 }) {
   const router = useRouter();
   const formules = formulesTriees(plans);
@@ -143,7 +147,20 @@ export function PlanTrenteJours({
             </select>
           </label>
 
-          {jour && <DetailJour jour={jour} compte={compte} mode={mode} zoneLabel={zoneLabel} />}
+          {jour && (
+            <DetailJour
+              jour={jour}
+              compte={compte}
+              mode={mode}
+              zoneLabel={zoneLabel}
+              verrouille={
+                jour.statut === "valide" &&
+                !!jour.joueur &&
+                !!verrous?.[jour.date] &&
+                normaliserNom(verrous[jour.date]) === normaliserNom(jour.joueur)
+              }
+            />
+          )}
 
           <details className="rounded-[14px] bg-surface-2 px-3 py-2">
             <summary className="cursor-pointer text-[13px] font-medium text-fg-muted">Les {options.length} soirées d&apos;un coup d&apos;œil</summary>
@@ -180,6 +197,9 @@ export function PlanTrenteJours({
       {message && <Retour message={message} />}
       <p className="text-[12px] text-fg-muted">
         Le joueur du soir est celui du plan ; il est revu à chaque calcul selon les blessures et les absents saisis.
+        {compte === COMPTE_AUTO
+          ? " Le compte 02 pose automatiquement le n°1 de la formule Équilibrée et le remplace si son joueur devient Out, Doubtful ou absent, sauf pick manuel validé."
+          : ""}
       </p>
     </section>
   );
@@ -193,7 +213,60 @@ function Retour({ message }: { message: { ok: boolean; texte: string } }) {
   );
 }
 
-function DetailJour({ jour, compte, mode, zoneLabel }: { jour: JourPlan30; compte: string; mode: Mode; zoneLabel: string }) {
+const COMPTE_AUTO = "02"; // le compte géré par le robot (pick automatique + contrôle de 23h30)
+
+// « Pick manuel validé » : tant que le joueur posé ce soir-là est celui-ci, ni le pick automatique ni le contrôle de
+// 23h30 ne le remplacent. Réservé au compte 02 (les autres comptes ne sont jamais remplacés par le pick automatique).
+function VerrouManuel({ jour, mode, verrouille }: { jour: JourPlan30; mode: Mode; verrouille: boolean }) {
+  const router = useRouter();
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [pending, start] = useTransition();
+
+  function agir() {
+    setMessage(null);
+    start(async () => {
+      const res = verrouille
+        ? await deverrouillerPickManuel(jour.date)
+        : await verrouillerPickManuel(mode, jour.date, jour.joueur ?? "");
+      setMessage(res.ok ? { ok: true, texte: res.message ?? "Enregistré." } : { ok: false, texte: res.error });
+      if (res.ok) router.refresh();
+    });
+  }
+
+  return (
+    <div className="space-y-1.5 border-t border-line pt-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className={`text-[13px] ${verrouille ? "font-semibold text-avail" : "text-fg-muted"}`}>
+          {verrouille ? "Pick manuel validé : rien ne le remplacera" : "Pick remplaçable par le robot"}
+        </span>
+        <button onClick={agir} disabled={pending} className="btn btn-plain btn-sm">
+          {pending
+            ? "…"
+            : verrouille
+              ? "Déverrouiller"
+              : jour.statut === "valide"
+                ? "Valider à la main"
+                : "Poser et valider à la main"}
+        </button>
+      </div>
+      {message && <Retour message={message} />}
+    </div>
+  );
+}
+
+function DetailJour({
+  jour,
+  compte,
+  mode,
+  zoneLabel,
+  verrouille,
+}: {
+  jour: JourPlan30;
+  compte: string;
+  mode: Mode;
+  zoneLabel: string;
+  verrouille: boolean;
+}) {
   if (jour.statut === "aucun" || !jour.joueur) {
     return (
       <div className="rounded-[14px] bg-surface-2 px-3 py-3">
@@ -236,6 +309,8 @@ function DetailJour({ jour, compte, mode, zoneLabel }: { jour: JourPlan30; compt
           dejaPicke={jour.statut === "valide"}
         />
       </div>
+
+      {compte === COMPTE_AUTO && <VerrouManuel jour={jour} mode={mode} verrouille={verrouille} />}
 
       {jour.alternatives.length > 0 && (
         <div>

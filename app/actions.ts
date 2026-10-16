@@ -228,6 +228,50 @@ export async function pickPlayerComptes(
   };
 }
 
+// --- « Pick manuel validé » du compte 02 --------------------------------------------
+// Le compte 02 appartient à Claude : chaque soir il pose le n°1 de son Plan 30 recalculé, et le contrôle de 23h30 le
+// remplace si son joueur est Out, Doubtful ou absent. Un pick VALIDÉ À LA MAIN échappe aux deux : tant que le joueur
+// posé ce soir-là est celui du verrou, rien ne le remplace (le contrôle ne fait que signaler). Si tu changes de joueur,
+// le verrou tombe de lui-même (il ne vaut que pour le joueur verrouillé). Lu par le moteur du PC (ttfl_verrous_pick).
+const COMPTE_VERROU = "02"; // pas exportée : un fichier "use server" n'exporte que des fonctions asynchrones
+
+// Pose le joueur sur le compte 02 (cycle de 30 jours revérifié) ET le verrouille.
+export async function verrouillerPickManuel(
+  mode: Mode,
+  pickDate: string,
+  player: string,
+): Promise<ActionResult> {
+  const joueur = player.trim();
+  if (!DATE_ISO.test(pickDate)) return { ok: false, error: "Date invalide." };
+  if (!joueur || joueur.length > 80) return { ok: false, error: "Joueur invalide." };
+
+  const pose = await pickPlayerComptes(mode, pickDate, joueur, [COMPTE_VERROU]);
+  if (!pose.ok) return pose;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("ttfl_verrous_pick")
+    .upsert({ compte: COMPTE_VERROU, pick_date: pickDate, joueur }, { onConflict: "compte,pick_date" });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/ce-soir");
+  return { ok: true, message: `${joueur} validé à la main le ${pickDate} : aucun remplacement automatique.` };
+}
+
+// Retire le verrou : le plan reprend la main (le pick posé reste en place jusqu'au prochain calcul).
+export async function deverrouillerPickManuel(pickDate: string): Promise<ActionResult> {
+  if (!DATE_ISO.test(pickDate)) return { ok: false, error: "Date invalide." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("ttfl_verrous_pick")
+    .delete()
+    .eq("compte", COMPTE_VERROU)
+    .eq("pick_date", pickDate);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/ce-soir");
+  return { ok: true, message: "Verrou retiré : le compte 02 suit de nouveau le plan." };
+}
+
 // Retire le pick d'une soirée pour une liste de comptes. Ne retire RIEN sur le site TTFL :
 // si le pick y est déjà posé, le robot le signalera comme conflit.
 export async function retirerPickComptes(
