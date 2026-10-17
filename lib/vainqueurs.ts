@@ -30,6 +30,23 @@ export interface ChoixVainqueur {
   source: "auto" | "manuel";
 }
 
+// Ce que l'API Pronos NBA de Game Tracker (chez Thomas) a enregistré pour un match, relu par le PC à chaque passage.
+export interface PronoKt {
+  event_id: string;
+  cote: Cote | null; // null = rien de posé chez Thomas
+  statut: string | null;
+  maj_le: string | null;
+}
+
+export type EtatKt = "identique" | "different" | "vide" | "inconnu";
+
+// Le prono chez Thomas comparé à notre choix effectif. 'inconnu' : le PC n'a pas encore relu ce match.
+export function etatKt(effectif: Cote | null, kt: PronoKt | undefined): EtatKt {
+  if (!kt) return "inconnu";
+  if (!kt.cote) return "vide";
+  return effectif && kt.cote === effectif ? "identique" : "different";
+}
+
 export function autre(c: Cote): Cote {
   return c === "dom" ? "ext" : "dom";
 }
@@ -85,9 +102,15 @@ export interface BilanSoiree {
   nbManuels: number;
   nbJuges: number;
   nbBons: number;
+  nbChezThomas: number; // matchs avec un prono posé chez Thomas
 }
 
-export function bilanSoiree(matchs: MatchVainqueur[], choix: Map<string, ChoixVainqueur>): BilanSoiree {
+export function bilanSoiree(
+  matchs: MatchVainqueur[],
+  choix: Map<string, ChoixVainqueur>,
+  kt: Map<string, PronoKt> = new Map(),
+): BilanSoiree {
+  let nbChezThomas = 0;
   let nbSerres = 0;
   let nbManuels = 0;
   let nbJuges = 0;
@@ -95,6 +118,7 @@ export function bilanSoiree(matchs: MatchVainqueur[], choix: Map<string, ChoixVa
   for (const m of matchs) {
     const c = choix.get(m.event_id);
     if (m.serre) nbSerres += 1;
+    if (kt.get(m.event_id)?.cote) nbChezThomas += 1;
     if (c?.source === "manuel") nbManuels += 1;
     const effectif = choixEffectif(m, c);
     if (m.resultat && effectif) {
@@ -102,5 +126,5 @@ export function bilanSoiree(matchs: MatchVainqueur[], choix: Map<string, ChoixVa
       if (effectif === m.resultat) nbBons += 1;
     }
   }
-  return { nbMatchs: matchs.length, nbSerres, nbManuels, nbJuges, nbBons };
+  return { nbMatchs: matchs.length, nbSerres, nbManuels, nbJuges, nbBons, nbChezThomas };
 }

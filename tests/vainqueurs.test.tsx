@@ -58,7 +58,7 @@ describe("lib/vainqueurs", () => {
   it("bilan de soirée : serrés, manuels et bons choix", () => {
     const choix = new Map<string, ChoixVainqueur>([["b", { event_id: "b", choix: "ext", source: "manuel" }]]);
     const b = bilanSoiree([match("a", { resultat: "dom" }), match("b", { serre: true, resultat: "dom" }), match("c")], choix);
-    expect(b).toEqual({ nbMatchs: 3, nbSerres: 1, nbManuels: 1, nbJuges: 2, nbBons: 1 });
+    expect(b).toEqual({ nbMatchs: 3, nbSerres: 1, nbManuels: 1, nbJuges: 2, nbBons: 1, nbChezThomas: 0 });
   });
 });
 

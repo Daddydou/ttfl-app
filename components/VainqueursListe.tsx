@@ -8,6 +8,7 @@ import {
   bilanSoiree,
   choixEffectif,
   commence,
+  etatKt,
   heureParis,
   nomEquipe,
   parSoiree,
@@ -16,6 +17,7 @@ import {
   type ChoixVainqueur,
   type Cote,
   type MatchVainqueur,
+  type PronoKt,
 } from "@/lib/vainqueurs";
 
 // Liste des matchs avec le favori des bookmakers déjà choisi. Un choix posé ici est « manuel » : le moteur ne l'écrase
@@ -23,16 +25,19 @@ import {
 export function VainqueursListe({
   matchs,
   choix,
+  kt = [],
   maintenantMs,
 }: {
   matchs: MatchVainqueur[];
   choix: ChoixVainqueur[];
+  kt?: PronoKt[];
   maintenantMs: number;
 }) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const parMatch = new Map(choix.map((c) => [c.event_id, c]));
+  const parMatchKt = new Map(kt.map((k) => [k.event_id, k]));
   const soirees = parSoiree(matchs);
   const dernierReleve = matchs.map((m) => m.releve_le).filter((x): x is string => !!x).sort().pop() ?? null;
 
@@ -60,7 +65,7 @@ export function VainqueursListe({
     <div className="space-y-4">
       {erreur && <p className="rounded-[10px] bg-out/10 px-3 py-2 text-[13px] text-out">{erreur}</p>}
       {soirees.map((s) => {
-        const b = bilanSoiree(s.matchs, parMatch);
+        const b = bilanSoiree(s.matchs, parMatch, parMatchKt);
         return (
           <section key={s.date} className="card space-y-3 px-4 py-4" aria-label={`Soirée du ${s.date}`}>
             <div>
@@ -69,6 +74,7 @@ export function VainqueursListe({
                 {b.nbMatchs} match{b.nbMatchs > 1 ? "s" : ""}
                 {b.nbSerres > 0 ? ` · ${b.nbSerres} serré${b.nbSerres > 1 ? "s" : ""}` : ""}
                 {b.nbManuels > 0 ? ` · ${b.nbManuels} choisi${b.nbManuels > 1 ? "s" : ""} à la main` : ""}
+                {b.nbChezThomas > 0 ? ` · ${b.nbChezThomas} validé${b.nbChezThomas > 1 ? "s" : ""} chez Thomas` : ""}
                 {b.nbJuges > 0 ? ` · ${b.nbBons}/${b.nbJuges} bon${b.nbBons > 1 ? "s" : ""}` : ""}
               </p>
             </div>
@@ -110,6 +116,7 @@ export function VainqueursListe({
                         />
                       ))}
                     </div>
+                    <LigneKt m={m} effectif={effectif} kt={parMatchKt.get(m.event_id)} />
                     {c?.source === "manuel" && m.favori && c.choix !== m.favori && !ferme && (
                       <button
                         className="text-[12px] font-medium text-court-400"
@@ -128,9 +135,24 @@ export function VainqueursListe({
       })}
       <p className="px-1 text-[12px] text-fg-muted">
         Favori = cote la plus basse (médiane des bookmakers, marge retirée). 1 point par bon vainqueur, pronostic possible
-        jusqu&apos;au coup d&apos;envoi. {dernierReleve ? `Dernier relevé il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(dernierReleve)) / 60000)))}.` : ""}
+        jusqu&apos;au coup d&apos;envoi. Un match n&apos;apparaît ici que lorsque les bookmakers ont publié ses cotes (en général la veille ou le jour
+        même). « Validé chez Thomas » = ce que l&apos;API de Game Tracker a enregistré, relu par le PC toutes les 10 minutes. {dernierReleve ? `Dernier relevé il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(dernierReleve)) / 60000)))}.` : ""}
       </p>
     </div>
+  );
+}
+
+// Ce qui est enregistré chez Thomas pour ce match, comparé à notre choix.
+function LigneKt({ m, effectif, kt }: { m: MatchVainqueur; effectif: Cote | null; kt: PronoKt | undefined }) {
+  const etat = etatKt(effectif, kt);
+  if (etat === "inconnu") return null;
+  if (etat === "vide") return <p className="text-[12px] text-fg-muted">Rien de posé chez Thomas pour l&apos;instant</p>;
+  const nom = nomEquipe(m, kt!.cote!);
+  if (etat === "identique") return <p className="text-[12px] font-medium text-avail">✓ Validé chez Thomas : {nom}</p>;
+  return (
+    <p className="text-[12px] font-medium text-quest">
+      Chez Thomas : {nom} (différent de ton choix{effectif ? ` : ${nomEquipe(m, effectif)}` : ""})
+    </p>
   );
 }
 
