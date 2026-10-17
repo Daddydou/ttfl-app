@@ -93,6 +93,31 @@ export interface PickLigne {
   compte: string;
 }
 
+// Pick posé par le robot (table ttfl_picks_auto), PAS validé par l'utilisateur : case vide remplie ou joueur
+// indisponible remplacé par le contrôle de 23 h 30, ou pick automatique des comptes 03 à 12.
+export interface PickAuto {
+  pick_date: string;
+  compte: string;
+  player: string;
+  origine: string;
+}
+
+// Une marque ne vaut que tant que le joueur du pick est celui de la marque : si l'utilisateur change de joueur,
+// le pick devient le sien et n'est plus « auto ».
+export function estPickAuto(autos: PickAuto[], compte: string, date: string, joueur: string | null): boolean {
+  if (!joueur) return false;
+  const cle = normaliserNom(joueur);
+  return autos.some((a) => a.compte === compte && a.pick_date === date && normaliserNom(a.player) === cle);
+}
+
+// Comptes dont le pick de la soirée est « auto » (triés).
+export function comptesAuto(autos: PickAuto[], picks: PickLigne[], date: string): string[] {
+  return picks
+    .filter((p) => p.pick_date === date && estPickAuto(autos, p.compte, date, p.player))
+    .map((p) => p.compte)
+    .sort();
+}
+
 // Joueurs indisponibles pour une soirée, par compte : { "nom normalisé": ["03", "04"] }.
 // La soirée elle-même est ignorée (re-picker le même soir remplace, ça ne bloque pas).
 export function bloquesPourSoiree(

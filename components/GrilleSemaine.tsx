@@ -55,6 +55,14 @@ export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
                           )}
                           {nomCourt(c.joueur)}
                         </span>
+                        {c.auto && (
+                          <span
+                            className="mt-0.5 inline-block rounded-full bg-quest/15 px-1.5 text-[10px] font-semibold text-quest"
+                            title="Auto-remplissage : posé par le robot, pas validé par toi"
+                          >
+                            auto
+                          </span>
+                        )}
                         {c.cycle && <span className="block text-[10px]">cycle ≤ 30 j</span>}
                       </div>
                     ) : (
@@ -67,6 +75,12 @@ export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
           </tbody>
         </table>
       </div>
+
+      <p className="px-1 text-[12px] text-fg-muted">
+        <span className="rounded-full bg-quest/15 px-1.5 text-[10px] font-semibold text-quest">auto</span> = posé par le
+        robot (case vide remplie à 23 h 30, joueur indisponible remplacé, ou pick automatique) : pas validé par toi.
+        Tu peux le changer jusqu&apos;à minuit.
+      </p>
 
       <section className="space-y-2">
         <h2 className="section-label">Soir par soir</h2>

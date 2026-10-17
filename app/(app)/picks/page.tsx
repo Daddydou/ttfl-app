@@ -15,6 +15,7 @@ import {
   aujourdhuiNY,
   avanceSeule,
   bloquesPourSoiree,
+  comptesAuto,
   estMoisValide,
   moisDisponibles,
   resumeEnvois,
@@ -23,6 +24,7 @@ import {
   type EnvoiLigne,
   type EtatEnvoi,
   type Nuit,
+  type PickAuto,
   type PickLigne,
   type ResumeEnvoi,
   type ResumeZone,
@@ -57,6 +59,7 @@ interface NuitVue {
   dejaPose: boolean; // au moins un compte a ce pick posé sur le site TTFL
   bloques: Record<string, string[]>;
   parCompte: Record<string, string>; // compte → joueur pické pour cette soirée
+  autos: string[]; // comptes dont le pick a été posé par le robot (auto-remplissage), pas validé par l'utilisateur
   passee: boolean;
 }
 
@@ -77,7 +80,7 @@ async function chargerPlanning(
   const zone = zoneDe(zoneParam);
   const aujourdhui = aujourdhuiNY();
 
-  const [nuitsRes, picksRes, envoisRes] = await Promise.all([
+  const [nuitsRes, picksRes, envoisRes, autosRes] = await Promise.all([
     supabase.from("ttfl_nuits").select("*").eq("mode", mode).returns<Nuit[]>(),
     supabase
       .from("ttfl_picks")
@@ -91,7 +94,15 @@ async function chargerPlanning(
       .eq("mode", mode)
       .in("compte", zone.comptes)
       .returns<EnvoiLigne[]>(),
+    // Marques « auto » : une erreur (table pas encore créée) est ignorée, elle ne doit jamais casser la page.
+    supabase
+      .from("ttfl_picks_auto")
+      .select("pick_date,compte,player,origine")
+      .eq("mode", mode)
+      .in("compte", zone.comptes)
+      .returns<PickAuto[]>(),
   ]);
+  const autosMarques = autosRes.error ? [] : (autosRes.data ?? []);
   const erreur =
     nuitsRes.error?.message ?? picksRes.error?.message ?? envoisRes.error?.message ?? null;
 
@@ -125,6 +136,7 @@ async function chargerPlanning(
         dejaPose: envoisDuSoir.some((e) => e.statut === "confirme"),
         bloques: bloquesPourSoiree(picks, zone.comptes, date),
         parCompte: Object.fromEntries(picks.filter((p) => p.pick_date === date).map((p) => [p.compte, p.player])),
+        autos: comptesAuto(autosMarques, picks, date),
         passee: date < aujourdhui,
       };
     });
@@ -271,6 +283,11 @@ function PlanningVue({
                 {libellePick(n.resume)}
               </p>
               {n.envoi.detail && <p className="mt-1 text-[13px] text-out">{n.envoi.detail}</p>}
+              {n.autos.length > 0 && (
+                <p className="mt-1 text-[13px] font-medium text-quest">
+                  Auto-remplissage, pas validé par toi : {n.autos.length > 1 ? "comptes" : "compte"} {n.autos.join(", ")}
+                </p>
+              )}
 
               {!n.passee && (
                 <NuitPicker

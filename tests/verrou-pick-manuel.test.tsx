@@ -74,7 +74,9 @@ describe("Pick manuel validé (compte 02)", () => {
   it("verrou actif sur le joueur posé : affiché, et « Déverrouiller » retire le verrou", async () => {
     deverrouiller.mockResolvedValue({ ok: true, message: "Verrou retiré." });
     rendre("02", { statut: "valide" }, { "2026-10-20": "Joueur 1" });
-    expect(screen.getByText("Pick manuel validé : rien ne le remplacera")).toBeInTheDocument();
+    expect(
+      screen.getByText("Pick manuel validé : gardé même si un autre joueur devient n°1 (remplacé s'il est Out, Doubtful ou absent)"),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Déverrouiller" }));
     await waitFor(() => expect(deverrouiller).toHaveBeenCalledWith("2026-10-20"));
     expect(verrouiller).not.toHaveBeenCalled();

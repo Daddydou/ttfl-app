@@ -198,7 +198,7 @@ export function PlanTrenteJours({
       <p className="text-[12px] text-fg-muted">
         Le joueur du soir est celui du plan ; il est revu à chaque calcul selon les blessures et les absents saisis.
         {compte === COMPTE_AUTO
-          ? " Le compte 02 pose automatiquement le n°1 de la formule Équilibrée et le remplace si son joueur devient Out, Doubtful ou absent, sauf pick manuel validé."
+          ? " Le compte 02 pose automatiquement le n°1 de la formule Équilibrée et le remplace si son joueur devient Out, Doubtful ou absent (même un pick manuel validé). Un pick manuel validé n'est protégé que contre un changement de n°1."
           : ""}
       </p>
     </section>
@@ -215,8 +215,9 @@ function Retour({ message }: { message: { ok: boolean; texte: string } }) {
 
 const COMPTE_AUTO = "02"; // le compte géré par le robot (pick automatique + contrôle de 23h30)
 
-// « Pick manuel validé » : tant que le joueur posé ce soir-là est celui-ci, ni le pick automatique ni le contrôle de
-// 23h30 ne le remplacent. Réservé au compte 02 (les autres comptes ne sont jamais remplacés par le pick automatique).
+// « Pick manuel validé » : tant que le joueur posé ce soir-là est celui-ci, le pick automatique ne le remplace pas par
+// un autre n°1. Depuis le 2026-10-17 il est tout de même remplacé (pick auto et contrôle de 23h30) s'il devient Out,
+// Doubtful ou absent. Réservé au compte 02 (les autres comptes ne sont jamais remplacés par le pick automatique).
 function VerrouManuel({ jour, mode, verrouille }: { jour: JourPlan30; mode: Mode; verrouille: boolean }) {
   const router = useRouter();
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
@@ -237,7 +238,7 @@ function VerrouManuel({ jour, mode, verrouille }: { jour: JourPlan30; mode: Mode
     <div className="space-y-1.5 border-t border-line pt-2">
       <div className="flex items-center justify-between gap-3">
         <span className={`text-[13px] ${verrouille ? "font-semibold text-avail" : "text-fg-muted"}`}>
-          {verrouille ? "Pick manuel validé : rien ne le remplacera" : "Pick remplaçable par le robot"}
+          {verrouille ? "Pick manuel validé : gardé même si un autre joueur devient n°1 (remplacé s'il est Out, Doubtful ou absent)" : "Pick remplaçable par le robot"}
         </span>
         <button onClick={agir} disabled={pending} className="btn btn-plain btn-sm">
           {pending

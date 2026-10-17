@@ -1,7 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { GrilleSemaine, NavSemaine } from "@/components/GrilleSemaine";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { COMPTES_EQUIPE, JOURS_CYCLE, ajouterJours, aujourdhuiNY, type EnvoiLigne, type PickLigne } from "@/lib/planning";
+import {
+  COMPTES_EQUIPE,
+  JOURS_CYCLE,
+  ajouterJours,
+  aujourdhuiNY,
+  type EnvoiLigne,
+  type PickAuto,
+  type PickLigne,
+} from "@/lib/planning";
 import { construireSemaine, datesDeLaSemaine } from "@/lib/semaine";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +25,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
   const fin = dates[dates.length - 1];
 
   const supabase = await createClient();
-  const [picksRes, envoisRes] = await Promise.all([
+  const [picksRes, envoisRes, autosRes] = await Promise.all([
     supabase
       .from("ttfl_picks")
       .select("pick_date,player,compte")
@@ -34,6 +42,15 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
       .gte("pick_date", debut)
       .lte("pick_date", fin)
       .returns<EnvoiLigne[]>(),
+    // Marques « auto » (posé par le robot, pas validé par l'utilisateur). Une erreur (table pas encore créée) est ignorée.
+    supabase
+      .from("ttfl_picks_auto")
+      .select("pick_date,compte,player,origine")
+      .eq("mode", "regular")
+      .in("compte", COMPTES_EQUIPE)
+      .gte("pick_date", debut)
+      .lte("pick_date", fin)
+      .returns<PickAuto[]>(),
   ]);
 
   const semaine = construireSemaine({
@@ -41,6 +58,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
     comptes: COMPTES_EQUIPE,
     picks: picksRes.data ?? [],
     envois: envoisRes.data ?? [],
+    autos: autosRes.error ? [] : (autosRes.data ?? []),
   });
   const erreur = picksRes.error?.message ?? envoisRes.error?.message ?? null;
 

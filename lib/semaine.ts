@@ -4,12 +4,22 @@
 // sans pick et la sur-concentration d'un même joueur (au-delà de la part maximale de l'équipe).
 
 import { PART_MAX } from "@/lib/repartition";
-import { JOURS_CYCLE, ajouterJours, joursEntre, normaliserNom, type EnvoiLigne, type PickLigne } from "@/lib/planning";
+import {
+  JOURS_CYCLE,
+  ajouterJours,
+  estPickAuto,
+  joursEntre,
+  normaliserNom,
+  type EnvoiLigne,
+  type PickAuto,
+  type PickLigne,
+} from "@/lib/planning";
 
 export interface Cellule {
   date: string;
   compte: string;
   joueur: string | null;
+  auto: boolean; // posé par le robot (case vide remplie / joueur remplacé / pick automatique), pas validé par l'utilisateur
   statut: string | null; // état d'envoi (ttfl_envois) : confirme / propose / conflit / echec…
   cycle: boolean; // le même joueur est déjà pické sur ce compte à ≤ 30 jours (dans la grille ou autour)
   libreLe: string | null; // première date où il redevient pickable pour ce compte
@@ -38,11 +48,13 @@ export function construireSemaine({
   comptes,
   picks,
   envois,
+  autos = [],
 }: {
   dates: string[];
   comptes: string[];
   picks: PickLigne[]; // picks voulus, fenêtre élargie à ±30 jours (pour le cycle)
   envois: EnvoiLigne[];
+  autos?: PickAuto[]; // marques « auto » (ttfl_picks_auto) ; absentes = aucun pick auto
 }): Semaine {
   const pickDe = new Map(picks.map((p) => [`${p.compte}|${p.pick_date}`, p.player]));
   const statutDe = new Map(envois.map((e) => [`${e.compte}|${e.pick_date}`, e.statut]));
@@ -65,6 +77,7 @@ export function construireSemaine({
         date,
         compte,
         joueur,
+        auto: estPickAuto(autos, compte, date, joueur),
         statut: joueur ? (statutDe.get(`${compte}|${date}`) ?? null) : null,
         cycle,
         libreLe: joueur ? ajouterJours(date, JOURS_CYCLE + 1) : null,
