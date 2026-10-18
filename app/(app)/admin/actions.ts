@@ -33,7 +33,7 @@ function revalider() {
 
 function comptesValides(comptes: string[]): string[] | null {
   const liste = [...new Set(comptes)];
-  return liste.length > 0 && liste.length <= 12 && liste.every((c) => COMPTE_VALIDE.test(c)) ? liste : null;
+  return liste.length > 0 && liste.length <= 14 && liste.every((c) => COMPTE_VALIDE.test(c)) ? liste : null;
 }
 
 async function picksExistants(supabase: Supabase, mode: Mode, comptes: string[], debut: string, fin: string) {
@@ -122,7 +122,7 @@ export async function importerPicks(
 ): Promise<ResultatAdmin> {
   if (mode !== "regular") return { ok: false, error: NON_AUTORISE };
   const liste = comptesValides(comptes);
-  if (!liste) return { ok: false, error: "Choisis au moins un compte (12 au plus)." };
+  if (!liste) return { ok: false, error: "Choisis au moins un compte (14 au plus)." };
   if (lignes.length === 0 || lignes.length > 400) return { ok: false, error: "Entre 1 et 400 lignes." };
   const propres = lignes.map((l) => ({ date: l.date, player: String(l.player).replace(/\s+/g, " ").trim() }));
   if (propres.some((l) => !dateReelle(l.date) || l.player.length < 2 || l.player.length > 80)) {

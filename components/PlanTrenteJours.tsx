@@ -197,8 +197,8 @@ export function PlanTrenteJours({
       {message && <Retour message={message} />}
       <p className="text-[12px] text-fg-muted">
         Le joueur du soir est celui du plan ; il est revu à chaque calcul selon les blessures et les absents saisis.
-        {compte === COMPTE_AUTO
-          ? " Le compte 02 pose automatiquement le n°1 de la formule Prudente et le remplace si son joueur devient Out, Doubtful ou absent (même un pick manuel validé). Un pick manuel validé n'est protégé que contre un changement de n°1."
+        {COMPTES_AUTO.includes(compte)
+          ? ` Le compte ${compte} pose automatiquement le n°1 de la formule ${compte === "13" ? "Ambitieuse" : "Prudente"} et le remplace si son joueur devient Out, Doubtful ou absent (même un pick manuel validé). Un pick manuel validé n'est protégé que contre un changement de n°1.`
           : ""}
       </p>
     </section>
@@ -213,12 +213,12 @@ function Retour({ message }: { message: { ok: boolean; texte: string } }) {
   );
 }
 
-const COMPTE_AUTO = "02"; // le compte géré par le robot (pick automatique + contrôle de 23h30)
+const COMPTES_AUTO = ["02", "13"]; // les comptes gérés par le robot (pick automatique + contrôle de 23h30)
 
 // « Pick manuel validé » : tant que le joueur posé ce soir-là est celui-ci, le pick automatique ne le remplace pas par
 // un autre n°1. Depuis le 2026-10-17 il est tout de même remplacé (pick auto et contrôle de 23h30) s'il devient Out,
 // Doubtful ou absent. Réservé au compte 02 (les autres comptes ne sont jamais remplacés par le pick automatique).
-function VerrouManuel({ jour, mode, verrouille }: { jour: JourPlan30; mode: Mode; verrouille: boolean }) {
+function VerrouManuel({ jour, mode, verrouille, compte }: { jour: JourPlan30; mode: Mode; verrouille: boolean; compte: string }) {
   const router = useRouter();
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
   const [pending, start] = useTransition();
@@ -227,8 +227,8 @@ function VerrouManuel({ jour, mode, verrouille }: { jour: JourPlan30; mode: Mode
     setMessage(null);
     start(async () => {
       const res = verrouille
-        ? await deverrouillerPickManuel(jour.date)
-        : await verrouillerPickManuel(mode, jour.date, jour.joueur ?? "");
+        ? await deverrouillerPickManuel(jour.date, compte)
+        : await verrouillerPickManuel(mode, jour.date, jour.joueur ?? "", compte);
       setMessage(res.ok ? { ok: true, texte: res.message ?? "Enregistré." } : { ok: false, texte: res.error });
       if (res.ok) router.refresh();
     });
@@ -311,7 +311,7 @@ function DetailJour({
         />
       </div>
 
-      {compte === COMPTE_AUTO && <VerrouManuel jour={jour} mode={mode} verrouille={verrouille} />}
+      {COMPTES_AUTO.includes(compte) && <VerrouManuel jour={jour} mode={mode} verrouille={verrouille} compte={compte} />}
 
       {jour.alternatives.length > 0 && (
         <div>

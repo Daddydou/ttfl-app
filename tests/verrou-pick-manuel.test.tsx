@@ -59,7 +59,7 @@ describe("Pick manuel validé (compte 02)", () => {
     rendre("02", { statut: "valide" });
     expect(screen.getByText("Pick remplaçable par le robot")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Valider à la main" }));
-    await waitFor(() => expect(verrouiller).toHaveBeenCalledWith("regular", "2026-10-20", "Joueur 1"));
+    await waitFor(() => expect(verrouiller).toHaveBeenCalledWith("regular", "2026-10-20", "Joueur 1", "02"));
     expect(await screen.findByText("Joueur 1 validé à la main.")).toBeInTheDocument();
     expect(refresh).toHaveBeenCalled();
   });
@@ -78,7 +78,7 @@ describe("Pick manuel validé (compte 02)", () => {
       screen.getByText("Pick manuel validé : gardé même si un autre joueur devient n°1 (remplacé s'il est Out, Doubtful ou absent)"),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Déverrouiller" }));
-    await waitFor(() => expect(deverrouiller).toHaveBeenCalledWith("2026-10-20"));
+    await waitFor(() => expect(deverrouiller).toHaveBeenCalledWith("2026-10-20", "02"));
     expect(verrouiller).not.toHaveBeenCalled();
   });
 

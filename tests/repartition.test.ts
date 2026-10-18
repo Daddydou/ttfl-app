@@ -120,7 +120,7 @@ describe("validerAffectations — revérification côté serveur", () => {
     expect(validerAffectations([{ player: "A", comptes: ["03"] }], voisins, date)).toBeNull();
   });
   it("refuse un compte invalide, un nom vide ou une liste vide", () => {
-    expect(validerAffectations([{ player: "A", comptes: ["13"] }], [], date)).toMatch(/invalides/);
+    expect(validerAffectations([{ player: "A", comptes: ["15"] }], [], date)).toMatch(/invalides/);
     expect(validerAffectations([{ player: " ", comptes: ["03"] }], [], date)).toMatch(/Joueur invalide/);
     expect(validerAffectations([], [], date)).toMatch(/Aucune/);
   });

@@ -2,7 +2,7 @@
 
 import { COMPTES_EQUIPE } from "@/lib/planning";
 
-const TOUS = ["01", "02", ...COMPTES_EQUIPE];
+const TOUS = ["01", "02", ...COMPTES_EQUIPE, "13"];
 
 // Sélection de comptes par pastilles, avec des raccourcis (compte 1, compte 2, équipe, tous).
 export function SelecteurComptes({
@@ -18,6 +18,7 @@ export function SelecteurComptes({
   const raccourcis: { label: string; comptes: string[] }[] = [
     { label: "Compte 1", comptes: ["01"] },
     { label: "Compte 2", comptes: ["02"] },
+    { label: "Compte 13", comptes: ["13"] },
     { label: "Équipe", comptes: [...COMPTES_EQUIPE] },
     { label: "Tous", comptes: [...TOUS] },
     { label: "Aucun", comptes: [] },

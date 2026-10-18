@@ -75,7 +75,8 @@ export default async function PicksConseillesPage({
   const date = dateParam && jours.includes(dateParam) ? dateParam : jours[0];
 
   // Plan glissant de 30 jours : seulement pour les comptes 01 et 02, pas pour la zone « Équipe ».
-  const avecPlan = zone.id === "c01" || zone.id === "c02";
+  const avecPlan = zone.id === "c01" || zone.id === "c02" || zone.id === "c13";
+  const compteAuto = zone.id === "c02" || zone.id === "c13"; // comptes gérés par le robot (verrou « validé à la main »)
 
   const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes] = await Promise.all([
     chargerSoiree(supabase, mode, date),
@@ -91,12 +92,12 @@ export default async function PicksConseillesPage({
     avecPlan
       ? supabase.from("ttfl_plan30").select("*").eq("compte", zone.comptes[0]).returns<TtflPlan30[]>()
       : Promise.resolve({ data: [] as TtflPlan30[], error: null }),
-    // « Picks manuels validés » du compte 02 (rien ne les remplace) et suivi des formules (comptes virtuels du PC).
-    zone.id === "c02"
+    // « Picks manuels validés » des comptes 02 et 13 (rien ne les remplace) et suivi des formules (comptes virtuels du PC).
+    compteAuto
       ? supabase
           .from("ttfl_verrous_pick")
           .select("pick_date,joueur")
-          .eq("compte", "02")
+          .eq("compte", zone.comptes[0])
           .gte("pick_date", aujourdhui)
           .returns<{ pick_date: string; joueur: string }[]>()
       : Promise.resolve({ data: [] as { pick_date: string; joueur: string }[], error: null }),

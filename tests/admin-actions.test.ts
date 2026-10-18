@@ -128,7 +128,7 @@ describe("importerPicks", () => {
     expect(await A.importerPicks("regular", [{ date: "2026-10-21", player: " " }], EQUIPE, true)).toMatchObject({ ok: false });
     expect(await A.importerPicks("regular", [lignes[0], { date: "2026-10-21", player: "Autre Joueur" }], EQUIPE, true)).toMatchObject({ ok: false });
     expect(await A.importerPicks("regular", lignes, [], true)).toMatchObject({ ok: false });
-    expect(await A.importerPicks("regular", lignes, ["03", "13"], true)).toMatchObject({ ok: false });
+    expect(await A.importerPicks("regular", lignes, ["03", "15"], true)).toMatchObject({ ok: false });
     expect(await A.importerPicks("regular", [], EQUIPE, true)).toMatchObject({ ok: false });
     expect(journal).toEqual([]);
   });

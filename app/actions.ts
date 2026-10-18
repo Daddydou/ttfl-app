@@ -233,25 +233,28 @@ export async function pickPlayerComptes(
 // remplace si son joueur est Out, Doubtful ou absent. Un pick VALIDÉ À LA MAIN échappe aux deux : tant que le joueur
 // posé ce soir-là est celui du verrou, rien ne le remplace (le contrôle ne fait que signaler). Si tu changes de joueur,
 // le verrou tombe de lui-même (il ne vaut que pour le joueur verrouillé). Lu par le moteur du PC (ttfl_verrous_pick).
-const COMPTE_VERROU = "02"; // pas exportée : un fichier "use server" n'exporte que des fonctions asynchrones
+// Depuis le 2026-10-18, le compte 13 (formule Ambitieuse) fonctionne comme le 02 : même verrou.
+const COMPTES_VERROU = ["02", "13"]; // pas exportée : un fichier "use server" n'exporte que des fonctions asynchrones
 
-// Pose le joueur sur le compte 02 (cycle de 30 jours revérifié) ET le verrouille.
+// Pose le joueur sur le compte 02 (ou 13) (cycle de 30 jours revérifié) ET le verrouille.
 export async function verrouillerPickManuel(
   mode: Mode,
   pickDate: string,
   player: string,
+  compte: string = "02",
 ): Promise<ActionResult> {
   const joueur = player.trim();
+  if (!COMPTES_VERROU.includes(compte)) return { ok: false, error: "Compte invalide." };
   if (!DATE_ISO.test(pickDate)) return { ok: false, error: "Date invalide." };
   if (!joueur || joueur.length > 80) return { ok: false, error: "Joueur invalide." };
 
-  const pose = await pickPlayerComptes(mode, pickDate, joueur, [COMPTE_VERROU]);
+  const pose = await pickPlayerComptes(mode, pickDate, joueur, [compte]);
   if (!pose.ok) return pose;
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("ttfl_verrous_pick")
-    .upsert({ compte: COMPTE_VERROU, pick_date: pickDate, joueur }, { onConflict: "compte,pick_date" });
+    .upsert({ compte, pick_date: pickDate, joueur }, { onConflict: "compte,pick_date" });
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/ce-soir");
@@ -259,17 +262,18 @@ export async function verrouillerPickManuel(
 }
 
 // Retire le verrou : le plan reprend la main (le pick posé reste en place jusqu'au prochain calcul).
-export async function deverrouillerPickManuel(pickDate: string): Promise<ActionResult> {
+export async function deverrouillerPickManuel(pickDate: string, compte: string = "02"): Promise<ActionResult> {
+  if (!COMPTES_VERROU.includes(compte)) return { ok: false, error: "Compte invalide." };
   if (!DATE_ISO.test(pickDate)) return { ok: false, error: "Date invalide." };
   const supabase = await createClient();
   const { error } = await supabase
     .from("ttfl_verrous_pick")
     .delete()
-    .eq("compte", COMPTE_VERROU)
+    .eq("compte", compte)
     .eq("pick_date", pickDate);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/ce-soir");
-  return { ok: true, message: "Verrou retiré : le compte 02 suit de nouveau le plan." };
+  return { ok: true, message: `Verrou retiré : le compte ${compte} suit de nouveau le plan.` };
 }
 
 // --- Jeu « vainqueur de chaque match » ---------------------------------------------

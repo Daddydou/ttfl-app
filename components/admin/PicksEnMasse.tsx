@@ -167,7 +167,7 @@ function Copier({ aujourdhui }: { aujourdhui: string }) {
       <label className="mt-3 block text-[13px] text-fg-muted">
         Compte source
         <select value={source} onChange={(e) => setSource(e.target.value)} aria-label="Compte source" className={champ}>
-          {["01", "02", ...COMPTES_EQUIPE].map((c) => (
+          {["01", "02", ...COMPTES_EQUIPE, "13"].map((c) => (
             <option key={c} value={c}>Compte {c}</option>
           ))}
         </select>

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   ZONES,
+  COMPTE_VALIDE,
   zoneDe,
   normaliserNom,
   ajouterJours,
@@ -31,7 +32,10 @@ describe("zones", () => {
   it("une zone inconnue retombe sur le compte 1", () => {
     expect(zoneDe("nimporte").id).toBe("c01");
     expect(zoneDe(undefined).id).toBe("c01");
-    expect(ZONES.map((z) => z.id)).toEqual(["c01", "c02", "equipe"]);
+    expect(ZONES.map((z) => z.id)).toEqual(["c01", "c02", "c13", "equipe"]);
+    expect(zoneDe("c13").comptes).toEqual(["13"]);
+    expect(COMPTE_VALIDE.test("13")).toBe(true);
+    expect(COMPTE_VALIDE.test("15")).toBe(false);
   });
 });
 

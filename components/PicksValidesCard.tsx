@@ -96,6 +96,7 @@ export function PicksValidesCard({
                     <div className="space-y-0.5">
                       <LigneCompte label="Compte 1" joueur={c1} />
                       <LigneCompte label="Compte 2" joueur={parDateCompte.get(`${date}|02`)} />
+                      <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} />
                     </div>
                   )}
                   <div className="mt-0.5 text-[13px] capitalize text-fg-muted">

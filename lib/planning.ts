@@ -6,7 +6,7 @@
 //     (les comptes pourront diverger plus tard sans changer le modèle).
 // Le cycle de 30 jours se calcule PAR COMPTE, picks déjà posés d'avance inclus.
 
-export type ZoneId = "c01" | "c02" | "equipe";
+export type ZoneId = "c01" | "c02" | "c13" | "equipe";
 
 export interface Zone {
   id: ZoneId;
@@ -19,6 +19,7 @@ export const COMPTES_EQUIPE = ["03", "04", "05", "06", "07", "08", "09", "10", "
 export const ZONES: Zone[] = [
   { id: "c01", label: "Compte 1", comptes: ["01"] },
   { id: "c02", label: "Compte 2", comptes: ["02"] },
+  { id: "c13", label: "Compte 13", comptes: ["13"] }, // ajouté le 2026-10-18 : plan 30 jours, formule Ambitieuse
   { id: "equipe", label: "Équipe", comptes: COMPTES_EQUIPE },
 ];
 
@@ -26,7 +27,7 @@ export function zoneDe(id?: string | null): Zone {
   return ZONES.find((z) => z.id === id) ?? ZONES[0];
 }
 
-export const COMPTE_VALIDE = /^(0[1-9]|1[0-2])$/;
+export const COMPTE_VALIDE = /^(0[1-9]|1[0-4])$/; // 01 à 14 (le 13 existe depuis le 2026-10-18 ; 14 réservé)
 
 // Un joueur pické est indisponible pour le même compte à ≤ 30 jours, dans les deux sens
 // (comme le robot : prudent). Même règle que ttfl-auto/src/ttfl-http.js.
