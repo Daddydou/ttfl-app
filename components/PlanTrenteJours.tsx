@@ -198,7 +198,7 @@ export function PlanTrenteJours({
       <p className="text-[12px] text-fg-muted">
         Le joueur du soir est celui du plan ; il est revu à chaque calcul selon les blessures et les absents saisis.
         {compte === COMPTE_AUTO
-          ? " Le compte 02 pose automatiquement le n°1 de la formule Équilibrée et le remplace si son joueur devient Out, Doubtful ou absent (même un pick manuel validé). Un pick manuel validé n'est protégé que contre un changement de n°1."
+          ? " Le compte 02 pose automatiquement le n°1 de la formule Prudente et le remplace si son joueur devient Out, Doubtful ou absent (même un pick manuel validé). Un pick manuel validé n'est protégé que contre un changement de n°1."
           : ""}
       </p>
     </section>
