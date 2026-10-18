@@ -18,6 +18,7 @@ import { JOURS_CYCLE, ajouterJours, type PickLigne } from "@/lib/planning";
 import type { TtflManualAbsent } from "@/lib/types";
 import { picksAVenir } from "@/lib/conseilles";
 import { aujourdhuiNY } from "@/lib/planning";
+import { chargerCaptures } from "@/lib/captures";
 import { ageMs, todayISO } from "@/lib/format";
 import type { Mode, TtflBenchmark, TtflRun, TtflSeasonStats } from "@/lib/types";
 
@@ -75,6 +76,7 @@ export default async function DashboardPage() {
       .returns<PickCompte[]>(),
   ]);
   const pickedPlayer = pickRes.data?.player ?? null;
+  const captures = await chargerCaptures(supabase);
   const tousPicks = picksAVenir(aVenirRes.data ?? [], aujourdhui);
   const picksValides = tousPicks.filter((p) => p.compte === COMPTE_REF); // compte 1 : alertes et photo hors-ligne
   const picksAutres = tousPicks.filter((p) => p.compte !== COMPTE_REF);
@@ -158,7 +160,7 @@ export default async function DashboardPage() {
       {run && <AlertesPicks alertes={alertesPicks} mode={run.mode} date={run.game_date} />}
 
       {/* Bloc 1 — mes picks validés (comptes 1 et 2 visibles, équipe dépliable) : une ligne par soirée, avec sa date ---- */}
-      <PicksValidesCard picks={picksValides} autres={picksAutres} aujourdhui={aujourdhui} />
+      <PicksValidesCard picks={picksValides} autres={picksAutres} aujourdhui={aujourdhui} captures={captures} />
 
       {/* Bloc 2 — fraîcheur du dernier calcul + accès aux picks conseillés ------------- */}
       <section className="space-y-3">

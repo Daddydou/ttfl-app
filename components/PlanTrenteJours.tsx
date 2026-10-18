@@ -6,6 +6,8 @@ import { lancerCommande } from "@/app/(app)/admin/actions";
 import { deverrouillerPickManuel, verrouillerPickManuel } from "@/app/actions";
 import { normaliserNom } from "@/lib/planning";
 import { PickZoneButton } from "@/components/PickZoneButton";
+import { CaptureVignette } from "@/components/CaptureVignette";
+import { captureDuPick, type Capture } from "@/lib/captures";
 import { frDate, fmtNum, humanAge } from "@/lib/format";
 import {
   bilanPlan,
@@ -34,6 +36,7 @@ export function PlanTrenteJours({
   aujourdhui,
   maintenantMs,
   verrous,
+  captures,
 }: {
   plans: TtflPlan30[];
   compte: string;
@@ -42,6 +45,7 @@ export function PlanTrenteJours({
   aujourdhui: string;
   maintenantMs: number;
   verrous?: Record<string, string>; // « picks manuels validés » du compte 02 : { date: joueur }
+  captures?: Capture[]; // captures d'écran de la case TTFL (posées par le robot), une par pick confirmé
 }) {
   const router = useRouter();
   const formules = formulesTriees(plans);
@@ -153,6 +157,7 @@ export function PlanTrenteJours({
               compte={compte}
               mode={mode}
               zoneLabel={zoneLabel}
+              capture={captureDuPick(captures, compte, jour.date, jour.joueur)}
               verrouille={
                 jour.statut === "valide" &&
                 !!jour.joueur &&
@@ -261,12 +266,14 @@ function DetailJour({
   mode,
   zoneLabel,
   verrouille,
+  capture,
 }: {
   jour: JourPlan30;
   compte: string;
   mode: Mode;
   zoneLabel: string;
   verrouille: boolean;
+  capture: Capture | null;
 }) {
   if (jour.statut === "aucun" || !jour.joueur) {
     return (
@@ -310,6 +317,8 @@ function DetailJour({
           dejaPicke={jour.statut === "valide"}
         />
       </div>
+
+      {capture && <CaptureVignette capture={capture} />}
 
       {COMPTES_AUTO.includes(compte) && <VerrouManuel jour={jour} mode={mode} verrouille={verrouille} compte={compte} />}
 

@@ -3,6 +3,8 @@ import { etiquetteJour } from "@/lib/conseilles";
 import { frDate } from "@/lib/format";
 import { COMPTES_EQUIPE } from "@/lib/planning";
 import { Icon } from "@/components/ui/Icon";
+import { CaptureVignette } from "@/components/CaptureVignette";
+import { captureDuPick, type Capture } from "@/lib/captures";
 
 // Petite tuile calendrier : jour de la semaine + numéro, comme l'app Calendrier d'iOS.
 function Tuile({ iso }: { iso: string }) {
@@ -28,11 +30,18 @@ export interface PickCompte {
   compte: string;
 }
 
-function LigneCompte({ label, joueur }: { label: string; joueur?: string }) {
+function LigneCompte({ label, joueur, capture }: { label: string; joueur?: string; capture?: Capture | null }) {
   return (
-    <div className="flex items-baseline gap-2 text-[14px]">
-      <span className="w-14 shrink-0 text-[12px] font-semibold uppercase tracking-wide text-fg-muted">{label}</span>
-      <span className={`min-w-0 truncate ${joueur ? "font-semibold text-fg" : "text-fg-faint"}`}>{joueur ?? "pas de pick"}</span>
+    <div>
+      <div className="flex items-baseline gap-2 text-[14px]">
+        <span className="w-14 shrink-0 text-[12px] font-semibold uppercase tracking-wide text-fg-muted">{label}</span>
+        <span className={`min-w-0 truncate ${joueur ? "font-semibold text-fg" : "text-fg-faint"}`}>{joueur ?? "pas de pick"}</span>
+      </div>
+      {capture && (
+        <div className="pl-16">
+          <CaptureVignette capture={capture} />
+        </div>
+      )}
     </div>
   );
 }
@@ -43,10 +52,12 @@ export function PicksValidesCard({
   picks,
   autres,
   aujourdhui,
+  captures,
 }: {
   picks: { pick_date: string; player: string }[];
   autres?: PickCompte[];
   aujourdhui: string;
+  captures?: Capture[]; // captures d'écran de la case TTFL (comptes 02 à 13), une par pick confirmé
 }) {
   const toutes = autres
     ? [...new Set([...picks.map((p) => p.pick_date), ...autres.map((p) => p.pick_date)])].sort()
@@ -95,8 +106,8 @@ export function PicksValidesCard({
                   ) : (
                     <div className="space-y-0.5">
                       <LigneCompte label="Compte 1" joueur={c1} />
-                      <LigneCompte label="Compte 2" joueur={parDateCompte.get(`${date}|02`)} />
-                      <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} />
+                      <LigneCompte label="Compte 2" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} />
+                      <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} />
                     </div>
                   )}
                   <div className="mt-0.5 text-[13px] capitalize text-fg-muted">
@@ -110,7 +121,7 @@ export function PicksValidesCard({
                       </summary>
                       <div className="mt-1.5 space-y-0.5">
                         {equipe.map((e) => (
-                          <LigneCompte key={e.compte} label={`Cpt ${e.compte}`} joueur={e.joueur} />
+                          <LigneCompte key={e.compte} label={`Cpt ${e.compte}`} joueur={e.joueur} capture={captureDuPick(captures, e.compte, date, e.joueur)} />
                         ))}
                       </div>
                     </details>

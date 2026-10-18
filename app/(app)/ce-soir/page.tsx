@@ -7,6 +7,7 @@ import { PlanTrenteJours } from "@/components/PlanTrenteJours";
 import { SuiviFormules } from "@/components/SuiviFormules";
 import type { LigneSuivi } from "@/lib/suivi-formules";
 import { chargerSoiree } from "@/lib/conseilles-data";
+import { chargerCaptures } from "@/lib/captures";
 import { maintenantMs, type TtflPlan30 } from "@/lib/plan30";
 import {
   construireConseilles,
@@ -109,6 +110,7 @@ export default async function PicksConseillesPage({
           .returns<LigneSuivi[]>()
       : Promise.resolve({ data: [] as LigneSuivi[], error: null }),
   ]);
+  const captures = avecPlan ? await chargerCaptures(supabase) : [];
   const verrous = Object.fromEntries((verrousRes.data ?? []).map((v) => [String(v.pick_date).slice(0, 10), v.joueur]));
 
   const picks = picksRes.data ?? [];
@@ -156,6 +158,7 @@ export default async function PicksConseillesPage({
           aujourdhui={aujourdhui}
           maintenantMs={maintenantMs()}
           verrous={verrous}
+          captures={captures}
         />
       )}
       {avecPlan && <SuiviFormules lignes={suiviRes.data ?? []} />}
