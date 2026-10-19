@@ -122,7 +122,7 @@ export function RepartitionEquipe({
               <p className="mt-2 rounded-[10px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
                 Cette soirée a déjà des picks : la répartition les remplace.
                 {dejaPose
-                  ? " Certains sont déjà posés sur le site TTFL : le robot les y remplacera dans les minutes qui suivent (jusqu'à minuit)."
+                  ? " Certains sont déjà posés sur le site TTFL : le robot les y remplacera dans les minutes qui suivent (jusqu'à la clôture de la soirée : début du premier match, au plus tard minuit)."
                   : ""}
               </p>
             )}

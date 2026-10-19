@@ -79,7 +79,7 @@ export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
       <p className="px-1 text-[12px] text-fg-muted">
         <span className="rounded-full bg-quest/15 px-1.5 text-[10px] font-semibold text-quest">auto</span> = posé par le
         robot (case vide remplie à 23 h 30, joueur indisponible remplacé, ou pick automatique) : pas validé par toi.
-        Tu peux le changer jusqu&apos;à minuit.
+        Tu peux le changer jusqu&apos;à la clôture de la soirée (début du premier match, au plus tard minuit).
       </p>
 
       <section className="space-y-2">
