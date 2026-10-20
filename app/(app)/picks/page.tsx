@@ -10,6 +10,9 @@ import { EditionComptes } from "@/components/EditionComptes";
 import { MoisTabs, VueTabs, ZoneTabs, type ParamsPicks } from "@/components/PlanningTabs";
 import { frDate } from "@/lib/format";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { RevelerBouton } from "@/components/RevelerBouton";
+import { chargerSecret, heureCloture, masquerLignes, soireeSecrete } from "@/lib/secret";
+import { maintenantMs as heureServeur } from "@/lib/plan30";
 import {
   aDesProjections,
   aujourdhuiNY,
@@ -61,6 +64,8 @@ interface NuitVue {
   parCompte: Record<string, string>; // compte → joueur pické pour cette soirée
   autos: string[]; // comptes dont le pick a été posé par le robot (auto-remplissage), pas validé par l'utilisateur
   passee: boolean;
+  secret: boolean; // pick du compte secret (02) caché jusqu'à la clôture de la soirée
+  clotureSecret: string | null; // heure de clôture (Paris) affichée avec le cadenas
 }
 
 interface PlanningData {
@@ -80,7 +85,7 @@ async function chargerPlanning(
   const zone = zoneDe(zoneParam);
   const aujourdhui = aujourdhuiNY();
 
-  const [nuitsRes, picksRes, envoisRes, autosRes] = await Promise.all([
+  const [nuitsRes, picksRes, envoisRes, autosRes, secret] = await Promise.all([
     supabase.from("ttfl_nuits").select("*").eq("mode", mode).returns<Nuit[]>(),
     supabase
       .from("ttfl_picks")
@@ -101,15 +106,21 @@ async function chargerPlanning(
       .eq("mode", mode)
       .in("compte", zone.comptes)
       .returns<PickAuto[]>(),
+    chargerSecret(supabase, aujourdhui),
   ]);
-  const autosMarques = autosRes.error ? [] : (autosRes.data ?? []);
+  const maintenantMs = heureServeur();
+  // Pick secret du compte 02 : ses lignes des soirées pas encore closes sont retirées AVANT tout calcul (cycle, envois,
+  // marques « auto »), pour que rien n'en trahisse le joueur.
+  const masquer = <T extends { compte: string }>(l: T[], champ: keyof T = "pick_date" as keyof T) =>
+    masquerLignes(l, secret, aujourdhui, maintenantMs, champ);
+  const autosMarques = masquer(autosRes.error ? [] : (autosRes.data ?? []));
   const erreur =
     nuitsRes.error?.message ?? picksRes.error?.message ?? envoisRes.error?.message ?? null;
 
   // Les soirées « Aucun match » (run vide du push quotidien) ne sont pas des soirées à picker.
   const nuits = (nuitsRes.data ?? []).filter(aDesProjections);
-  const picks = (picksRes.data ?? []).filter((p) => zone.comptes.includes(p.compte));
-  const envois = (envoisRes.data ?? []).filter((e) => zone.comptes.includes(e.compte));
+  const picks = masquer((picksRes.data ?? []).filter((p) => zone.comptes.includes(p.compte)));
+  const envois = masquer((envoisRes.data ?? []).filter((e) => zone.comptes.includes(e.compte)));
 
   // Le planning ne montre que les soirées à venir (aujourd'hui compris) : le passé est dans « Historique ».
   const dates = new Set<string>(
@@ -138,6 +149,8 @@ async function chargerPlanning(
         parCompte: Object.fromEntries(picks.filter((p) => p.pick_date === date).map((p) => [p.compte, p.player])),
         autos: comptesAuto(autosMarques, picks, date),
         passee: date < aujourdhui,
+        secret: zone.comptes.includes(secret.compte) && soireeSecrete(secret, secret.compte, date, aujourdhui, maintenantMs),
+        clotureSecret: heureCloture(secret, date),
       };
     });
 
@@ -277,11 +290,22 @@ function PlanningVue({
                 )}
               </div>
 
-              <p
-                className={`mt-2 text-sm ${n.resume.etat === "aucun" ? "text-fg-muted" : "font-semibold text-fg"}`}
-              >
-                {libellePick(n.resume)}
-              </p>
+              {n.secret ? (
+                // Pick secret (compte 02) : ni joueur, ni état d'envoi, ni sélecteur — rien qui permette de le deviner
+                // ou de l'écraser à l'aveugle. « Révéler maintenant » le montre tout de suite.
+                <div className="mt-2 space-y-2">
+                  <p className="text-sm font-semibold text-court-400">
+                    🔒 Pick secret{n.clotureSecret ? ` · révélé à ${n.clotureSecret} (Paris)` : " · révélé à la clôture de la soirée"}
+                  </p>
+                  <RevelerBouton soiree={n.date} />
+                </div>
+              ) : (
+                <p
+                  className={`mt-2 text-sm ${n.resume.etat === "aucun" ? "text-fg-muted" : "font-semibold text-fg"}`}
+                >
+                  {libellePick(n.resume)}
+                </p>
+              )}
               {n.envoi.detail && <p className="mt-1 text-[13px] text-out">{n.envoi.detail}</p>}
               {n.autos.length > 0 && (
                 <p className="mt-1 text-[13px] font-medium text-quest">
@@ -289,7 +313,7 @@ function PlanningVue({
                 </p>
               )}
 
-              {!n.passee && (
+              {!n.passee && !n.secret && (
                 <NuitPicker
                   mode={mode}
                   date={n.date}
@@ -300,7 +324,7 @@ function PlanningVue({
                   bloques={n.bloques}
                 />
               )}
-              {!n.passee && zone.comptes.length > 1 && (
+              {!n.passee && !n.secret && zone.comptes.length > 1 && (
                 <RepartitionEquipe
                   mode={mode}
                   date={n.date}
@@ -310,7 +334,7 @@ function PlanningVue({
                   dejaPose={n.dejaPose}
                 />
               )}
-              {!n.passee && zone.comptes.length > 1 && (
+              {!n.passee && !n.secret && zone.comptes.length > 1 && (
                 <EditionComptes
                   mode={mode}
                   date={n.date}

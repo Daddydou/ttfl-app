@@ -27,6 +27,8 @@ function from(table: string) {
     },
   };
   for (const m of ["select", "eq", "in", "gte", "lte"]) q[m] = () => q;
+  // Pick secret du compte 02 : éteint dans ces tests (le chargeur lit ttfl_secret_reglage).
+  q.maybeSingle = async () => ({ data: table === "ttfl_secret_reglage" ? { id: 1, actif: false, compte: "02", profil: "prudent" } : null, error: null });
   return q;
 }
 

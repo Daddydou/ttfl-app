@@ -30,12 +30,14 @@ export interface PickCompte {
   compte: string;
 }
 
-function LigneCompte({ label, joueur, capture }: { label: string; joueur?: string; capture?: Capture | null }) {
+function LigneCompte({ label, joueur, capture, secret }: { label: string; joueur?: string; capture?: Capture | null; secret?: boolean }) {
   return (
     <div>
       <div className="flex items-baseline gap-2 text-[14px]">
         <span className="w-14 shrink-0 text-[12px] font-semibold uppercase tracking-wide text-fg-muted">{label}</span>
-        <span className={`min-w-0 truncate ${joueur ? "font-semibold text-fg" : "text-fg-faint"}`}>{joueur ?? "pas de pick"}</span>
+        <span className={`min-w-0 truncate ${joueur ? "font-semibold text-fg" : "text-fg-faint"}`}>
+          {joueur ?? (secret ? "🔒 secret jusqu'à la clôture" : "pas de pick")}
+        </span>
       </div>
       {capture && (
         <div className="pl-16">
@@ -53,7 +55,9 @@ export function PicksValidesCard({
   autres,
   aujourdhui,
   captures,
+  datesSecretes = [],
 }: {
+  datesSecretes?: string[]; // soirées dont le pick du compte 2 est secret (affiché « 🔒 secret » au lieu de « pas de pick »)
   picks: { pick_date: string; player: string }[];
   autres?: PickCompte[];
   aujourdhui: string;
@@ -106,7 +110,7 @@ export function PicksValidesCard({
                   ) : (
                     <div className="space-y-0.5">
                       <LigneCompte label="Compte 1" joueur={c1} />
-                      <LigneCompte label="Compte 2" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} />
+                      <LigneCompte label="Compte 2" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} secret={datesSecretes.includes(date)} />
                       <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} />
                     </div>
                   )}

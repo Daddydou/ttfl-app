@@ -15,6 +15,11 @@ function from(table: string) {
     journal.push({ table, op, payload, filtres, options });
     return q;
   };
+  // Pick secret du compte 02 : éteint par défaut dans ces tests (le chargeur lit ttfl_secret_reglage).
+  q.maybeSingle = async () => ({
+    data: table === "ttfl_secret_reglage" ? (tables[table]?.[0] ?? { id: 1, actif: false, compte: "02", profil: "prudent" }) : null,
+    error: null,
+  });
   q.insert = ecrire("insert");
   q.upsert = ecrire("upsert");
   q.update = ecrire("update");

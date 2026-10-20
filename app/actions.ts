@@ -5,10 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 import type { Mode, PlayerStatus } from "@/lib/types";
 import { COMPTE_REF } from "@/lib/compte";
 import { validerAffectations } from "@/lib/repartition";
+import { chargerSecret, refusSecret } from "@/lib/secret";
 import {
   COMPTE_VALIDE,
   JOURS_CYCLE,
   ajouterJours,
+  aujourdhuiNY,
   bloquesPourSoiree,
   normaliserNom,
   type PickLigne,
@@ -28,6 +30,8 @@ export async function pickPlayer(
   compte: string = COMPTE_REF,
 ): Promise<ActionResult> {
   const supabase = await createClient();
+  const refus = await refusSecret(supabase, [compte], [pickDate], aujourdhuiNY());
+  if (refus) return { ok: false, error: refus };
   const { error } = await supabase
     .from("ttfl_picks")
     .upsert(
@@ -185,6 +189,8 @@ export async function pickPlayerComptes(
   if (!liste) return { ok: false, error: "Comptes invalides." };
 
   const supabase = await createClient();
+  const refus = await refusSecret(supabase, liste, [pickDate], aujourdhuiNY());
+  if (refus) return { ok: false, error: refus };
 
   // Cycle de 30 jours revérifié côté serveur : l'écran désactive déjà ces joueurs, mais la
   // liste affichée peut être périmée (autre appareil, pick remonté du site entre-temps).
@@ -200,6 +206,11 @@ export async function pickPlayerComptes(
 
   const bloques = bloquesPourSoiree(voisins ?? [], liste, pickDate)[normaliserNom(joueur)];
   if (bloques && bloques.length > 0) {
+    // Compte secret concerné : le détail (quel compte, donc quel pick voisin) pourrait trahir un pick encore secret.
+    const etatSecret = await chargerSecret(supabase, aujourdhuiNY());
+    if (etatSecret.actif && liste.includes(etatSecret.compte)) {
+      return { ok: false, error: `${joueur} est refusé par le cycle de ${JOURS_CYCLE} jours (détail masqué : pick secret).` };
+    }
     return {
       ok: false,
       error: `${joueur} est déjà pické à ${JOURS_CYCLE} jours ou moins sur le(s) compte(s) ${bloques.join(", ")}.`,
@@ -344,6 +355,8 @@ export async function retirerPickComptes(
   if (!liste) return { ok: false, error: "Comptes invalides." };
 
   const supabase = await createClient();
+  const refus = await refusSecret(supabase, liste, [pickDate], aujourdhuiNY());
+  if (refus) return { ok: false, error: refus };
   const { error } = await supabase
     .from("ttfl_picks")
     .delete()
@@ -375,6 +388,8 @@ export async function pickRepartition(
   if (liste.length === 0) return { ok: false, error: "Comptes invalides." };
 
   const supabase = await createClient();
+  const refus = await refusSecret(supabase, liste, [pickDate], aujourdhuiNY());
+  if (refus) return { ok: false, error: refus };
   const { data: voisins, error: errVoisins } = await supabase
     .from("ttfl_picks")
     .select("pick_date,player,compte")

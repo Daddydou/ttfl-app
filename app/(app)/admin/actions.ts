@@ -15,6 +15,7 @@ import {
 } from "@/lib/admin";
 import { COMPTE_VALIDE, JOURS_CYCLE, ajouterJours, aujourdhuiNY, type PickLigne } from "@/lib/planning";
 import { frDate } from "@/lib/format";
+import { plageDates, refusSecret } from "@/lib/secret";
 import type { Mode } from "@/lib/types";
 
 export type ResultatAdmin = { ok: true; message: string; details: string[] } | { ok: false; error: string };
@@ -134,6 +135,8 @@ export async function importerPicks(
 
   const dates = propres.map((l) => l.date).sort();
   const supabase = await createClient();
+  const refusImport = await refusSecret(supabase, liste, dates, aujourdhuiNY());
+  if (refusImport) return { ok: false, error: refusImport };
   const { picks, erreur } = await picksExistants(supabase, mode, liste, dates[0], dates[dates.length - 1]);
   if (erreur) return { ok: false, error: erreur };
 
@@ -163,6 +166,8 @@ export async function copierPicks(
   if (erreurPlage) return { ok: false, error: erreurPlage };
 
   const supabase = await createClient();
+  const refusCopie = await refusSecret(supabase, [source, ...liste], plageDates(debut, fin), aujourdhuiNY());
+  if (refusCopie) return { ok: false, error: refusCopie };
   const { picks: sources, erreur: e1 } = await picksExistants(supabase, mode, [source], debut, fin);
   if (e1) return { ok: false, error: e1 };
   const aCopier = sources.filter((p) => p.pick_date >= debut && p.pick_date <= fin);
@@ -198,6 +203,8 @@ export async function supprimerPicks(
   }
 
   const supabase = await createClient();
+  const refusSuppr = await refusSecret(supabase, liste, plageDates(debut, fin), aujourdhuiNY());
+  if (refusSuppr) return { ok: false, error: refusSuppr };
   const { data, error } = await supabase
     .from("ttfl_picks")
     .select("id,pick_date,compte")

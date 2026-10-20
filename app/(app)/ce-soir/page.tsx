@@ -8,6 +8,9 @@ import { SuiviFormules } from "@/components/SuiviFormules";
 import type { LigneSuivi } from "@/lib/suivi-formules";
 import { chargerSoiree } from "@/lib/conseilles-data";
 import { chargerCaptures } from "@/lib/captures";
+import { BandeauSecret } from "@/components/BandeauSecret";
+import { RevelerBouton } from "@/components/RevelerBouton";
+import { chargerSecret, heureCloture, masquerLignes, soireeSecrete, soireesSecretes } from "@/lib/secret";
 import { maintenantMs, type TtflPlan30 } from "@/lib/plan30";
 import {
   construireConseilles,
@@ -79,7 +82,7 @@ export default async function PicksConseillesPage({
   const avecPlan = zone.id === "c01" || zone.id === "c02" || zone.id === "c13";
   const compteAuto = zone.id === "c02" || zone.id === "c13"; // comptes gérés par le robot (verrou « validé à la main »)
 
-  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes] = await Promise.all([
+  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes, secret] = await Promise.all([
     chargerSoiree(supabase, mode, date),
     supabase
       .from("ttfl_picks")
@@ -109,11 +112,30 @@ export default async function PicksConseillesPage({
           .order("pick_date")
           .returns<LigneSuivi[]>()
       : Promise.resolve({ data: [] as LigneSuivi[], error: null }),
+    chargerSecret(supabase, aujourdhui),
   ]);
-  const captures = avecPlan ? await chargerCaptures(supabase) : [];
-  const verrous = Object.fromEntries((verrousRes.data ?? []).map((v) => [String(v.pick_date).slice(0, 10), v.joueur]));
+  const nowMs = maintenantMs();
+  // Pick secret du compte 02 : tout ce qui trahirait son joueur (picks, cycle, plan, verrous, suivi, captures) est
+  // retiré tant que la soirée n'est ni close, ni révélée (lib/secret.ts).
+  const estSecret = (compte: string, d: string) => soireeSecrete(secret, compte, d, aujourdhui, nowMs);
+  const captures = avecPlan ? masquerLignes(await chargerCaptures(supabase), secret, aujourdhui, nowMs) : [];
+  const verrous = Object.fromEntries(
+    (verrousRes.data ?? [])
+      .filter((v) => !estSecret(zone.comptes[0], String(v.pick_date).slice(0, 10)))
+      .map((v) => [String(v.pick_date).slice(0, 10), v.joueur]),
+  );
+  const suiviVisible = (suiviRes.data ?? []).filter(
+    (l) => !(l.profil === secret.profil && estSecret(secret.compte, String(l.pick_date).slice(0, 10))),
+  );
 
-  const picks = picksRes.data ?? [];
+  const picks = masquerLignes(picksRes.data ?? [], secret, aujourdhui, nowMs);
+  // Le plan du compte secret : on ne garde que les soirées révélées ; s'il n'en reste aucune, un cadenas remplace le plan.
+  const planSecret = zone.comptes.includes(secret.compte) && secret.actif;
+  const plansVisibles = (planRes.data ?? [])
+    .filter((p) => p.compte === zone.comptes[0])
+    .map((p) => (planSecret ? { ...p, jours: p.jours.filter((j) => !estSecret(secret.compte, j.date)) } : p));
+  const planCache = planSecret && plansVisibles.length > 0 && plansVisibles.every((p) => p.jours.length === 0);
+  const datesSecretes = zone.comptes.includes(secret.compte) ? soireesSecretes(secret, jours, aujourdhui, nowMs) : [];
   const lignes = fusionnerSoiree(soiree.avance, soiree.soir);
   const { conseilles, masques } = construireConseilles({
     lignes,
@@ -149,9 +171,23 @@ export default async function PicksConseillesPage({
       <JoursConseilles jours={jours} courant={date} pour={zone.id} aujourdhui={aujourdhui} />
       <ZonesConseilles courant={zone.id} date={date} />
 
-      {avecPlan && (
+      <BandeauSecret etat={secret} dates={datesSecretes} />
+
+      {avecPlan && planCache && (
+        <section className="card space-y-2 px-4 py-4" aria-label="Plan 30 jours caché">
+          <p className="section-label">Plan 30 jours · Compte {secret.compte}</p>
+          <p className="text-sm font-semibold text-court-400">🔒 Plan caché : il montrerait le pick secret</p>
+          <p className="text-[13px] text-fg-muted">
+            Chaque soirée du plan se dévoile à sa clôture{heureCloture(secret, jours[0]) ? ` (ce soir : ${heureCloture(secret, jours[0])}, heure de Paris)` : ""}.
+            Le robot continue de poser le pick comme d&apos;habitude.
+          </p>
+          <RevelerBouton soiree={jours[0]} libelle="Révéler le plan de ce soir" />
+        </section>
+      )}
+
+      {avecPlan && !planCache && (
         <PlanTrenteJours
-          plans={(planRes.data ?? []).filter((p) => p.compte === zone.comptes[0])}
+          plans={plansVisibles}
           compte={zone.comptes[0]}
           zoneLabel={zone.label}
           mode={mode}
@@ -161,7 +197,7 @@ export default async function PicksConseillesPage({
           captures={captures}
         />
       )}
-      {avecPlan && <SuiviFormules lignes={suiviRes.data ?? []} />}
+      {avecPlan && <SuiviFormules lignes={suiviVisible} />}
 
       {ancien && (
         <div className="rounded-[20px] bg-quest/10 px-4 py-3">

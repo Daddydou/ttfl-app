@@ -3,6 +3,9 @@ import { ActionsPC } from "@/components/admin/ActionsPC";
 import { HistoriqueCommandes, type Commande } from "@/components/admin/HistoriqueCommandes";
 import { JournalEnvois, type EntreeJournal } from "@/components/admin/JournalEnvois";
 import { PicksEnMasse } from "@/components/admin/PicksEnMasse";
+import { SecretPick, type SoireeSecreteVue } from "@/components/admin/SecretPick";
+import { chargerSecret, heureCloture, masquerLignes, soireeSecrete } from "@/lib/secret";
+import { maintenantMs as heureServeur } from "@/lib/plan30";
 import { etatExecuteur } from "@/lib/admin";
 import { ageMs, humanAge } from "@/lib/format";
 import { aujourdhuiNY } from "@/lib/planning";
@@ -20,7 +23,8 @@ const PILULES = {
 
 export default async function AdminPage() {
   const supabase = await createClient();
-  const [commandesRes, poulsRes, journalRes] = await Promise.all([
+  const aujourdhui = aujourdhuiNY();
+  const [commandesRes, poulsRes, journalRes, secret] = await Promise.all([
     supabase.from("ttfl_commandes").select("*").order("id", { ascending: false }).limit(30).returns<Commande[]>(),
     supabase
       .from("ttfl_robot_etat")
@@ -33,7 +37,24 @@ export default async function AdminPage() {
       .order("id", { ascending: false })
       .limit(40)
       .returns<EntreeJournal[]>(),
+    chargerSecret(supabase, aujourdhui),
   ]);
+  const maintenantMs = heureServeur();
+  // Pick secret du compte 02 : ses lignes du journal d'envoi (joueur !) sont retirées tant que la soirée est secrète.
+  const journal = masquerLignes(journalRes.data ?? [], secret, aujourdhui, maintenantMs);
+  const soireesSecretes: SoireeSecreteVue[] = Object.keys(secret.lignes)
+    .sort()
+    .filter((d) => d >= aujourdhui)
+    .map((d) => {
+      const l = secret.lignes[d];
+      const secrete = soireeSecrete(secret, secret.compte, d, aujourdhui, maintenantMs);
+      return {
+        soiree: d,
+        libelle: new Date(`${d}T00:00:00Z`).toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit", timeZone: "UTC" }),
+        cloture: heureCloture(secret, d),
+        etat: secrete ? "secrete" : l.revele_le && l.motif === "force" ? "revelee_force" : "revelee_cloture",
+      };
+    });
 
   const commandes = commandesRes.data ?? [];
   const dernier = poulsRes.data?.valeur?.dernier_passage ?? poulsRes.data?.maj_le ?? null;
@@ -62,7 +83,8 @@ export default async function AdminPage() {
 
       <ActionsPC actives={actives} />
       <HistoriqueCommandes commandes={commandes} />
-      <JournalEnvois entrees={journalRes.data ?? []} disponible={!journalRes.error} />
+      <SecretPick actif={secret.actif} compte={secret.compte} soirees={soireesSecretes} lisible={secret.lisible} />
+      <JournalEnvois entrees={journal} disponible={!journalRes.error} />
       <PicksEnMasse aujourdhui={aujourdhuiNY()} />
     </div>
   );

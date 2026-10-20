@@ -7,7 +7,10 @@ export function fakeSupabase(tables: Tables) {
   return {
     from(table: string) {
       // La vue ttfl_latest_run se comporte comme ttfl_runs dans ces tests.
-      const rows = tables[table] ?? (table === "ttfl_latest_run" ? tables["ttfl_runs"] : undefined) ?? [];
+      // Pick secret du compte 02 : par défaut ÉTEINT dans les tests (sinon les lignes du 02 seraient masquées). Un test
+      // du secret fournit sa propre table ttfl_secret_reglage.
+      const parDefaut = table === "ttfl_secret_reglage" ? [{ id: 1, actif: false, compte: "02", profil: "prudent" }] : undefined;
+      const rows = tables[table] ?? (table === "ttfl_latest_run" ? tables["ttfl_runs"] : undefined) ?? parDefaut ?? [];
       const result = { data: rows, error: null };
       const single = { data: rows[0] ?? null, error: null };
       const query: Record<string, unknown> = {

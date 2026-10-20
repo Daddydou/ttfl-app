@@ -14,7 +14,10 @@ import { SauvegardeHorsLigne } from "@/components/SauvegardeHorsLigne";
 import { alertesPicksDuSoir, type AlertePick } from "@/lib/alertes-picks";
 import { chargerSoiree } from "@/lib/conseilles-data";
 import { fusionnerSoiree } from "@/lib/conseilles";
-import { JOURS_CYCLE, ajouterJours, type PickLigne } from "@/lib/planning";
+import { JOURS_CYCLE, ZONES, ajouterJours, type PickLigne } from "@/lib/planning";
+import { BandeauSecret } from "@/components/BandeauSecret";
+import { chargerSecret, masquerLignes, soireeSecrete, soireesSecretes } from "@/lib/secret";
+import { maintenantMs as heureServeur } from "@/lib/plan30";
 import type { TtflManualAbsent } from "@/lib/types";
 import { picksAVenir } from "@/lib/conseilles";
 import { aujourdhuiNY } from "@/lib/planning";
@@ -56,7 +59,7 @@ export default async function DashboardPage() {
 
   const mode: Mode = run?.mode ?? "regular";
 
-  const [pickRes, aVenirRes] = await Promise.all([
+  const [pickRes, aVenirRes, secret] = await Promise.all([
     run
       ? supabase
           .from("ttfl_picks")
@@ -74,10 +77,19 @@ export default async function DashboardPage() {
       .order("pick_date", { ascending: true })
       .limit(800)
       .returns<PickCompte[]>(),
+    chargerSecret(supabase, aujourdhui),
   ]);
+  const maintenantMs = heureServeur();
+  // Pick secret du compte 02 : ses picks, captures et alertes des soirées pas encore closes sont retirés (lib/secret.ts).
+  const datesSecretes = soireesSecretes(
+    secret,
+    [...new Set([...(run ? [run.game_date] : []), ...Object.keys(secret.lignes)])].sort(),
+    aujourdhui,
+    maintenantMs,
+  );
   const pickedPlayer = pickRes.data?.player ?? null;
-  const captures = await chargerCaptures(supabase);
-  const tousPicks = picksAVenir(aVenirRes.data ?? [], aujourdhui);
+  const captures = masquerLignes(await chargerCaptures(supabase), secret, aujourdhui, maintenantMs);
+  const tousPicks = picksAVenir(masquerLignes(aVenirRes.data ?? [], secret, aujourdhui, maintenantMs), aujourdhui);
   const picksValides = tousPicks.filter((p) => p.compte === COMPTE_REF); // compte 1 : alertes et photo hors-ligne
   const picksAutres = tousPicks.filter((p) => p.compte !== COMPTE_REF);
 
@@ -132,8 +144,13 @@ export default async function DashboardPage() {
         .returns<PickLigne[]>(),
       supabase.from("ttfl_manual_absents").select("*").returns<TtflManualAbsent[]>(),
     ]);
-    const voisins = voisinsRes.data ?? [];
+    const voisins = masquerLignes(voisinsRes.data ?? [], secret, aujourdhui, maintenantMs);
+    // Ce soir encore secret : aucune alerte pour le compte secret (« sans pick » serait faux, « Out » trahirait le joueur).
+    const zonesAlertes = soireeSecrete(secret, secret.compte, run.game_date, aujourdhui, maintenantMs)
+      ? ZONES.filter((z) => !z.comptes.includes(secret.compte))
+      : ZONES;
     alertesPicks = alertesPicksDuSoir({
+      zones: zonesAlertes,
       date: run.game_date,
       picksDuSoir: voisins.filter((p) => p.pick_date === run.game_date),
       voisins,
@@ -160,7 +177,14 @@ export default async function DashboardPage() {
       {run && <AlertesPicks alertes={alertesPicks} mode={run.mode} date={run.game_date} />}
 
       {/* Bloc 1 — mes picks validés (comptes 1 et 2 visibles, équipe dépliable) : une ligne par soirée, avec sa date ---- */}
-      <PicksValidesCard picks={picksValides} autres={picksAutres} aujourdhui={aujourdhui} captures={captures} />
+      <BandeauSecret etat={secret} dates={datesSecretes} />
+      <PicksValidesCard
+        picks={picksValides}
+        autres={picksAutres}
+        aujourdhui={aujourdhui}
+        captures={captures}
+        datesSecretes={datesSecretes}
+      />
 
       {/* Bloc 2 — fraîcheur du dernier calcul + accès aux picks conseillés ------------- */}
       <section className="space-y-3">
