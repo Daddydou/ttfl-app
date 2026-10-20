@@ -61,7 +61,7 @@ export function PicksValidesCard({
   picks: { pick_date: string; player: string }[];
   autres?: PickCompte[];
   aujourdhui: string;
-  captures?: Capture[]; // captures d'écran de la case TTFL (comptes 02 à 13), une par pick confirmé
+  captures?: Capture[]; // captures d'écran de la case TTFL (comptes 01 à 13), une par pick confirmé
 }) {
   const toutes = autres
     ? [...new Set([...picks.map((p) => p.pick_date), ...autres.map((p) => p.pick_date)])].sort()
@@ -106,10 +106,13 @@ export function PicksValidesCard({
                 <Tuile iso={date} />
                 <div className="min-w-0 flex-1">
                   {!autres ? (
-                    <div className="truncate text-[17px] font-semibold tracking-[-0.01em] text-fg">{c1}</div>
+                    <>
+                      <div className="truncate text-[17px] font-semibold tracking-[-0.01em] text-fg">{c1}</div>
+                      {captureDuPick(captures, "01", date, c1) && <CaptureVignette capture={captureDuPick(captures, "01", date, c1)!} />}
+                    </>
                   ) : (
                     <div className="space-y-0.5">
-                      <LigneCompte label="Compte 1" joueur={c1} />
+                      <LigneCompte label="Compte 1" joueur={c1} capture={captureDuPick(captures, "01", date, c1)} />
                       <LigneCompte label="Compte 2" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} secret={datesSecretes.includes(date)} />
                       <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} />
                     </div>
