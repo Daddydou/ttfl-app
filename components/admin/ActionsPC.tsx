@@ -49,7 +49,17 @@ function CarteAction({ action, active }: { action: ActionPC; active: boolean }) 
     <div className="px-4 py-3.5">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <h4 className="text-[16px] font-semibold leading-snug text-fg">{action.libelle}</h4>
+          <h4 className="text-[16px] font-semibold leading-snug text-fg">
+            {action.libelle}
+            {action.cloud && (
+              <span
+                title="Marche aussi PC éteint : exécutée dans le cloud si le PC ne répond pas"
+                className="ml-2 inline-block rounded-full bg-court-500/15 px-2 py-0.5 align-middle text-[11px] font-bold text-court-400"
+              >
+                Cloud
+              </span>
+            )}
+          </h4>
           <p className="mt-0.5 text-[13px] leading-snug text-fg-muted">{action.detail}</p>
         </div>
         <button

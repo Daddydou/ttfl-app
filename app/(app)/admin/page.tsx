@@ -10,6 +10,8 @@ import { etatExecuteur } from "@/lib/admin";
 import { ageMs, humanAge } from "@/lib/format";
 import { aujourdhuiNY } from "@/lib/planning";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Sante } from "@/components/admin/Sante";
+import { etatSante, type LigneEtat } from "@/lib/sante";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin — TTFL" };
@@ -24,13 +26,15 @@ const PILULES = {
 export default async function AdminPage() {
   const supabase = await createClient();
   const aujourdhui = aujourdhuiNY();
-  const [commandesRes, poulsRes, journalRes, secret] = await Promise.all([
+  const [commandesRes, etatsRes, runRes, planRes, cotesRes, journalRes, secret] = await Promise.all([
     supabase.from("ttfl_commandes").select("*").order("id", { ascending: false }).limit(30).returns<Commande[]>(),
-    supabase
-      .from("ttfl_robot_etat")
-      .select("valeur,maj_le")
-      .eq("cle", "commandes")
-      .maybeSingle<{ valeur: { dernier_passage?: string } | null; maj_le: string }>(),
+    supabase.from("ttfl_robot_etat").select("cle,valeur,maj_le").returns<LigneEtat[]>(),
+    supabase.from("ttfl_runs").select("computed_at").eq("mode", "regular").order("computed_at", { ascending: false }).limit(1)
+      .maybeSingle<{ computed_at: string }>(),
+    supabase.from("ttfl_plan30").select("calcule_le").order("calcule_le", { ascending: false }).limit(1)
+      .maybeSingle<{ calcule_le: string }>(),
+    supabase.from("ttfl_vainqueurs_releves").select("releve_le").order("releve_le", { ascending: false }).limit(1)
+      .maybeSingle<{ releve_le: string }>(),
     supabase
       .from("ttfl_envois_journal")
       .select("id,le,pick_date,compte,joueur,statut,message")
@@ -57,7 +61,19 @@ export default async function AdminPage() {
     });
 
   const commandes = commandesRes.data ?? [];
-  const dernier = poulsRes.data?.valeur?.dernier_passage ?? poulsRes.data?.maj_le ?? null;
+  const etats = etatsRes.data ?? [];
+  const pouls = etats.find((e) => e.cle === "commandes");
+  const dernierPassage = pouls?.valeur?.dernier_passage;
+  const dernier = (typeof dernierPassage === "string" ? dernierPassage : null) ?? pouls?.maj_le ?? null;
+  const taches = etatSante(
+    {
+      etats,
+      dernierRun: runRes.data?.computed_at ?? null,
+      dernierPlan30: planRes.data?.calcule_le ?? null,
+      dernierReleveCotes: cotesRes.data?.releve_le ?? null,
+    },
+    maintenantMs,
+  );
   const { etat, minutes } = etatExecuteur(dernier ? Math.round(ageMs(dernier) / 60000) : null);
   const pilule = PILULES[etat];
   const actives = commandes.filter((c) => c.statut === "en_attente" || c.statut === "en_cours").map((c) => c.type);
@@ -73,9 +89,11 @@ export default async function AdminPage() {
             ? "L'exécuteur du PC n'a encore jamais répondu."
             : etat === "en_ligne"
               ? `Dernier passage ${humanAge(minutes ?? 0)}. Les actions démarrent dans la minute.`
-              : `Dernier passage ${humanAge(minutes ?? 0)}. Les actions attendront que le PC soit allumé et connecté.`}
+              : `Dernier passage ${humanAge(minutes ?? 0)}. Les actions marquées « Cloud » s'exécutent quand même (environ 2 min) ; les autres attendront le PC.`}
         </p>
       </section>
+
+      <Sante taches={taches} maintenantMs={maintenantMs} />
 
       {commandesRes.error && (
         <p className="rounded-[14px] bg-out/10 px-3 py-2 text-[13px] text-out">{commandesRes.error.message}</p>

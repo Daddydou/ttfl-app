@@ -18,7 +18,7 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
-const pouls = (iso: string) => [{ valeur: { dernier_passage: iso }, maj_le: iso }];
+const pouls = (iso: string) => [{ cle: "commandes", valeur: { dernier_passage: iso }, maj_le: iso }];
 async function rendre(tables: Record<string, unknown[]>) {
   createClient.mockResolvedValue(fakeSupabase(tables));
   render(await AdminPage());
@@ -31,10 +31,18 @@ describe("Page Admin", () => {
     expect(screen.getByText(/Les actions démarrent dans la minute/)).toBeInTheDocument();
   });
 
-  it("prévient quand le PC est hors ligne : les actions attendront son retour", async () => {
+  it("prévient quand le PC est hors ligne : les actions « Cloud » partent quand même, les autres attendront", async () => {
     await rendre({ ttfl_commandes: [], ttfl_robot_etat: pouls("2026-10-10T13:20:00Z") });
     expect(screen.getByText("PC hors ligne")).toBeInTheDocument();
-    expect(screen.getByText(/attendront que le PC soit allumé/)).toBeInTheDocument();
+    expect(screen.getByText(/s'exécutent quand même .* les autres attendront le PC/)).toBeInTheDocument();
+    expect(screen.getAllByText("Cloud").length).toBeGreaterThanOrEqual(3); // badges des 3 actions cloud
+  });
+
+  it("affiche la santé des tâches : PC muet depuis 40 min = en retard", async () => {
+    await rendre({ ttfl_commandes: [], ttfl_robot_etat: pouls("2026-10-10T13:20:00Z") });
+    expect(screen.getByRole("heading", { name: "Santé des tâches" })).toBeInTheDocument();
+    expect(screen.getByText("Exécuteur du PC")).toBeInTheDocument();
+    expect(screen.getAllByText(/En retard/).length).toBeGreaterThanOrEqual(1);
   });
 
   it("signale qu'aucun passage n'a jamais été reçu", async () => {

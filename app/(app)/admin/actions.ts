@@ -96,7 +96,13 @@ export async function lancerCommande(type: string, params: Record<string, unknow
   const { error } = await supabase.from("ttfl_commandes").insert({ type, params: propres.params });
   if (error) return { ok: false, error: error.message };
   revalidatePath("/admin");
-  return { ok: true, message: "Demandée : l'exécuteur du PC la prend en charge dans la minute.", details: [] };
+  return {
+    ok: true,
+    message: action.cloud
+      ? "Demandée : le PC la prend dans la minute ; s'il ne répond pas, le cloud l'exécute (environ 2 min)."
+      : "Demandée : l'exécuteur du PC la prend en charge dans la minute.",
+    details: [],
+  };
 }
 
 export async function annulerCommande(id: number): Promise<ResultatAdmin> {

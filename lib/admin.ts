@@ -16,7 +16,12 @@ export interface ActionPC {
   detail: string;
   param?: "date" | "nuits"; // paramètre optionnel
   confirmer?: string; // actions sensibles : message de confirmation
+  // Exécutable aussi PC éteint (exécuteur cloud, ttfl-auto/src/commandes-cloud.js : même liste à garder à jour).
+  cloud?: boolean;
 }
+
+// Actions que l'exécuteur cloud sait faire (miroir de CATALOGUE_CLOUD et du déclencheur Supabase ttfl_commande_reveil).
+export const ACTIONS_CLOUD = ["synchro_app", "synchro_complet", "cookies"] as const;
 
 export const GROUPES: { id: GroupeAction; titre: string }[] = [
   { id: "calculs", titre: "Calculs et statistiques" },
@@ -43,13 +48,13 @@ export const ACTIONS_PC: ActionPC[] = [
   { id: "import_cotes", groupe: "donnees", libelle: "Importer les cotes de paris", param: "date",
     detail: "Récupère les lignes de paris du Top 10 (The Odds API).",
     confirmer: "Cet import consomme du quota The Odds API : environ 16 crédits sur 500 par mois. Continuer ?" },
-  { id: "synchro_app", groupe: "synchro", libelle: "Envoyer mes picks sur le site TTFL",
+  { id: "synchro_app", groupe: "synchro", libelle: "Envoyer mes picks sur le site TTFL", cloud: true,
     detail: "Envoie tout de suite les picks validés dans l'application vers le site TTFL.",
     confirmer: "Les picks de l'application vont être envoyés sur le site TTFL maintenant, remplacements compris. Continuer ?" },
-  { id: "synchro_complet", groupe: "synchro", libelle: "Synchronisation complète (2 sens)",
+  { id: "synchro_complet", groupe: "synchro", libelle: "Synchronisation complète (2 sens)", cloud: true,
     detail: "Envoie les picks vers le site ET remonte ceux posés sur le site.",
     confirmer: "La synchronisation complète va écrire sur le site TTFL et dans l'application. Continuer ?" },
-  { id: "cookies", groupe: "synchro", libelle: "Vérifier les 13 connexions TTFL",
+  { id: "cookies", groupe: "synchro", libelle: "Vérifier les 13 connexions TTFL", cloud: true,
     detail: "Teste que les 13 comptes sont toujours connectés (les cookies durent environ 2 mois)." },
   { id: "controle_2330", groupe: "synchro", libelle: "Lancer le contrôle de 23 h 30 maintenant",
     detail: "Vérifie les blessures des comptes 01 à 12 (et du 13 une fois activé). Suit le réglage du PC : à blanc (il notifie seulement) tant que tu ne l'as pas activé en réel." },
