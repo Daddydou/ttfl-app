@@ -12,6 +12,8 @@ import { aujourdhuiNY } from "@/lib/planning";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Sante } from "@/components/admin/Sante";
 import { etatSante, type LigneEtat } from "@/lib/sante";
+import { MoteurCloud } from "@/components/admin/MoteurCloud";
+import { lireModeCloud } from "@/lib/cloud";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin — TTFL" };
@@ -26,7 +28,7 @@ const PILULES = {
 export default async function AdminPage() {
   const supabase = await createClient();
   const aujourdhui = aujourdhuiNY();
-  const [commandesRes, etatsRes, runRes, planRes, cotesRes, journalRes, secret] = await Promise.all([
+  const [commandesRes, etatsRes, runRes, planRes, cotesRes, cloudRes, journalRes, secret] = await Promise.all([
     supabase.from("ttfl_commandes").select("*").order("id", { ascending: false }).limit(30).returns<Commande[]>(),
     supabase.from("ttfl_robot_etat").select("cle,valeur,maj_le").returns<LigneEtat[]>(),
     supabase.from("ttfl_runs").select("computed_at").eq("mode", "regular").order("computed_at", { ascending: false }).limit(1)
@@ -35,6 +37,7 @@ export default async function AdminPage() {
       .maybeSingle<{ calcule_le: string }>(),
     supabase.from("ttfl_vainqueurs_releves").select("releve_le").order("releve_le", { ascending: false }).limit(1)
       .maybeSingle<{ releve_le: string }>(),
+    supabase.from("ttfl_cloud_reglage").select("mode").eq("id", 1).maybeSingle<{ mode: string }>(),
     supabase
       .from("ttfl_envois_journal")
       .select("id,le,pick_date,compte,joueur,statut,message")
@@ -71,11 +74,20 @@ export default async function AdminPage() {
       dernierRun: runRes.data?.computed_at ?? null,
       dernierPlan30: planRes.data?.calcule_le ?? null,
       dernierReleveCotes: cotesRes.data?.releve_le ?? null,
+      modeCloud: cloudRes.data?.mode ?? null,
     },
     maintenantMs,
   );
+  const modeCloud = lireModeCloud(cloudRes.data?.mode);
+  const lancement = etats.find((e) => e.cle === "reveil_moteur_envoi");
+  const tacheLancee = (lancement?.valeur?.inputs as { tache?: string } | undefined)?.tache;
+  const dernierLancement = lancement
+    ? `${new Date(lancement.maj_le).toLocaleString("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}${tacheLancee ? ` (${tacheLancee})` : ""}`
+    : null;
   const { etat, minutes } = etatExecuteur(dernier ? Math.round(ageMs(dernier) / 60000) : null);
-  const pilule = PILULES[etat];
+  const pilule = modeCloud === "reel"
+    ? { classe: "bg-court-500/15 text-court-400", titre: "Cloud en charge — le PC est au repos" }
+    : PILULES[etat];
   const actives = commandes.filter((c) => c.statut === "en_attente" || c.statut === "en_cours").map((c) => c.type);
 
   return (
@@ -85,7 +97,9 @@ export default async function AdminPage() {
       <section className={`rounded-[20px] px-4 py-3.5 ${pilule.classe}`}>
         <p className="text-sm font-semibold">{pilule.titre}</p>
         <p className="mt-0.5 text-[13px] opacity-80">
-          {etat === "inconnu"
+          {modeCloud === "reel"
+            ? "Toutes les actions s'exécutent dans le cloud (environ 2 à 5 min). Le PC peut rester éteint."
+            : etat === "inconnu"
             ? "L'exécuteur du PC n'a encore jamais répondu."
             : etat === "en_ligne"
               ? `Dernier passage ${humanAge(minutes ?? 0)}. Les actions démarrent dans la minute.`
@@ -94,6 +108,7 @@ export default async function AdminPage() {
       </section>
 
       <Sante taches={taches} maintenantMs={maintenantMs} />
+      <MoteurCloud mode={modeCloud} dernier={dernierLancement} />
 
       {commandesRes.error && (
         <p className="rounded-[14px] bg-out/10 px-3 py-2 text-[13px] text-out">{commandesRes.error.message}</p>

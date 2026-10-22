@@ -165,7 +165,11 @@ export default async function DashboardPage() {
   const alerteCk = alerteCookies(cookiesEtat ? { ...(cookiesEtat.valeur as EtatCookies | null), le: (cookiesEtat.valeur as EtatCookies | null)?.le ?? cookiesEtat.maj_le } : null);
   if (alerteCk) alerts.push(alerteCk);
   const pouls = etatsRobot?.find((e) => e.cle === "commandes");
-  const alertePc = alertePcSilencieux((pouls?.valeur as { dernier_passage?: string } | null)?.dernier_passage ?? pouls?.maj_le);
+  // Cloud en charge (migration sans PC) : le PC se tait exprès, ce n'est pas une alerte.
+  const { data: cloud } = await supabase.from("ttfl_cloud_reglage").select("mode").eq("id", 1).maybeSingle<{ mode: string }>();
+  const alertePc = cloud?.mode === "reel"
+    ? null
+    : alertePcSilencieux((pouls?.valeur as { dernier_passage?: string } | null)?.dernier_passage ?? pouls?.maj_le);
   if (alertePc) alerts.push(alertePc);
 
   return (

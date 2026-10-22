@@ -73,3 +73,19 @@ describe("actions cloud", () => {
     expect(ACTIONS_PC.filter((a) => a.cloud).map((a) => a.id).sort()).toEqual([...ACTIONS_CLOUD].sort());
   });
 });
+
+describe("cloud en charge", () => {
+  it("le PC muet n'est pas une panne et les tâches passent au cloud", () => {
+    const t = etatSante({ ...sources([{ cle: "commandes", valeur: { dernier_passage: ilYa(600) }, maj_le: ilYa(600) }], { dernierRun: ilYa(10) }), modeCloud: "reel" }, T);
+    const pc = t.find((x) => x.id === "commandes")!;
+    expect(pc.niveau).toBe("info");
+    expect(pc.detail).toContain("cloud est en charge");
+    expect(t.find((x) => x.id === "run")!.qui).toBe("Cloud");
+  });
+
+  it("en essai à blanc, le PC reste la référence", () => {
+    const t = etatSante({ ...sources([{ cle: "commandes", valeur: { dernier_passage: ilYa(600) }, maj_le: ilYa(600) }]), modeCloud: "simulation" }, T);
+    expect(t.find((x) => x.id === "commandes")!.niveau).toBe("panne");
+    expect(t.find((x) => x.id === "run")!.qui).toBe("PC");
+  });
+});

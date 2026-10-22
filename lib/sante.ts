@@ -15,6 +15,7 @@ export interface SourcesSante {
   dernierRun: string | null; // ttfl_runs.computed_at (mode regular) : projections du soir
   dernierPlan30: string | null; // ttfl_plan30.calcule_le
   dernierReleveCotes: string | null; // ttfl_vainqueurs_releves.releve_le
+  modeCloud?: string | null; // ttfl_cloud_reglage.mode : « reel » = le cloud fait tout, le PC se tait exprès
 }
 
 export interface TacheSante {
@@ -43,6 +44,7 @@ const REGLES: Record<string, Regle> = {
   executeur_cloud: { id: "executeur_cloud", titre: "Exécuteur cloud", qui: "Cloud", rythme: "à la demande, quand le PC ne répond pas" },
   secours: { id: "secours", titre: "Relais de secours", qui: "Cloud", rythme: "prend le relais de la synchro quand le PC dort" },
   reveil_secours: { id: "reveil_secours", titre: "Réveil Supabase → relais", qui: "Supabase", rythme: "lance le relais au bon moment (PC muet)" },
+  reveil_moteur_envoi: { id: "reveil_moteur_envoi", titre: "Moteur cloud (dernier lancement)", qui: "Supabase", rythme: "lance le moteur dans le cloud aux heures prévues" },
   synchro: { id: "synchro", titre: "Synchro app → site TTFL", qui: "PC", retard: 3 * 60, panne: 12 * 60, rythme: "toutes les 10 min de 8 h à minuit" },
   cookies: { id: "cookies", titre: "Connexions TTFL (cookies)", qui: "PC", retard: 36 * 60, panne: 72 * 60, rythme: "contrôle chaque matin à 9 h" },
   blessures: { id: "blessures", titre: "Rapport des blessures", qui: "PC", retard: 26 * 60, panne: 50 * 60, rythme: "exporté à chaque contrôle du soir" },
@@ -83,7 +85,11 @@ export function etatSante(s: SourcesSante, maintenant: number): TacheSante[] {
   const par = new Map(s.etats.map((e) => [e.cle, e]));
   const out: TacheSante[] = [];
 
-  out.push(tache(REGLES.commandes, horodatage(par.get("commandes")), maintenant));
+  const reel = s.modeCloud === "reel";
+  // Cloud en charge : le PC se tait exprès, ce n'est pas une panne. Les tâches sont alors faites par le cloud.
+  out.push(reel
+    ? tache(REGLES.commandes, horodatage(par.get("commandes")), maintenant, "au repos : le cloud est en charge", "info")
+    : tache(REGLES.commandes, horodatage(par.get("commandes")), maintenant));
 
   const sy = par.get("synchro");
   const erreurs = Array.isArray(sy?.valeur?.erreurs) ? (sy?.valeur?.erreurs as unknown[]).length : 0;
@@ -105,10 +111,11 @@ export function etatSante(s: SourcesSante, maintenant: number): TacheSante[] {
   out.push(tache(REGLES.resultats, par.get("resultats")?.maj_le ?? null, maintenant));
   out.push(tache(REGLES.cotes, s.dernierReleveCotes, maintenant));
 
-  for (const id of ["executeur_cloud", "secours", "reveil_secours"] as const) {
+  for (const id of ["reveil_moteur_envoi", "executeur_cloud", "secours", "reveil_secours"] as const) {
     out.push(tache(REGLES[id], horodatage(par.get(id)), maintenant));
   }
-  return out;
+  // Cloud en charge : les tâches du moteur et du robot sont faites dans le cloud.
+  return reel ? out.map((t) => (t.qui === "PC" && t.id !== "commandes" ? { ...t, qui: "Cloud" as const } : t)) : out;
 }
 
 // Résumé d'une ligne pour le haut de la section.

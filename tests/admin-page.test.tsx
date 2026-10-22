@@ -71,3 +71,17 @@ describe("Page Admin", () => {
     expect(screen.getByRole("heading", { name: "Picks en masse" })).toBeInTheDocument();
   });
 });
+
+describe("Page Admin — moteur cloud", () => {
+  it("affiche l'interrupteur à 3 positions avec le mode courant", async () => {
+    await rendre({ ttfl_commandes: [], ttfl_robot_etat: [], ttfl_cloud_reglage: [{ id: 1, mode: "simulation" }] });
+    expect(screen.getByRole("heading", { name: "Moteur dans le cloud" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Essai à blanc" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "Cloud en charge" })).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("cloud en charge : la pastille dit que le PC est au repos", async () => {
+    await rendre({ ttfl_commandes: [], ttfl_robot_etat: pouls("2026-10-10T08:00:00Z"), ttfl_cloud_reglage: [{ id: 1, mode: "reel" }] });
+    expect(screen.getByText("Cloud en charge — le PC est au repos")).toBeInTheDocument();
+  });
+});
