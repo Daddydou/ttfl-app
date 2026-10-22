@@ -14,6 +14,8 @@ import { Sante } from "@/components/admin/Sante";
 import { etatSante, type LigneEtat } from "@/lib/sante";
 import { MoteurCloud } from "@/components/admin/MoteurCloud";
 import { lireModeCloud } from "@/lib/cloud";
+import { JournalApercu } from "@/components/admin/JournalActions";
+import { COLONNES_JOURNAL, grouperParCause, masquerJournal, type EntreeJournal as LigneJournalActions } from "@/lib/journal";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin — TTFL" };
@@ -28,7 +30,7 @@ const PILULES = {
 export default async function AdminPage() {
   const supabase = await createClient();
   const aujourdhui = aujourdhuiNY();
-  const [commandesRes, etatsRes, runRes, planRes, cotesRes, cloudRes, journalRes, secret] = await Promise.all([
+  const [commandesRes, etatsRes, runRes, planRes, cotesRes, cloudRes, journalRes, apercuRes, secret] = await Promise.all([
     supabase.from("ttfl_commandes").select("*").order("id", { ascending: false }).limit(30).returns<Commande[]>(),
     supabase.from("ttfl_robot_etat").select("cle,valeur,maj_le").returns<LigneEtat[]>(),
     supabase.from("ttfl_runs").select("computed_at").eq("mode", "regular").order("computed_at", { ascending: false }).limit(1)
@@ -44,11 +46,14 @@ export default async function AdminPage() {
       .order("id", { ascending: false })
       .limit(40)
       .returns<EntreeJournal[]>(),
+    supabase.from("ttfl_journal").select(COLONNES_JOURNAL).order("id", { ascending: false }).limit(40).returns<LigneJournalActions[]>(),
     chargerSecret(supabase, aujourdhui),
   ]);
   const maintenantMs = heureServeur();
   // Pick secret du compte 02 : ses lignes du journal d'envoi (joueur !) sont retirées tant que la soirée est secrète.
   const journal = masquerLignes(journalRes.data ?? [], secret, aujourdhui, maintenantMs);
+  // Journal des actions et conséquences : mêmes règles de masquage ; on n'affiche ici que les 5 dernières entrées.
+  const apercu = grouperParCause(masquerJournal(apercuRes.data ?? [], secret, aujourdhui, maintenantMs)).slice(0, 5);
   const soireesSecretes: SoireeSecreteVue[] = Object.keys(secret.lignes)
     .sort()
     .filter((d) => d >= aujourdhui)
@@ -116,6 +121,7 @@ export default async function AdminPage() {
 
       <ActionsPC actives={actives} />
       <HistoriqueCommandes commandes={commandes} />
+      <JournalApercu groupes={apercu} disponible={!apercuRes.error} />
       <SecretPick actif={secret.actif} compte={secret.compte} soirees={soireesSecretes} lisible={secret.lisible} />
       <JournalEnvois entrees={journal} disponible={!journalRes.error} />
       <PicksEnMasse aujourdhui={aujourdhuiNY()} />
