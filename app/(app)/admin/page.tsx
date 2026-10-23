@@ -13,6 +13,9 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Sante } from "@/components/admin/Sante";
 import { etatSante, type LigneEtat } from "@/lib/sante";
 import { MoteurCloud } from "@/components/admin/MoteurCloud";
+import { Cookies } from "@/components/admin/Cookies";
+import { secretsConfigures } from "@/lib/github-secrets";
+import type { LigneCookie } from "@/lib/cookies";
 import { lireModeCloud } from "@/lib/cloud";
 import { JournalApercu } from "@/components/admin/JournalActions";
 import { COLONNES_JOURNAL, grouperParCause, masquerJournal, type EntreeJournal as LigneJournalActions } from "@/lib/journal";
@@ -50,6 +53,11 @@ export default async function AdminPage() {
     chargerSecret(supabase, aujourdhui),
   ]);
   const maintenantMs = heureServeur();
+  // Âge des cookies TTFL (table absente = liste vide : la carte s'affiche quand même, avec « date inconnue »).
+  const { data: cookiesData } = await supabase
+    .from("ttfl_cookie_renouvellements")
+    .select("compte,renouvele_le,estime")
+    .returns<LigneCookie[]>();
   // Pick secret du compte 02 : ses lignes du journal d'envoi (joueur !) sont retirées tant que la soirée est secrète.
   const journal = masquerLignes(journalRes.data ?? [], secret, aujourdhui, maintenantMs);
   // Journal des actions et conséquences : mêmes règles de masquage ; on n'affiche ici que les 5 dernières entrées.
@@ -125,6 +133,7 @@ export default async function AdminPage() {
       <SecretPick actif={secret.actif} compte={secret.compte} soirees={soireesSecretes} lisible={secret.lisible} />
       <JournalEnvois entrees={journal} disponible={!journalRes.error} />
       <PicksEnMasse aujourdhui={aujourdhuiNY()} />
+      <Cookies lignes={cookiesData ?? []} secretsPrets={secretsConfigures()} maintenantMs={maintenantMs} />
     </div>
   );
 }
