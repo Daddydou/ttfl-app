@@ -75,3 +75,11 @@ poussé dans Supabase.
 - Centre de surveillance TTFL (https://fantasy.trashtalk.co/?tpl=followers) : noter et garder en mémoire les picks validés par des joueurs suivis. À cadrer plus tard (l'utilisateur dit « on verra ce qu'on en fera »).
 - Matchup à ×1.00 en début de saison (table défense/poste vide) : TESTÉ le 15/10/2026 (ttfl : recherche/matchup_saison_precedente.py, 4 saisons, 33 variantes) → pas de gain démontré avec la saison précédente, le rythme ou le profil statistique ; l'historique contre l'adversaire DEGRADE le classement. Seule piste à surveiller : mélange saison précédente/courante K=20, poids 0.6 (+0.1 pt/soirée sur le top 10, non significatif). Rien à activer.
 - Stats : grande partie « Adversaires » à définir avec l'utilisateur.
+
+
+## Mise à jour 2026-10-23
+- Onglet Vainqueurs : un changement de choix est envoyé chez Thomas par le moteur cloud sous 2 à 4 minutes ; l'app affiche « Envoi chez Thomas en cours » tant que `maj_le` du choix est plus récent que celui de KT.
+- Onglet Admin > Cookies : suivi de l'âge des cookies et renouvellement depuis l'app (`lib/cookies.ts`, `lib/github-secrets.ts`, `app/(app)/admin/cookies-actions.ts`). Nécessite la variable Vercel `GITHUB_SECRETS_TOKEN` (jeton GitHub fin, accès Secrets en lecture/écriture sur `ttfl-auto`). `libsodium-wrappers` est listé dans `serverExternalPackages` (next.config.mjs).
+- Tests : `NODE_ENV=test npx vitest run`, `npx tsc --noEmit`, `npx eslint .` (CI GitHub `tests.yml`, seulement quand le code change). Les tests libsodium/GitHub doivent rester en environnement node (`// @vitest-environment node`).
+- Supabase partagé avec d'autres apps : ne jamais exposer une table à tout le rôle authenticated ; politiques propriétaire (uid `fd0b91ef-…`).
+- Ne jamais afficher ni journaliser le joueur du compte 02 tant que sa soirée est secrète.
