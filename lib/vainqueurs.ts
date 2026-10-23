@@ -28,6 +28,7 @@ export interface ChoixVainqueur {
   event_id: string;
   choix: Cote;
   source: "auto" | "manuel";
+  maj_le?: string | null; // heure du dernier changement (sert à dire « envoi chez Thomas en cours »)
 }
 
 // Ce que l'API Pronos NBA de Game Tracker (chez Thomas) a enregistré pour un match, relu par le PC à chaque passage.

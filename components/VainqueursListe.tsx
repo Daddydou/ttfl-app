@@ -116,7 +116,7 @@ export function VainqueursListe({
                         />
                       ))}
                     </div>
-                    <LigneKt m={m} effectif={effectif} kt={parMatchKt.get(m.event_id)} />
+                    <LigneKt m={m} effectif={effectif} kt={parMatchKt.get(m.event_id)} choixMaj={c?.maj_le ?? null} />
                     {c?.source === "manuel" && m.favori && c.choix !== m.favori && !ferme && (
                       <button
                         className="text-[12px] font-medium text-court-400"
@@ -136,19 +136,44 @@ export function VainqueursListe({
       <p className="px-1 text-[12px] text-fg-muted">
         Favori = cote la plus basse (médiane des bookmakers, marge retirée). 1 point par bon vainqueur, pronostic possible
         jusqu&apos;au coup d&apos;envoi. Un match n&apos;apparaît ici que lorsque les bookmakers ont publié ses cotes (en général la veille ou le jour
-        même). « Validé chez Thomas » = ce que l&apos;API de Game Tracker a enregistré, relu par le PC toutes les 10 minutes. {dernierReleve ? `Dernier relevé il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(dernierReleve)) / 60000)))}.` : ""}
+        même). « Validé chez Thomas » = ce que l&apos;API de Game Tracker a enregistré, relu par le moteur à chaque passage. Quand tu changes un choix, l&apos;envoi chez Thomas part dans les 2 à 4 minutes. {dernierReleve ? `Dernier relevé il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(dernierReleve)) / 60000)))}.` : ""}
       </p>
     </div>
   );
 }
 
 // Ce qui est enregistré chez Thomas pour ce match, comparé à notre choix.
-function LigneKt({ m, effectif, kt }: { m: MatchVainqueur; effectif: Cote | null; kt: PronoKt | undefined }) {
+function LigneKt({
+  m,
+  effectif,
+  kt,
+  choixMaj = null,
+}: {
+  m: MatchVainqueur;
+  effectif: Cote | null;
+  kt: PronoKt | undefined;
+  choixMaj?: string | null;
+}) {
   const etat = etatKt(effectif, kt);
   if (etat === "inconnu") return null;
-  if (etat === "vide") return <p className="text-[12px] text-fg-muted">Rien de posé chez Thomas pour l&apos;instant</p>;
+  // Choix changé après la dernière relecture de Thomas : l'envoi part dans les minutes qui suivent (passage « vainqueurs »).
+  const enAttente = !!choixMaj && !!kt?.maj_le && Date.parse(choixMaj) > Date.parse(kt.maj_le);
+  if (etat === "vide") {
+    return (
+      <p className="text-[12px] text-fg-muted">
+        {enAttente ? "Envoi chez Thomas en cours (quelques minutes)…" : "Rien de posé chez Thomas pour l'instant"}
+      </p>
+    );
+  }
   const nom = nomEquipe(m, kt!.cote!);
   if (etat === "identique") return <p className="text-[12px] font-medium text-avail">✓ Validé chez Thomas : {nom}</p>;
+  if (enAttente) {
+    return (
+      <p className="text-[12px] font-medium text-fg-muted">
+        Envoi chez Thomas en cours (quelques minutes)… pour l&apos;instant chez lui : {nom}
+      </p>
+    );
+  }
   return (
     <p className="text-[12px] font-medium text-quest">
       Chez Thomas : {nom} (différent de ton choix{effectif ? ` : ${nomEquipe(m, effectif)}` : ""})
