@@ -35,6 +35,7 @@ function LiensStats() {
   return (
     <div className="flex gap-3">
       <Link href="/adversaires" className="text-[13px] font-semibold text-court-400">Adversaires →</Link>
+      <Link href="/stars" className="text-[13px] font-semibold text-court-400">Stars →</Link>
       <Link href="/absents" className="text-[13px] font-semibold text-court-400">Absents →</Link>
     </div>
   );
