@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { CarteConseille } from "@/components/CarteConseille";
+import { PourquoiPick } from "@/components/PourquoiPick";
 import { JoursConseilles, ZonesConseilles } from "@/components/ConseillesNav";
 import { PlanTrenteJours } from "@/components/PlanTrenteJours";
 import { SuiviFormules } from "@/components/SuiviFormules";
@@ -228,6 +229,7 @@ export default async function PicksConseillesPage({
         </div>
       ) : (
         <div className="space-y-3">
+          {conseilles.length >= 2 && <PourquoiPick n1={conseilles[0]} n2={conseilles[1]} />}
           {conseilles.map((c) => (
             <CarteConseille
               key={c.player}

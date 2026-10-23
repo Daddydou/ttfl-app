@@ -73,9 +73,13 @@ describe("Picks conseillés", () => {
     expect(screen.getByText("Joueur 10")).toBeInTheDocument();
     expect(screen.queryByText("Joueur 11")).not.toBeInTheDocument();
     // Stats détaillées visibles d'emblée (aucun dépli) : forme, plafond, matchup
-    expect(screen.getAllByText("38.2")).toHaveLength(10);
-    expect(screen.getAllByText("47.5")).toHaveLength(10);
-    expect(screen.getAllByText("×1.07")).toHaveLength(10);
+    for (const carte of screen.getAllByRole("article")) {
+      expect(within(carte).getByText("38.2")).toBeInTheDocument();
+      expect(within(carte).getByText("47.5")).toBeInTheDocument();
+      expect(within(carte).getByText("×1.07")).toBeInTheDocument();
+    }
+    // La carte « Pourquoi le n°1 ? » compare les deux premiers
+    expect(screen.getByRole("heading", { name: "Pourquoi le n°1 ?" })).toBeInTheDocument();
   });
 
   it("propose un onglet par soirée à venir, 7 au plus, sans les soirées passées ni « aucun match »", async () => {
