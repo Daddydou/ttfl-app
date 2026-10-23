@@ -83,3 +83,10 @@ poussé dans Supabase.
 - Tests : `NODE_ENV=test npx vitest run`, `npx tsc --noEmit`, `npx eslint .` (CI GitHub `tests.yml`, seulement quand le code change). Les tests libsodium/GitHub doivent rester en environnement node (`// @vitest-environment node`).
 - Supabase partagé avec d'autres apps : ne jamais exposer une table à tout le rôle authenticated ; politiques propriétaire (uid `fd0b91ef-…`).
 - Ne jamais afficher ni journaliser le joueur du compte 02 tant que sa soirée est secrète.
+
+
+## Onglet « Mode op. » (23/10/2026)
+- Page `/mode-operatoire` (7e onglet de `components/BottomNav.tsx`) : fiches « pour quoi faire / quand / étapes / à retenir » pour chaque procédure importante.
+- TOUT le contenu est dans UN fichier : `lib/modes-operatoires.ts` (`MODES`, `SECTIONS`). Pour modifier ou ajouter une fiche : éditer ce fichier, mettre à jour `misAJour`, lancer les tests (`tests/modes-operatoires.test.tsx` vérifie fiches complètes, ancres uniques, aucun secret, aucun Telegram), publier. Ne jamais y mettre de cookie, clé, jeton, ni le joueur d'un pick secret.
+- Quand une procédure change dans l'app (Admin, cookies, notifications, mode cloud...), mettre la fiche correspondante à jour dans la même modification.
+- Telegram est abandonné définitivement par l'utilisateur : ne jamais le proposer.

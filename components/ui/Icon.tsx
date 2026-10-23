@@ -71,6 +71,12 @@ const CHEMINS = {
     </>
   ),
   plus: <path d="M12 5v14M5 12h14" />,
+  livre: (
+    <>
+      <path d="M12 6.5C10.3 5 8 4.5 5 4.5v13c3 0 5.3.5 7 2 1.7-1.5 4-2 7-2v-13c-3 0-5.3.5-7 2z" />
+      <path d="M12 6.5v13" />
+    </>
+  ),
 } as const;
 
 export type NomIcone = keyof typeof CHEMINS;

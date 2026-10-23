@@ -11,6 +11,7 @@ const TABS: { href: string; label: string; icon: NomIcone }[] = [
   { href: "/vainqueurs", label: "Vainqueurs", icon: "trophee" },
   { href: "/stats", label: "Stats", icon: "stats" },
   { href: "/admin", label: "Admin", icon: "reglages" },
+  { href: "/mode-operatoire", label: "Mode op.", icon: "livre" },
 ];
 
 // Barre d'onglets flottante en verre dépoli (façon iOS récent).
