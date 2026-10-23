@@ -14,6 +14,7 @@ import { Sante } from "@/components/admin/Sante";
 import { etatSante, type LigneEtat } from "@/lib/sante";
 import { MoteurCloud } from "@/components/admin/MoteurCloud";
 import { Cookies } from "@/components/admin/Cookies";
+import { PushToggle } from "@/components/admin/PushToggle";
 import { secretsConfigures } from "@/lib/github-secrets";
 import type { LigneCookie } from "@/lib/cookies";
 import { lireModeCloud } from "@/lib/cloud";
@@ -133,6 +134,7 @@ export default async function AdminPage() {
       <SecretPick actif={secret.actif} compte={secret.compte} soirees={soireesSecretes} lisible={secret.lisible} />
       <JournalEnvois entrees={journal} disponible={!journalRes.error} />
       <PicksEnMasse aujourdhui={aujourdhuiNY()} />
+      <PushToggle />
       <Cookies lignes={cookiesData ?? []} secretsPrets={secretsConfigures()} maintenantMs={maintenantMs} />
     </div>
   );

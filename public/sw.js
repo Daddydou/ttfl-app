@@ -81,3 +81,26 @@ self.addEventListener("notificationclick", (event) => {
       }),
   );
 });
+
+// Notification push envoyée par le serveur (fonction Supabase « ttfl-push », via ttfl_alerter).
+// Charge utile : { titre, corps, prio, url }. Les alertes urgentes (prio >= 4) restent affichées jusqu'au clic.
+self.addEventListener("push", (event) => {
+  let d = {};
+  try {
+    d = event.data ? event.data.json() : {};
+  } catch {
+    d = { titre: "TTFL", corps: event.data ? event.data.text() : "" };
+  }
+  const urgent = Number(d.prio || 0) >= 4;
+  event.waitUntil(
+    self.registration.showNotification(d.titre || "TTFL", {
+      body: d.corps || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: "ttfl-alerte",
+      renotify: true,
+      requireInteraction: urgent,
+      data: { url: d.url || "/" },
+    }),
+  );
+});
