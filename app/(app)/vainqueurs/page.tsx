@@ -26,7 +26,7 @@ export default async function VainqueursPage() {
   const { data: choix } = liste.length
     ? await supabase
         .from("ttfl_vainqueurs_choix")
-        .select("event_id,choix,source")
+        .select("event_id,choix,source,maj_le")
         .in("event_id", liste.map((m) => m.event_id))
         .returns<ChoixVainqueur[]>()
     : { data: [] as ChoixVainqueur[] };
