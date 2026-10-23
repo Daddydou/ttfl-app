@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { adversairesAvecPicks, derniersChoix, fmtRang } from "@/lib/adversaires";
+import { adversairesAvecPicks, derniersChoix, fmtRang, scoresParAdversaire, type ScoreSuivi } from "@/lib/adversaires";
 import { frDate } from "@/lib/format";
 import type { TtflSuivi, TtflSuiviPick } from "@/lib/types";
 
@@ -12,7 +12,7 @@ export const metadata = { title: "Adversaires — TTFL" };
 // Le site n'affiche que le pick d'HIER de chaque joueur suivi : l'historique ci-dessous n'existe que parce qu'il est gardé.
 export default async function AdversairesPage() {
   const supabase = await createClient();
-  const [suivisRes, picksRes] = await Promise.all([
+  const [suivisRes, picksRes, scoresRes] = await Promise.all([
     supabase.from("ttfl_suivis").select("*").eq("suivi", true).returns<TtflSuivi[]>(),
     supabase
       .from("ttfl_suivis_picks")
@@ -20,12 +20,20 @@ export default async function AdversairesPage() {
       .order("pick_date", { ascending: false })
       .limit(1500)
       .returns<TtflSuiviPick[]>(),
+    // Scores du jour de chaque adversaire (vue ttfl_suivis_scores). Facultatif : si la vue manque, la page reste utilisable.
+    supabase
+      .from("ttfl_suivis_scores")
+      .select("users_id,soiree,score_du_jour")
+      .order("soiree", { ascending: false })
+      .limit(1500)
+      .returns<ScoreSuivi[]>(),
   ]);
   const erreur = suivisRes.error?.message ?? picksRes.error?.message ?? null;
   const suivis = suivisRes.data ?? [];
   const picks = picksRes.data ?? [];
   const adversaires = adversairesAvecPicks(suivis, picks);
   const dernier = derniersChoix(suivis, picks);
+  const scores = scoresParAdversaire(scoresRes.data ?? []);
 
   return (
     <div className="space-y-4">
@@ -67,7 +75,9 @@ export default async function AdversairesPage() {
 
       {adversaires.length > 0 && (
         <ul className="card overflow-hidden">
-          {adversaires.map(({ suivi: s, picks: ps }) => (
+          {adversaires.map(({ suivi: s, picks: ps }) => {
+            const resume = scores.get(s.users_id);
+            return (
             <li key={s.users_id} className="list-row items-start">
               <div className="w-16 shrink-0 text-right text-[15px] font-bold num text-court-400">{fmtRang(s.rang)}</div>
               <div className="min-w-0 flex-1">
@@ -77,7 +87,12 @@ export default async function AdversairesPage() {
                     {s.points === null ? "—" : `${s.points.toLocaleString("fr-FR")} pts`}
                   </span>
                 </div>
-                <div className="text-[13px] text-fg-muted">{s.equipe ?? "Sans équipe"}</div>
+                <div className="text-[13px] text-fg-muted">
+                  {s.equipe ?? "Sans équipe"}
+                  {resume && resume.moyenne !== null && (
+                    <span> · moy. {resume.moyenne.toFixed(1)} sur {resume.n} soirée{resume.n > 1 ? "s" : ""} · meilleur {resume.meilleur}</span>
+                  )}
+                </div>
                 {ps.length === 0 ? (
                   <p className="mt-1 text-[13px] text-fg-faint">Aucun pick gardé pour l&apos;instant.</p>
                 ) : (
@@ -89,7 +104,10 @@ export default async function AdversairesPage() {
                       {ps.map((p) => (
                         <li key={p.pick_date} className="flex justify-between gap-3 text-[13px]">
                           <span className="capitalize text-fg-muted">{frDate(p.pick_date)}</span>
-                          <span className="min-w-0 truncate font-medium text-fg">{p.joueur}</span>
+                          <span className="min-w-0 flex-1 truncate font-medium text-fg">{p.joueur}</span>
+                          {resume?.parSoiree.has(p.pick_date) && (
+                            <span className="w-10 shrink-0 text-right font-semibold num text-court-400">{resume.parSoiree.get(p.pick_date)}</span>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -97,7 +115,8 @@ export default async function AdversairesPage() {
                 )}
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 

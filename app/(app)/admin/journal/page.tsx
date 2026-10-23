@@ -2,38 +2,30 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ListeJournal } from "@/components/admin/JournalActions";
-import { chargerSecret } from "@/lib/secret";
-import { maintenantMs as heureServeur } from "@/lib/plan30";
-import { aujourdhuiNY } from "@/lib/planning";
-import {
-  COLONNES_JOURNAL, FILTRES, PERIODES, filtrer, filtreValide, grouperParCause, masquerJournal, periodeValide,
-  type EntreeJournal,
-} from "@/lib/journal";
+import { grouperParCause, FILTRES, PERIODES, filtreValide, periodeValide, rechercheValide } from "@/lib/journal";
+import { chargerJournal } from "@/lib/journal-charge";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Journal — TTFL" };
 
-const MAX_LIGNES = 600; // lignes lues par période ; l'affichage est limité aux 150 groupes les plus récents
-
 // LECTURE SEULE : toutes les actions (demandes, calculs, picks, envois, réglages, robots) et leurs conséquences.
-export default async function JournalPage({ searchParams }: { searchParams: Promise<{ f?: string; p?: string }> }) {
-  const { f, p } = await searchParams;
+// L'affichage est limité aux 150 groupes les plus récents.
+export default async function JournalPage({ searchParams }: { searchParams: Promise<{ f?: string; p?: string; q?: string }> }) {
+  const { f, p, q: qBrut } = await searchParams;
   const filtre = filtreValide(f);
   const jours = periodeValide(p);
+  const q = rechercheValide(qBrut);
 
   const supabase = await createClient();
-  const aujourdhui = aujourdhuiNY();
-  const maintenantMs = heureServeur();
-  const depuis = new Date(maintenantMs - jours * 86400000).toISOString();
-  const [res, secret] = await Promise.all([
-    supabase.from("ttfl_journal").select(COLONNES_JOURNAL).gte("le", depuis).order("id", { ascending: false }).limit(MAX_LIGNES)
-      .returns<EntreeJournal[]>(),
-    chargerSecret(supabase, aujourdhui),
-  ]);
+  const { entrees, erreur } = await chargerJournal(supabase, { jours, filtre, q });
+  const groupes = grouperParCause(entrees).slice(0, 150);
 
-  const entrees = masquerJournal(res.data ?? [], secret, aujourdhui, maintenantMs);
-  const groupes = grouperParCause(filtrer(entrees, filtre)).slice(0, 150);
-  const lien = (nf: string, np: number) => `/admin/journal?f=${nf}&p=${np}`;
+  const params = (nf: string, np: number, avecQ = true) => {
+    const s = new URLSearchParams({ f: nf, p: String(np) });
+    if (q && avecQ) s.set("q", q);
+    return s.toString();
+  };
+  const lien = (nf: string, np: number, avecQ = true) => `/admin/journal?${params(nf, np, avecQ)}`;
   const puce = (actif: boolean) => `btn btn-sm ${actif ? "btn-primary" : "btn-secondary"}`;
 
   return (
@@ -59,18 +51,38 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
             </Link>
           ))}
         </div>
+        <form method="get" action="/admin/journal" role="search" className="flex gap-2">
+          <input type="hidden" name="f" value={filtre} />
+          <input type="hidden" name="p" value={jours} />
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            maxLength={60}
+            placeholder="Chercher (joueur, compte, action…)"
+            aria-label="Chercher dans le journal"
+            className="min-w-0 flex-1 rounded-lg border border-line bg-transparent px-3 py-1.5 text-[13px]"
+          />
+          <button type="submit" className="btn btn-sm btn-secondary">Chercher</button>
+          {q && <Link href={lien(filtre, jours, false)} className="btn btn-sm btn-secondary">Effacer</Link>}
+        </form>
       </nav>
 
-      {res.error ? (
+      {erreur ? (
         <p className="card px-4 py-6 text-center text-sm text-fg-muted">
           Journal pas encore activé (migration « journal » à appliquer sur Supabase).
         </p>
       ) : (
-        <ListeJournal groupes={groupes} vide="Rien à signaler sur cette période." />
+        <ListeJournal groupes={groupes} vide={q ? "Aucun résultat pour cette recherche." : "Rien à signaler sur cette période."} />
       )}
-      <p className="px-1 text-[12px] text-fg-muted">
-        Le pick du compte 02 reste caché ici tant que la soirée n&apos;est pas close. Les lignes sont gardées 120 jours.
-      </p>
+      <div className="flex items-center justify-between gap-3 px-1 text-[12px] text-fg-muted">
+        <p>Le pick du compte 02 reste caché ici tant que la soirée n&apos;est pas close. Les lignes sont gardées 120 jours.</p>
+        {!erreur && (
+          <a href={`/admin/journal/export?${params(filtre, jours)}`} className="shrink-0 font-semibold text-court-400" download>
+            Exporter (CSV)
+          </a>
+        )}
+      </div>
     </div>
   );
 }

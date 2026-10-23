@@ -116,3 +116,35 @@ export function quand(iso: string): string {
     timeZone: "Europe/Paris", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
   });
 }
+
+// Recherche libre (action, conséquence, joueur, compte, soirée). Vide = tout.
+export function rechercher(entrees: EntreeJournal[], q: string | undefined): EntreeJournal[] {
+  const t = (q ?? "").trim().toLowerCase();
+  if (!t) return entrees;
+  return entrees.filter((e) =>
+    [e.action, e.consequence, e.joueur, e.compte, e.soiree, LIBELLES_CATEGORIE[e.categorie]].some((v) => v && v.toLowerCase().includes(t)),
+  );
+}
+
+export function rechercheValide(v: string | undefined): string {
+  return (v ?? "").trim().slice(0, 60);
+}
+
+// Cellule CSV : guillemets doublés ; une cellule qui commence par = + - @ est neutralisée (pas de formule dans Excel).
+function celluleCsv(v: string | number | null): string {
+  let s = v === null ? "" : String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  return `"${s.replace(/"/g, '""')}"`;
+}
+
+// Export CSV (séparateur « ; », ouvert directement par Excel en français). Du plus récent au plus ancien.
+export function versCsv(entrees: EntreeJournal[]): string {
+  const entete = ["Date (Paris)", "Catégorie", "Action", "Conséquence", "Résultat", "Origine", "Compte", "Soirée", "Joueur"];
+  const lignes = entrees.map((e) =>
+    [
+      quand(e.le), LIBELLES_CATEGORIE[e.categorie], e.action, e.consequence, LIBELLES_RESULTAT[e.resultat],
+      LIBELLES_ORIGINE[e.origine], e.compte, e.soiree, e.joueur,
+    ].map(celluleCsv).join(";"),
+  );
+  return "﻿" + [entete.map(celluleCsv).join(";"), ...lignes].join("\r\n") + "\r\n";
+}
