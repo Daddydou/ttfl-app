@@ -64,7 +64,7 @@ export function ZoneTabs({ courant }: { courant: ParamsPicks }) {
 // Un onglet par mois ; défilement horizontal si la saison s'allonge.
 export function MoisTabs({ courant, mois }: { courant: ParamsPicks; mois: string[] }) {
   return (
-    <div className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
+    <div className="rail -mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
       {mois.map((m) => (
         <Link
           key={m}

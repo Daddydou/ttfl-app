@@ -29,17 +29,19 @@ export function BottomNav() {
       >
         {TABS.map((tab) => {
           const active = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+          // Largeurs égales, mais un libellé n'est jamais coupé ni replié (nowrap) :
+          // un onglet au mot long s'élargit. Sous 360 px seulement, repli en « … ».
           return (
             <Link
               key={tab.href}
               href={tab.href}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[22px] px-0.5 text-[11px] font-semibold tracking-tight transition duration-200 ${
+              className={`flex min-h-[52px] flex-1 flex-col max-[359px]:min-w-0 items-center justify-center gap-0.5 rounded-[22px] px-0.5 text-[11px] font-semibold tracking-tight transition duration-200 ${
                 active ? "bg-court-500/15 text-court-400" : "text-fg-muted active:bg-fill/60"
               }`}
             >
               <Icon name={tab.icon} size={24} strokeWidth={active ? 2.1 : 1.8} />
-              <span className="leading-none">{tab.label}</span>
+              <span className="max-w-full truncate whitespace-nowrap leading-none">{tab.label}</span>
             </Link>
           );
         })}

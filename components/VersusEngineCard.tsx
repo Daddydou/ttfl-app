@@ -52,9 +52,9 @@ export function VersusEngineCard({
           return (
             <div
               key={r.date}
-              className="grid grid-cols-[3.5rem_1fr_1fr_2.5rem] items-center gap-2 border-b border-line px-3 py-2 text-sm last:border-0"
+              className="grid grid-cols-[2.75rem_1fr_1fr_2.5rem] items-center gap-2 border-b border-line px-3 py-2 text-sm last:border-0"
             >
-              <span className="text-[13px] text-fg-muted">{frDate(r.date)}</span>
+              <DateCourte iso={r.date} />
               <Cell player={r.mine.player} score={r.mine.score} />
               {r.engine ? (
                 same ? (
@@ -84,6 +84,20 @@ export function VersusEngineCard({
         Colonne 1 : ton pick · colonne 2 : celui du moteur ce soir-là.
       </p>
     </section>
+  );
+}
+
+// Date sur deux lignes fixes (« mar. » / « 27/10 ») : la colonne reste étroite sans couper au hasard.
+function DateCourte({ iso }: { iso: string }) {
+  const d = new Date(`${iso}T00:00:00`);
+  const jour = d.toLocaleDateString("fr-FR", { weekday: "short" });
+  const jm = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+  return (
+    <span className="text-[12px] leading-tight text-fg-muted" title={frDate(iso)}>
+      {jour}
+      <br />
+      <span className="num">{jm}</span>
+    </span>
   );
 }
 

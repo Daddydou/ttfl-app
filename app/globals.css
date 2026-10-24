@@ -129,8 +129,19 @@ input[type="number"]::-webkit-outer-spin-button {
   .section-label {
     @apply px-4 text-[13px] font-medium uppercase tracking-[0.04em] text-fg-muted;
   }
+  /* Dans une carte, l'étiquette s'aligne sur le contenu (la carte a déjà sa marge). */
+  .card .section-label {
+    @apply px-0;
+  }
   .num {
     font-variant-numeric: tabular-nums;
+  }
+  /* Rail défilant horizontal (jours, onglets) : on glisse au doigt, pas de barre. */
+  .rail {
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
   }
 
   /* Surfaces */
@@ -174,7 +185,7 @@ input[type="number"]::-webkit-outer-spin-button {
     @apply bg-fill text-fg;
   }
   .btn-sm {
-    @apply min-h-[36px] rounded-full px-3.5 text-[14px];
+    @apply min-h-[36px] shrink-0 whitespace-nowrap rounded-full px-3.5 text-[14px];
   }
 
   /* Champs */

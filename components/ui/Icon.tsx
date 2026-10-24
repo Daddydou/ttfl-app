@@ -62,6 +62,12 @@ const CHEMINS = {
   ),
   chevron: <path d="m9 5 7 7-7 7" />,
   coche: <path d="m5 12.5 4.5 4.5L19 7.5" />,
+  cadenas: (
+    <>
+      <rect x="5" y="10.5" width="14" height="10" rx="2" />
+      <path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" />
+    </>
+  ),
   fermer: <path d="M6 6l12 12M18 6 6 18" />,
   eclair: <path d="M13 3 5 13.5h6L10 21l8-10.5h-6z" />,
   poubelle: (

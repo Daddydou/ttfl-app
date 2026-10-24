@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T12:00:00Z",
+  "title": "Design System: TTFL — Le pick du soir",
+  "extensions": {
+    "colorMeta": {
+      "court-500": { "role": "primary", "displayName": "Orange ballon", "canonical": "rgb(207 69 16)", "dark": "rgb(255 140 26)", "tonalRamp": ["oklch(25% 0.08 40)", "oklch(35% 0.12 40)", "oklch(45% 0.16 40)", "oklch(55% 0.19 40)", "oklch(65% 0.17 45)", "oklch(75% 0.13 50)", "oklch(85% 0.08 55)", "oklch(95% 0.03 60)"] },
+      "court-400": { "role": "primary", "displayName": "Orange ballon foncé (texte)", "canonical": "rgb(194 65 12)", "dark": "rgb(255 159 67)" },
+      "court-600": { "role": "primary", "displayName": "Orange pressé", "canonical": "rgb(178 56 10)", "dark": "rgb(232 120 10)" },
+      "canvas": { "role": "neutral", "displayName": "Fond système", "canonical": "rgb(242 242 247)", "dark": "rgb(0 0 0)" },
+      "surface": { "role": "neutral", "displayName": "Carte", "canonical": "rgb(255 255 255)", "dark": "rgb(28 28 30)" },
+      "surface-2": { "role": "neutral", "displayName": "Tuile en creux", "canonical": "rgb(242 242 247)", "dark": "rgb(44 44 46)" },
+      "fill": { "role": "neutral", "displayName": "Remplissage", "canonical": "rgb(229 229 234)", "dark": "rgb(58 58 60)" },
+      "fg": { "role": "neutral", "displayName": "Texte", "canonical": "rgb(17 17 19)", "dark": "rgb(245 245 247)" },
+      "fg-muted": { "role": "neutral", "displayName": "Texte secondaire", "canonical": "rgb(108 108 112)", "dark": "rgb(152 152 159)" },
+      "avail": { "role": "status", "displayName": "Disponible", "canonical": "rgb(36 138 61)", "dark": "rgb(48 209 88)" },
+      "quest": { "role": "status", "displayName": "Questionable", "canonical": "rgb(156 90 0)", "dark": "rgb(255 214 10)" },
+      "doubt": { "role": "status", "displayName": "Doubtful", "canonical": "rgb(190 80 0)", "dark": "rgb(255 159 10)" },
+      "out": { "role": "status", "displayName": "Out", "canonical": "rgb(215 0 21)", "dark": "rgb(255 69 58)" }
+    },
+    "typographyMeta": {
+      "title-large": { "displayName": "Title Large", "purpose": "Titre de page (PageHeader), un par écran." },
+      "headline": { "displayName": "Headline", "purpose": "Nom du joueur, titre de carte." },
+      "section-label": { "displayName": "Section label", "purpose": "En-tête de groupe de liste, en majuscules." }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 1px 2px rgb(0 0 0 / 0.04), 0 6px 20px rgb(0 0 0 / 0.05)", "purpose": "Toutes les cartes (en sombre : filet blanc 4 %)." },
+      { "name": "float", "value": "0 8px 32px rgb(0 0 0 / 0.16), 0 1px 0 rgb(255 255 255 / 0.6) inset", "purpose": "Barre d'onglets et feuilles modales." }
+    ],
+    "motion": [
+      { "name": "page-in", "value": "160ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Entrée de page." },
+      { "name": "sheet-up", "value": "280ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Montée de la feuille modale." },
+      { "name": "press", "value": "150ms ease-out, scale(0.97)", "purpose": "Retour de pression des boutons." }
+    ],
+    "breakpoints": [
+      { "name": "tab-truncate", "value": "359px" },
+      { "name": "sm", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Bouton plein",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action principale d'un écran (ex. « J'ai pické »).",
+      "html": "<button class=\"ds-btn ds-btn-primary\">J'ai pické</button>",
+      "css": ".ds-btn{display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;padding:0 20px;font:600 17px -apple-system,BlinkMacSystemFont,Inter,sans-serif;letter-spacing:-0.01em;transition:all 150ms ease-out;cursor:pointer}.ds-btn:active{transform:scale(0.97)}.ds-btn:focus-visible{outline:2px solid rgb(207 69 16);outline-offset:2px}.ds-btn-primary{background:rgb(207 69 16);color:#fff}.ds-btn-primary:active{background:rgb(178 56 10)}"
+    },
+    {
+      "name": "Bouton secondaire",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Action d'accent moins forte.",
+      "html": "<button class=\"ds-btn2\">Voir le Top 10</button>",
+      "css": ".ds-btn2{display:inline-flex;min-height:48px;align-items:center;justify-content:center;border:0;border-radius:14px;padding:0 20px;font:600 17px -apple-system,BlinkMacSystemFont,Inter,sans-serif;background:rgb(207 69 16 / 0.1);color:rgb(194 65 12);transition:all 150ms ease-out}.ds-btn2:active{background:rgb(207 69 16 / 0.2);transform:scale(0.97)}.ds-btn2:focus-visible{outline:2px solid rgb(207 69 16);outline-offset:2px}"
+    },
+    {
+      "name": "Champ",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Saisie (score, nom de joueur absent).",
+      "html": "<input class=\"ds-field\" placeholder=\"Score réel\" />",
+      "css": ".ds-field{width:100%;border-radius:12px;background:rgb(242 242 247);padding:12px 16px;font:400 17px -apple-system,BlinkMacSystemFont,Inter,sans-serif;color:rgb(17 17 19);border:1.5px solid transparent;outline:none;transition:all 150ms}.ds-field::placeholder{color:rgb(142 142 147)}.ds-field:focus{border-color:rgb(207 69 16);background:#fff}"
+    },
+    {
+      "name": "Contrôle segmenté",
+      "kind": "custom",
+      "refersTo": "segmented-thumb",
+      "description": "Bascule de compte, de mode ou de période.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-i ds-seg-on\">Compte 01</button><button class=\"ds-seg-i\">Compte 02</button></div>",
+      "css": ".ds-seg{display:flex;gap:2px;border-radius:11px;background:rgb(229 229 234 / 0.7);padding:2px}.ds-seg-i{flex:1;border:0;background:transparent;border-radius:9px;padding:7px 8px;font:600 14px -apple-system,BlinkMacSystemFont,Inter,sans-serif;color:rgb(108 108 112)}.ds-seg-on{background:#fff;color:rgb(17 17 19);box-shadow:0 1px 3px rgb(0 0 0 / 0.16),0 0 0 0.5px rgb(0 0 0 / 0.04)}"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Sélection d'un jour ou d'un mois.",
+      "html": "<span class=\"ds-chip\">lun.</span> <span class=\"ds-chip ds-chip-on\">mar.</span>",
+      "css": ".ds-chip{display:inline-block;border-radius:9999px;background:rgb(229 229 234 / 0.8);padding:6px 14px;font:600 13px -apple-system,BlinkMacSystemFont,Inter,sans-serif;color:rgb(17 17 19)}.ds-chip-on{background:rgb(207 69 16);color:#fff}"
+    },
+    {
+      "name": "Carte",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Conteneur standard (pick du soir, stats).",
+      "html": "<div class=\"ds-card\"><div class=\"ds-h\">Pick du soir</div><div class=\"ds-f\">Calculé il y a 12 min</div></div>",
+      "css": ".ds-card{border-radius:20px;background:#fff;padding:16px;box-shadow:0 1px 2px rgb(0 0 0 / 0.04),0 6px 20px rgb(0 0 0 / 0.05)}.ds-h{font:600 17px -apple-system,BlinkMacSystemFont,Inter,sans-serif;color:rgb(17 17 19)}.ds-f{font:400 13px -apple-system,BlinkMacSystemFont,Inter,sans-serif;color:rgb(108 108 112);margin-top:4px}"
+    },
+    {
+      "name": "Barre d'onglets",
+      "kind": "nav",
+      "refersTo": "tab-label",
+      "description": "Navigation principale flottante en verre, 7 onglets.",
+      "html": "<nav class=\"ds-tabs\"><a class=\"ds-tab ds-tab-on\">Accueil</a><a class=\"ds-tab\">Conseillés</a><a class=\"ds-tab\">Mes picks</a><a class=\"ds-tab\">Stats</a></nav>",
+      "css": ".ds-tabs{display:flex;border-radius:28px;padding:6px;background:rgb(255 255 255 / 0.82);backdrop-filter:saturate(180%) blur(28px);border:0.5px solid rgb(0 0 0 / 0.06);box-shadow:0 8px 32px rgb(0 0 0 / 0.16)}.ds-tab{flex:1;display:flex;min-height:52px;align-items:center;justify-content:center;border-radius:22px;padding:0 2px;white-space:nowrap;font:600 11px -apple-system,BlinkMacSystemFont,Inter,sans-serif;letter-spacing:-0.025em;color:rgb(108 108 112)}.ds-tab-on{background:rgb(207 69 16 / 0.15);color:rgb(194 65 12)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le vestiaire de poche",
+    "overview": "Une app qui se comporte comme une app Apple native, pas comme un site : gris système, grands titres, listes groupées en encart, feuilles modales qui montent du bas, barre d'onglets flottante en verre dépoli. La seule touche d'identité est l'orange ballon de basket, réservé à l'action et à la sélection.",
+    "keyCharacteristics": [
+      "Conventions iOS natives (grand titre, liste inset, segmented control, bottom sheet, tab bar flottante).",
+      "Un seul accent, orange ballon, pour l'action et la sélection.",
+      "Clair / sombre automatique, réglé à un seul endroit (app/globals.css).",
+      "Couleurs d'état sémantiques pour la disponibilité des joueurs.",
+      "Cibles tactiles de 48 px minimum, champs en 16 px (pas de zoom iOS)."
+    ],
+    "rules": [
+      { "name": "La Règle de l'accent unique", "body": "L'orange ne sert qu'à l'action et à la sélection. Jamais pour décorer un titre, un fond de carte ou une donnée neutre.", "section": "colors" },
+      { "name": "La Règle zéro couleur en dur", "body": "Aucune couleur écrite en dur dans un composant : tout passe par les jetons --c-*.", "section": "colors" },
+      { "name": "La Règle des chiffres alignés", "body": "Tout score, projection ou pourcentage porte .num (chiffres tabulaires).", "section": "typography" },
+      { "name": "La Règle du 16 px", "body": "Champs, sélecteurs et boutons à 16 px minimum : iOS ne zoome pas au focus.", "section": "typography" },
+      { "name": "La Règle du flottant seul", "body": "Seuls les éléments posés au-dessus du contenu ont une ombre marquée et du verre. Une carte ne flotte jamais.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do passer par les jetons --c-* et les classes de app/globals.css avant d'écrire du Tailwind sur mesure.",
+      "Do mettre .num sur tout chiffre.",
+      "Do garder 48 px de cible tactile minimum (36 px pour btn-sm).",
+      "Do vérifier chaque écran en clair ET en sombre, et à 375 px de large.",
+      "Do respecter prefers-reduced-motion : les animations restent courtes (160–280 ms)."
+    ],
+    "donts": [
+      "Don't utiliser l'orange pour autre chose qu'une action ou une sélection.",
+      "Don't écrire une couleur en dur dans un composant.",
+      "Don't descendre sous 11 px de texte, sauf les micro-badges existants à 10 px.",
+      "Don't donner une ombre marquée ou du verre à une carte.",
+      "Don't bloquer le zoom ni mettre un champ sous 16 px."
+    ]
+  }
+}

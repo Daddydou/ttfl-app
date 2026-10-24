@@ -34,9 +34,17 @@ function LigneCompte({ label, joueur, capture, secret }: { label: string; joueur
   return (
     <div>
       <div className="flex items-baseline gap-2 text-[14px]">
-        <span className="w-14 shrink-0 text-[12px] font-semibold uppercase tracking-wide text-fg-muted">{label}</span>
+        <span className="w-14 shrink-0 whitespace-nowrap text-[12px] font-semibold uppercase tracking-wide text-fg-muted">{label}</span>
         <span className={`min-w-0 truncate ${joueur ? "font-semibold text-fg" : "text-fg-faint"}`}>
-          {joueur ?? (secret ? "🔒 secret jusqu'à la clôture" : "pas de pick")}
+          {joueur ??
+            (secret ? (
+              <>
+                <Icon name="cadenas" size={13} strokeWidth={2} className="mr-1 inline-block -translate-y-px" />
+                secret jusqu&apos;à la clôture
+              </>
+            ) : (
+              "pas de pick"
+            ))}
         </span>
       </div>
       {capture && (
@@ -57,7 +65,7 @@ export function PicksValidesCard({
   captures,
   datesSecretes = [],
 }: {
-  datesSecretes?: string[]; // soirées dont le pick du compte 2 est secret (affiché « 🔒 secret » au lieu de « pas de pick »)
+  datesSecretes?: string[]; // soirées dont le pick du compte 2 est secret (affiché « secret » avec un cadenas au lieu de « pas de pick »)
   picks: { pick_date: string; player: string }[];
   autres?: PickCompte[];
   aujourdhui: string;
@@ -112,8 +120,8 @@ export function PicksValidesCard({
                     </>
                   ) : (
                     <div className="space-y-0.5">
-                      <LigneCompte label="Compte 1" joueur={c1} capture={captureDuPick(captures, "01", date, c1)} />
-                      <LigneCompte label="Compte 2" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} secret={datesSecretes.includes(date)} />
+                      <LigneCompte label="Cpt 01" joueur={c1} capture={captureDuPick(captures, "01", date, c1)} />
+                      <LigneCompte label="Cpt 02" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} secret={datesSecretes.includes(date)} />
                       <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} />
                     </div>
                   )}

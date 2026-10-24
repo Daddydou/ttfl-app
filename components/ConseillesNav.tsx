@@ -22,7 +22,7 @@ export function JoursConseilles({
   aujourdhui: string;
 }) {
   return (
-    <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Soirées">
+    <div className="rail -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Soirées">
       {jours.map((j) => {
         const e = etiquetteJour(j, aujourdhui);
         const actif = j === courant;

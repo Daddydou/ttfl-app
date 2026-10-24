@@ -49,7 +49,7 @@ describe("PickButton", () => {
 
   it("n'affiche qu'un badge si le joueur est déjà pické", () => {
     render(<PickButton mode="regular" pickDate="2026-03-10" player="Jayson Tatum" alreadyPicked />);
-    expect(screen.getByText("✓ Pické")).toBeInTheDocument();
+    expect(screen.getByText("Pické")).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });

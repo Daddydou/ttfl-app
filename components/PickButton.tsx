@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { pickPlayer } from "@/app/actions";
 import type { Mode } from "@/lib/types";
+import { Icon } from "@/components/ui/Icon";
 
 export function PickButton({
   mode,
@@ -39,7 +40,8 @@ export function PickButton({
   if (alreadyPicked) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-avail/15 px-3 py-1.5 text-sm font-semibold text-avail">
-        ✓ Pické
+        <Icon name="coche" size={15} strokeWidth={2.4} />
+        Pické
       </span>
     );
   }

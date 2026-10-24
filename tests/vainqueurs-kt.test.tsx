@@ -75,6 +75,6 @@ describe("pronos chez Thomas", () => {
 
   it("sans données KT (table absente), la page s'affiche comme avant", () => {
     render(<VainqueursListe matchs={[match("a")]} choix={[]} maintenantMs={MAINTENANT} />);
-    expect(screen.queryByText(/^✓ Validé|^Rien de posé|^Chez Thomas :/)).toBeNull();
+    expect(screen.queryByText(/^Validé|^Rien de posé|^Chez Thomas :/)).toBeNull();
   });
 });

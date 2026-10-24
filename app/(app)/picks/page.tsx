@@ -35,6 +35,7 @@ import {
   type Zone,
 } from "@/lib/planning";
 import type { Mode, TtflPick } from "@/lib/types";
+import { Icon } from "@/components/ui/Icon";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Mes picks — TTFL" };
@@ -309,7 +310,8 @@ function PlanningVue({
                 // ou de l'écraser à l'aveugle. « Révéler maintenant » le montre tout de suite.
                 <div className="mt-2 space-y-2">
                   <p className="text-sm font-semibold text-court-400">
-                    🔒 Pick secret{n.clotureSecret ? ` · révélé à ${n.clotureSecret} (Paris)` : " · révélé à la clôture de la soirée"}
+                    <Icon name="cadenas" size={15} strokeWidth={2} className="mr-1.5 inline-block -translate-y-px" />
+                    Pick secret{n.clotureSecret ? ` · révélé à ${n.clotureSecret} (Paris)` : " · révélé à la clôture de la soirée"}
                   </p>
                   <RevelerBouton soiree={n.date} />
                 </div>

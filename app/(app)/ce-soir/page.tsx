@@ -178,7 +178,10 @@ export default async function PicksConseillesPage({
       {avecPlan && planCache && (
         <section className="card space-y-2 px-4 py-4" aria-label="Plan 30 jours caché">
           <p className="section-label">Plan 30 jours · Compte {secret.compte}</p>
-          <p className="text-sm font-semibold text-court-400">🔒 Plan caché : il montrerait le pick secret</p>
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-court-400">
+            <Icon name="cadenas" size={15} strokeWidth={2} className="shrink-0" />
+            Plan caché : il montrerait le pick secret
+          </p>
           <p className="text-[13px] text-fg-muted">
             Chaque soirée du plan se dévoile à sa clôture{heureCloture(secret, jours[0]) ? ` (ce soir : ${heureCloture(secret, jours[0])}, heure de Paris)` : ""}.
             Le robot continue de poser le pick comme d&apos;habitude.

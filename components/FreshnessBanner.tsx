@@ -8,19 +8,16 @@ const TONE = {
     bg: "bg-avail/10",
     text: "text-avail",
     dot: "bg-avail",
-    icon: "✓",
   },
   aging: {
     bg: "bg-quest/10",
     text: "text-quest",
     dot: "bg-quest",
-    icon: "•",
   },
   stale: {
     bg: "bg-out/10",
     text: "text-out",
     dot: "bg-out",
-    icon: "!",
   },
 } as const;
 

@@ -33,3 +33,7 @@ yarn-error.log*
 
 # fichiers temporaires de la CLI Supabase
 supabase/.temp/
+
+# Impeccable : fichiers locaux (le DESIGN.md et .impeccable/design.json sont versionnés)
+.impeccable/config.local.json
+.impeccable/hook.cache.json

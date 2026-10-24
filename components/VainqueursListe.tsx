@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/ui/Icon";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { choisirVainqueur, revenirAuFavori } from "@/app/actions";
@@ -166,7 +167,13 @@ function LigneKt({
     );
   }
   const nom = nomEquipe(m, kt!.cote!);
-  if (etat === "identique") return <p className="text-[12px] font-medium text-avail">✓ Validé chez Thomas : {nom}</p>;
+  if (etat === "identique")
+    return (
+      <p className="flex items-center gap-1 text-[12px] font-medium text-avail">
+        <Icon name="coche" size={13} strokeWidth={2.4} className="shrink-0" />
+        Validé chez Thomas : {nom}
+      </p>
+    );
   if (enAttente) {
     return (
       <p className="text-[12px] font-medium text-fg-muted">

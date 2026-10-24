@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { reglerSecret } from "@/app/(app)/secret/actions";
 import { RevelerBouton } from "@/components/RevelerBouton";
+import { Icon } from "@/components/ui/Icon";
 
 export interface SoireeSecreteVue {
   soiree: string;
@@ -33,7 +34,10 @@ export function SecretPick({ actif, compte, soirees, lisible }: { actif: boolean
       <div className="card space-y-3 px-4 py-3.5">
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
-            <h3 className="text-[16px] font-semibold leading-snug text-fg">{actif ? "🔒 Secret activé" : "Secret désactivé"}</h3>
+            <h3 className="flex items-center gap-1.5 text-[16px] font-semibold leading-snug text-fg">
+              {actif && <Icon name="cadenas" size={16} strokeWidth={2} className="shrink-0 text-court-400" />}
+              {actif ? "Secret activé" : "Secret désactivé"}
+            </h3>
             <p className="mt-0.5 text-[13px] leading-snug text-fg-muted">
               {actif
                 ? `Le joueur du compte ${compte} est caché dans l'application et dans les notifications jusqu'à la clôture de chaque soirée ; une notification te le donne à la clôture.`
