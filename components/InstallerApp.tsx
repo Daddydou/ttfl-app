@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 // Invitation à installer l'application sur l'écran d'accueil du téléphone (PWA).
 //  - Android / Chrome : un bouton « Installer » qui déclenche l'installation native.
@@ -94,8 +95,13 @@ export function InstallerApp() {
           </button>
         )}
       </div>
-      <button type="button" onClick={masquer} aria-label="Masquer" className="shrink-0 px-1 text-[20px] leading-none text-fg-faint active:opacity-60">
-        ×
+      <button
+        type="button"
+        onClick={masquer}
+        aria-label="Masquer"
+        className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-fg-muted active:opacity-60"
+      >
+        <Icon name="fermer" size={18} strokeWidth={2} />
       </button>
     </section>
   );

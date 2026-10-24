@@ -22,7 +22,7 @@ export function CaptureVignette({ capture }: { capture: Capture }) {
         className="text-[12px] font-medium text-court-400 active:opacity-60"
       >
         {ouverte ? "Masquer la capture" : "Voir la capture du site"}
-        <span className="ml-1 font-normal text-fg-faint">· {heure}</span>
+        <span className="ml-1 font-normal text-fg-muted">· {heure}</span>
       </button>
       {ouverte && (
         // eslint-disable-next-line @next/next/no-img-element -- adresse signée temporaire : pas d'optimisation Next

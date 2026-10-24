@@ -90,6 +90,7 @@ function BenchmarkLine({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
           className="flex min-w-0 flex-1 items-center gap-2 text-left"
         >
           <svg
@@ -108,9 +109,13 @@ function BenchmarkLine({
           type="button"
           aria-label={`À propos de ${meta.label}`}
           onClick={() => setShowTip((v) => !v)}
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fill text-[11px] font-bold text-fg-muted active:bg-fill"
+          aria-expanded={showTip}
+          // Zone tactile de 44 px (marges négatives : la ligne garde sa hauteur), pastille visible de 20 px.
+          className="group -my-3 flex h-11 w-11 shrink-0 items-center justify-center"
         >
-          ?
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-fill text-[11px] font-bold text-fg-muted group-active:bg-line-strong">
+            ?
+          </span>
         </button>
         <div className="shrink-0 text-right">
           {cmp.n === 0 ? (

@@ -35,7 +35,7 @@ function LigneCompte({ label, joueur, capture, secret }: { label: string; joueur
     <div>
       <div className="flex items-baseline gap-2 text-[14px]">
         <span className="w-14 shrink-0 whitespace-nowrap text-[12px] font-semibold uppercase tracking-wide text-fg-muted">{label}</span>
-        <span className={`min-w-0 truncate ${joueur ? "font-semibold text-fg" : "text-fg-faint"}`}>
+        <span className={`min-w-0 truncate ${joueur ? "font-semibold text-fg" : "text-fg-muted"}`}>
           {joueur ??
             (secret ? (
               <>
@@ -87,7 +87,7 @@ export function PicksValidesCard({
             {dates.length}
           </span>
           {toutes.length > dates.length && (
-            <span className="ml-1.5 align-middle text-[12px] font-normal text-fg-faint">sur {toutes.length}</span>
+            <span className="ml-1.5 align-middle text-[12px] font-normal text-fg-muted">sur {toutes.length}</span>
           )}
         </h2>
         <Link href="/picks" className="text-[15px] font-medium text-court-400 active:opacity-60">

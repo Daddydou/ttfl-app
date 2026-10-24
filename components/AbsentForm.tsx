@@ -65,7 +65,7 @@ export function AbsentForm({ today }: { today: string }) {
         </label>
         <label className="flex-1">
           <span className="mb-1 block text-[13px] text-fg-muted">
-            Fin <span className="text-fg-faint">(option.)</span>
+            Fin <span className="text-fg-muted">(option.)</span>
           </span>
           <input
             type="date"

@@ -1,40 +1,150 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-24T12:00:00Z",
+  "generatedAt": "2026-10-24T12:35:14.860Z",
   "title": "Design System: TTFL — Le pick du soir",
   "extensions": {
     "colorMeta": {
-      "court-500": { "role": "primary", "displayName": "Orange ballon", "canonical": "rgb(207 69 16)", "dark": "rgb(255 140 26)", "tonalRamp": ["oklch(25% 0.08 40)", "oklch(35% 0.12 40)", "oklch(45% 0.16 40)", "oklch(55% 0.19 40)", "oklch(65% 0.17 45)", "oklch(75% 0.13 50)", "oklch(85% 0.08 55)", "oklch(95% 0.03 60)"] },
-      "court-400": { "role": "primary", "displayName": "Orange ballon foncé (texte)", "canonical": "rgb(194 65 12)", "dark": "rgb(255 159 67)" },
-      "court-600": { "role": "primary", "displayName": "Orange pressé", "canonical": "rgb(178 56 10)", "dark": "rgb(232 120 10)" },
-      "canvas": { "role": "neutral", "displayName": "Fond système", "canonical": "rgb(242 242 247)", "dark": "rgb(0 0 0)" },
-      "surface": { "role": "neutral", "displayName": "Carte", "canonical": "rgb(255 255 255)", "dark": "rgb(28 28 30)" },
-      "surface-2": { "role": "neutral", "displayName": "Tuile en creux", "canonical": "rgb(242 242 247)", "dark": "rgb(44 44 46)" },
-      "fill": { "role": "neutral", "displayName": "Remplissage", "canonical": "rgb(229 229 234)", "dark": "rgb(58 58 60)" },
-      "fg": { "role": "neutral", "displayName": "Texte", "canonical": "rgb(17 17 19)", "dark": "rgb(245 245 247)" },
-      "fg-muted": { "role": "neutral", "displayName": "Texte secondaire", "canonical": "rgb(108 108 112)", "dark": "rgb(152 152 159)" },
-      "avail": { "role": "status", "displayName": "Disponible", "canonical": "rgb(36 138 61)", "dark": "rgb(48 209 88)" },
-      "quest": { "role": "status", "displayName": "Questionable", "canonical": "rgb(156 90 0)", "dark": "rgb(255 214 10)" },
-      "doubt": { "role": "status", "displayName": "Doubtful", "canonical": "rgb(190 80 0)", "dark": "rgb(255 159 10)" },
-      "out": { "role": "status", "displayName": "Out", "canonical": "rgb(215 0 21)", "dark": "rgb(255 69 58)" }
+      "court-500": {
+        "role": "primary",
+        "displayName": "Orange ballon",
+        "canonical": "rgb(207 69 16)",
+        "dark": "rgb(255 140 26)",
+        "tonalRamp": [
+          "oklch(25% 0.08 40)",
+          "oklch(35% 0.12 40)",
+          "oklch(45% 0.16 40)",
+          "oklch(55% 0.19 40)",
+          "oklch(65% 0.17 45)",
+          "oklch(75% 0.13 50)",
+          "oklch(85% 0.08 55)",
+          "oklch(95% 0.03 60)"
+        ]
+      },
+      "court-400": {
+        "role": "primary",
+        "displayName": "Orange ballon foncé (texte)",
+        "canonical": "rgb(194 65 12)",
+        "dark": "rgb(255 159 67)"
+      },
+      "court-600": {
+        "role": "primary",
+        "displayName": "Orange pressé",
+        "canonical": "rgb(178 56 10)",
+        "dark": "rgb(232 120 10)"
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Fond système",
+        "canonical": "rgb(242 242 247)",
+        "dark": "rgb(0 0 0)"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Carte",
+        "canonical": "rgb(255 255 255)",
+        "dark": "rgb(28 28 30)"
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Tuile en creux",
+        "canonical": "rgb(242 242 247)",
+        "dark": "rgb(44 44 46)"
+      },
+      "fill": {
+        "role": "neutral",
+        "displayName": "Remplissage",
+        "canonical": "rgb(229 229 234)",
+        "dark": "rgb(58 58 60)"
+      },
+      "fg": {
+        "role": "neutral",
+        "displayName": "Texte",
+        "canonical": "rgb(17 17 19)",
+        "dark": "rgb(245 245 247)"
+      },
+      "fg-muted": {
+        "role": "neutral",
+        "displayName": "Texte secondaire",
+        "canonical": "rgb(108 108 112)",
+        "dark": "rgb(152 152 159)"
+      },
+      "avail": {
+        "role": "status",
+        "displayName": "Disponible",
+        "canonical": "rgb(36 138 61)",
+        "dark": "rgb(48 209 88)"
+      },
+      "quest": {
+        "role": "status",
+        "displayName": "Questionable",
+        "canonical": "rgb(156 90 0)",
+        "dark": "rgb(255 214 10)"
+      },
+      "doubt": {
+        "role": "status",
+        "displayName": "Doubtful",
+        "canonical": "rgb(190 80 0)",
+        "dark": "rgb(255 159 10)"
+      },
+      "out": {
+        "role": "status",
+        "displayName": "Out",
+        "canonical": "rgb(215 0 21)",
+        "dark": "rgb(255 69 58)"
+      }
     },
     "typographyMeta": {
-      "title-large": { "displayName": "Title Large", "purpose": "Titre de page (PageHeader), un par écran." },
-      "headline": { "displayName": "Headline", "purpose": "Nom du joueur, titre de carte." },
-      "section-label": { "displayName": "Section label", "purpose": "En-tête de groupe de liste, en majuscules." }
+      "title-large": {
+        "displayName": "Title Large",
+        "purpose": "Titre de page (PageHeader), un par écran."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Nom du joueur, titre de carte."
+      },
+      "section-label": {
+        "displayName": "Section label",
+        "purpose": "En-tête de groupe de liste, en majuscules."
+      }
     },
     "shadows": [
-      { "name": "card", "value": "0 1px 2px rgb(0 0 0 / 0.04), 0 6px 20px rgb(0 0 0 / 0.05)", "purpose": "Toutes les cartes (en sombre : filet blanc 4 %)." },
-      { "name": "float", "value": "0 8px 32px rgb(0 0 0 / 0.16), 0 1px 0 rgb(255 255 255 / 0.6) inset", "purpose": "Barre d'onglets et feuilles modales." }
+      {
+        "name": "card",
+        "value": "0 1px 2px rgb(0 0 0 / 0.04), 0 6px 20px rgb(0 0 0 / 0.05)",
+        "purpose": "Toutes les cartes (en sombre : filet blanc 4 %)."
+      },
+      {
+        "name": "float",
+        "value": "0 8px 32px rgb(0 0 0 / 0.16), 0 1px 0 rgb(255 255 255 / 0.6) inset",
+        "purpose": "Barre d'onglets et feuilles modales."
+      }
     ],
     "motion": [
-      { "name": "page-in", "value": "160ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Entrée de page." },
-      { "name": "sheet-up", "value": "280ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Montée de la feuille modale." },
-      { "name": "press", "value": "150ms ease-out, scale(0.97)", "purpose": "Retour de pression des boutons." }
+      {
+        "name": "page-in",
+        "value": "160ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Entrée de page."
+      },
+      {
+        "name": "sheet-up",
+        "value": "280ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Montée de la feuille modale."
+      },
+      {
+        "name": "press",
+        "value": "150ms ease-out, scale(0.97)",
+        "purpose": "Retour de pression des boutons."
+      }
     ],
     "breakpoints": [
-      { "name": "tab-truncate", "value": "359px" },
-      { "name": "sm", "value": "640px" }
+      {
+        "name": "tab-truncate",
+        "value": "359px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      }
     ]
   },
   "components": [
@@ -106,11 +216,31 @@
       "Cibles tactiles de 48 px minimum, champs en 16 px (pas de zoom iOS)."
     ],
     "rules": [
-      { "name": "La Règle de l'accent unique", "body": "L'orange ne sert qu'à l'action et à la sélection. Jamais pour décorer un titre, un fond de carte ou une donnée neutre.", "section": "colors" },
-      { "name": "La Règle zéro couleur en dur", "body": "Aucune couleur écrite en dur dans un composant : tout passe par les jetons --c-*.", "section": "colors" },
-      { "name": "La Règle des chiffres alignés", "body": "Tout score, projection ou pourcentage porte .num (chiffres tabulaires).", "section": "typography" },
-      { "name": "La Règle du 16 px", "body": "Champs, sélecteurs et boutons à 16 px minimum : iOS ne zoome pas au focus.", "section": "typography" },
-      { "name": "La Règle du flottant seul", "body": "Seuls les éléments posés au-dessus du contenu ont une ombre marquée et du verre. Une carte ne flotte jamais.", "section": "elevation" }
+      {
+        "name": "La Règle de l'accent unique",
+        "body": "L'orange ne sert qu'à l'action et à la sélection. Jamais pour décorer un titre, un fond de carte ou une donnée neutre.",
+        "section": "colors"
+      },
+      {
+        "name": "La Règle zéro couleur en dur",
+        "body": "Aucune couleur écrite en dur dans un composant : tout passe par les jetons --c-*.",
+        "section": "colors"
+      },
+      {
+        "name": "La Règle des chiffres alignés",
+        "body": "Tout score, projection ou pourcentage porte .num (chiffres tabulaires).",
+        "section": "typography"
+      },
+      {
+        "name": "La Règle du 16 px",
+        "body": "Champs, sélecteurs et boutons à 16 px minimum : iOS ne zoome pas au focus.",
+        "section": "typography"
+      },
+      {
+        "name": "La Règle du flottant seul",
+        "body": "Seuls les éléments posés au-dessus du contenu ont une ombre marquée et du verre. Une carte ne flotte jamais.",
+        "section": "elevation"
+      }
     ],
     "dos": [
       "Do passer par les jetons --c-* et les classes de app/globals.css avant d'écrire du Tailwind sur mesure.",
@@ -124,7 +254,9 @@
       "Don't écrire une couleur en dur dans un composant.",
       "Don't descendre sous 11 px de texte, sauf les micro-badges existants à 10 px.",
       "Don't donner une ombre marquée ou du verre à une carte.",
-      "Don't bloquer le zoom ni mettre un champ sous 16 px."
+      "Don't bloquer le zoom ni mettre un champ sous 16 px.",
+      "Don't utiliser d'emoji ou de glyphe (🔒, ✓) comme icône : toujours components/ui/Icon.tsx (cadenas, coche…).",
+      "Don't laisser une barre de défilement sur un rail horizontal de pastilles : classe .rail."
     ]
   }
 }

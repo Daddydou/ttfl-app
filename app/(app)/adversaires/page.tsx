@@ -94,7 +94,7 @@ export default async function AdversairesPage() {
                   )}
                 </div>
                 {ps.length === 0 ? (
-                  <p className="mt-1 text-[13px] text-fg-faint">Aucun pick gardé pour l&apos;instant.</p>
+                  <p className="mt-1 text-[13px] text-fg-muted">Aucun pick gardé pour l&apos;instant.</p>
                 ) : (
                   <details className="mt-1">
                     <summary className="cursor-pointer text-[13px] font-medium text-court-400">

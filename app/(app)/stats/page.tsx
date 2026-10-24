@@ -222,7 +222,7 @@ export default async function StatsPage({
               <div key={r.label} className="flex items-center gap-3">
                 <span className="w-24 shrink-0 text-[13px] font-medium text-fg-muted">
                   {r.label}
-                  <span className="text-fg-faint"> ·{r.n}</span>
+                  <span className="text-fg-muted"> ·{r.n}</span>
                 </span>
                 <div className="h-6 flex-1 overflow-hidden rounded-md bg-surface-2">
                   <div
