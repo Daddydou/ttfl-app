@@ -56,7 +56,7 @@ export default async function StarsPage() {
             <li key={r.compte} className="px-4 py-3">
               <details>
                 <summary className="flex cursor-pointer items-baseline justify-between gap-3">
-                  <span className="text-[17px] font-semibold text-fg">Compte {r.compte}</span>
+                  <span className="shrink-0 whitespace-nowrap text-[17px] font-semibold text-fg">Compte {r.compte}</span>
                   <span className="text-right text-[13px] text-fg-muted">
                     {r.bloquees.length} bloquée{r.bloquees.length > 1 ? "s" : ""}
                     {r.prochaine_libre && (

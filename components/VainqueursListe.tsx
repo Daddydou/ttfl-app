@@ -211,11 +211,12 @@ function EquipeBouton({
       disabled={desactive}
       aria-pressed={choisie}
       className={`rounded-[12px] px-2.5 py-2 text-left transition ${
-        choisie ? "bg-court-500/20 ring-2 ring-court-500" : "bg-surface-1 ring-1 ring-line"
+        choisie ? "bg-court-500/20 ring-2 ring-court-500" : "bg-surface-2 ring-1 ring-line"
       } ${desactive && !choisie ? "opacity-60" : ""}`}
     >
       <span className="block truncate text-[14px] font-semibold text-fg">{nom}</span>
-      <span className="flex items-baseline justify-between text-[12px] text-fg-muted">
+      {/* Sur le fond orangé, le gris secondaire tombe à 4:1 : texte principal adouci à la place. */}
+      <span className={`flex items-baseline justify-between text-[12px] ${choisie ? "text-fg/80" : "text-fg-muted"}`}>
         <span>{domicile ? "à domicile" : "à l'extérieur"}</span>
         <span className={`num font-semibold ${gagnante ? "text-avail" : "text-fg"}`}>{pourcent(proba)}</span>
       </span>

@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type NomIcone } from "@/components/ui/Icon";
 
-const TABS: { href: string; label: string; icon: NomIcone }[] = [
+// `aussi` : sous-pages rattachées à l'onglet (on garde sa place en y entrant).
+const TABS: { href: string; label: string; icon: NomIcone; aussi?: string[] }[] = [
   { href: "/", label: "Accueil", icon: "accueil" },
   { href: "/ce-soir", label: "Conseillés", icon: "ballon" },
-  { href: "/picks", label: "Mes picks", icon: "picks" },
+  { href: "/picks", label: "Mes picks", icon: "picks", aussi: ["/equipe"] },
   { href: "/vainqueurs", label: "Vainqueurs", icon: "trophee" },
-  { href: "/stats", label: "Stats", icon: "stats" },
+  { href: "/stats", label: "Stats", icon: "stats", aussi: ["/stars", "/adversaires", "/absents"] },
   { href: "/admin", label: "Admin", icon: "reglages" },
   { href: "/mode-operatoire", label: "Mode op.", icon: "livre" },
 ];
@@ -28,7 +29,10 @@ export function BottomNav() {
         style={{ boxShadow: "var(--shadow-float)" }}
       >
         {TABS.map((tab) => {
-          const active = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+          const active =
+            tab.href === "/"
+              ? pathname === "/"
+              : [tab.href, ...(tab.aussi ?? [])].some((h) => pathname === h || pathname.startsWith(`${h}/`));
           // Largeurs égales, mais un libellé n'est jamais coupé ni replié (nowrap) :
           // un onglet au mot long s'élargit. Sous 360 px seulement, repli en « … ».
           return (

@@ -1,6 +1,8 @@
 // Page « Santé » de l'Admin (migration sans PC, 2026-10-22) : dernier passage de chaque tâche et retard éventuel.
 // Logique PURE (aucun accès réseau, l'heure est passée en paramètre) : testée dans tests/sante.test.ts.
 
+import { nb } from "./format";
+
 export type NiveauSante = "ok" | "retard" | "panne" | "inconnu" | "info";
 
 export interface LigneEtat {
@@ -122,7 +124,7 @@ export function etatSante(s: SourcesSante, maintenant: number): TacheSante[] {
 export function resumeSante(taches: TacheSante[]): { niveau: NiveauSante; texte: string } {
   const pannes = taches.filter((t) => t.niveau === "panne").length;
   const retards = taches.filter((t) => t.niveau === "retard").length;
-  if (pannes) return { niveau: "panne", texte: `${pannes} tâche(s) à l'arrêt${retards ? `, ${retards} en retard` : ""}.` };
-  if (retards) return { niveau: "retard", texte: `${retards} tâche(s) en retard.` };
+  if (pannes) return { niveau: "panne", texte: `${nb(pannes, "tâche")} à l'arrêt${retards ? `, ${retards} en retard` : ""}.` };
+  if (retards) return { niveau: "retard", texte: `${nb(retards, "tâche")} en retard.` };
   return { niveau: "ok", texte: "Tout tourne normalement." };
 }

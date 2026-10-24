@@ -11,8 +11,21 @@ export function ageMs(iso: string): number {
 export interface Freshness {
   label: string; // "il y a 12 min"
   minutes: number;
-  tone: "fresh" | "aging" | "stale";
+  tone: "fresh" | "aging" | "stale" | "waiting";
 }
+
+// Heure de Paris (0-23) d'un instant donné.
+export function heureParis(maintenant: Date = new Date()): number {
+  // formatToParts : en fr-FR, format() renvoie « 14 h », pas « 14 ».
+  const partie = new Intl.DateTimeFormat("fr-FR", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Paris" })
+    .formatToParts(maintenant)
+    .find((p) => p.type === "hour");
+  return Number(partie?.value ?? 0);
+}
+
+// Le moteur calcule toutes les 30 min de 16 h à 2 h (Paris). Entre 3 h et 16 h, aucun calcul n'est attendu :
+// un run de la veille est normal, pas « périmé » (sinon le bandeau est rouge tous les après-midi pour rien).
+export const DEBUT_CALCUL_SOIR = 16;
 
 // Le calcul de fraîcheur combine deux choses : l'âge du run ET si l'injury
 // report a bien été rafraîchi. Un run récent mais sur report périmé reste
@@ -20,14 +33,18 @@ export interface Freshness {
 export function freshness(
   computedAt: string,
   injuryFresh: boolean,
+  maintenant: Date = new Date(),
 ): Freshness {
   const minutes = Math.max(
     0,
-    Math.round(ageMs(computedAt) / 60000),
+    Math.round((maintenant.getTime() - new Date(computedAt).getTime()) / 60000),
   );
 
+  const h = heureParis(maintenant);
   let tone: Freshness["tone"];
-  if (!injuryFresh) {
+  if (h >= 3 && h < DEBUT_CALCUL_SOIR && minutes >= 120) {
+    tone = "waiting";
+  } else if (!injuryFresh) {
     // Report non rafraîchi : jamais "vert", peu importe l'âge.
     tone = minutes < 60 ? "aging" : "stale";
   } else if (minutes < 30) {
@@ -39,6 +56,11 @@ export function freshness(
   }
 
   return { label: humanAge(minutes), minutes, tone };
+}
+
+// « 1 tâche », « 3 tâches » : remplace les « tâche(s) ». `pluriel` sert aux formes irrégulières.
+export function nb(n: number, singulier: string, pluriel = `${singulier}s`): string {
+  return `${n} ${Math.abs(n) >= 2 ? pluriel : singulier}`;
 }
 
 export function humanAge(minutes: number): string {

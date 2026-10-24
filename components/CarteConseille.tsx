@@ -94,7 +94,7 @@ export function CarteConseille({
       {mode === "playoffs" && c.series_state && (
         <p className="mt-2 text-[13px] text-fg-muted">
           Série <span className="font-semibold text-fg">{c.series_state}</span>
-          {c.expected_nights_left != null && ` · ~${fmtNum(c.expected_nights_left)} soir(s) restant(s)`}
+          {c.expected_nights_left != null && ` · ~${fmtNum(c.expected_nights_left)} ${c.expected_nights_left >= 2 ? "soirs restants" : "soir restant"}`}
         </p>
       )}
 

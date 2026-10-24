@@ -18,7 +18,7 @@
   --c-line: 224 224 229; /* filets */
   --c-line-strong: 199 199 204;
   --c-fg: 17 17 19;
-  --c-fg-muted: 108 108 112; /* 5:1 sur blanc */
+  --c-fg-muted: 100 100 105; /* ≥ 4,5:1 même sur fill (pastilles) */
   --c-fg-faint: 142 142 147; /* placeholders, éléments désactivés */
   --c-accent: 194 65 12; /* texte / liens : orange foncé lisible */
   --c-accent-fill: 207 69 16; /* boutons pleins (texte blanc ≥ 4,5:1) */
@@ -46,7 +46,7 @@
     --c-line: 56 56 58;
     --c-line-strong: 72 72 74;
     --c-fg: 245 245 247;
-    --c-fg-muted: 152 152 159;
+    --c-fg-muted: 166 166 172; /* ≥ 4,5:1 même sur fill */
     --c-fg-faint: 99 99 102;
     --c-accent: 255 159 67;
     --c-accent-fill: 255 140 26;
@@ -55,7 +55,7 @@
     --c-avail: 48 209 88;
     --c-quest: 255 214 10;
     --c-doubt: 255 159 10;
-    --c-out: 255 69 58;
+    --c-out: 255 105 97; /* ≥ 4,5:1 sur surface-2 */
 
     --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
     --shadow-float: 0 8px 32px rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.08) inset;

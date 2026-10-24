@@ -108,8 +108,19 @@ export const STATUTS_COMMANDE: Record<string, { label: string; classe: string }>
   en_cours: { label: "En cours", classe: "bg-court-500/15 text-court-400" },
   ok: { label: "Terminée", classe: "bg-avail/15 text-avail" },
   echec: { label: "Échec", classe: "bg-out/15 text-out" },
-  annule: { label: "Annulée", classe: "bg-ink-850 text-ink-600" },
+  annule: { label: "Annulée", classe: "bg-fill text-fg-muted" },
 };
+
+// Le moteur peut marquer une commande « ok » alors que son résumé rapporte une erreur (fichier verrouillé…) :
+// on n'affiche alors pas un « Terminée » vert trompeur, mais « Terminée avec erreur » en ambre.
+const MOTIFS_ERREUR = /erreur|error|traceback|exception|échec|ne peut pas|impossible/i;
+
+export function statutAffiche(statut: string, resume: string | null): { label: string; classe: string } {
+  if (statut === "ok" && resume && MOTIFS_ERREUR.test(resume.replace(/\b(aucune|0) erreurs?\b/gi, ""))) {
+    return { label: "Terminée avec erreur", classe: "bg-quest/15 text-quest" };
+  }
+  return STATUTS_COMMANDE[statut] ?? { label: statut, classe: "bg-surface-2 text-fg-muted" };
+}
 
 // --- Import de picks collés ----------------------------------------------------------------------------------
 

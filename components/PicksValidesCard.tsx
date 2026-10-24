@@ -16,7 +16,7 @@ function Tuile({ iso }: { iso: string }) {
       className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-[12px] bg-surface-2"
       aria-hidden="true"
     >
-      <span className="text-[10px] font-semibold uppercase leading-none tracking-[0.06em] text-court-400">{jour}</span>
+      <span className="text-[11px] font-semibold uppercase leading-none tracking-[0.06em] text-court-400">{jour}</span>
       <span className="mt-0.5 text-[20px] font-bold leading-none num text-fg">{num}</span>
     </span>
   );

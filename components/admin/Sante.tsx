@@ -45,7 +45,7 @@ export function Sante({ taches, maintenantMs }: { taches: TacheSante[]; maintena
                   {minutes === null ? "Aucun passage enregistré" : `${humanAge(minutes)} (${quand(t.derniere as string)})`}
                   {p.label ? <span className={`font-semibold ${p.texte}`}> · {p.label}</span> : null}
                 </p>
-                <p className="text-[12px] leading-snug text-fg-muted/80">{t.detail}</p>
+                <p className="text-[12px] leading-snug text-fg-muted">{t.detail}</p>
               </div>
             </li>
           );

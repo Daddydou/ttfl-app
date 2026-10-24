@@ -10,6 +10,8 @@ export function VersusEngineCard({
   rows: VersusRow[];
   engineLabel: string;
 }) {
+  // Soirées pas encore jouées (ni score ni repère) : rien à comparer, on ne les liste pas.
+  rows = rows.filter((r) => r.mine.score !== null || r.engine !== null);
   if (rows.length === 0) return null;
 
   // Écart cumulé uniquement sur les soirs où les deux scores sont connus.
@@ -39,7 +41,7 @@ export function VersusEngineCard({
         )}
       </div>
       <p className="mb-3 text-[13px] text-fg-muted">
-        {rows.length} dernier(s) soir(s) · repère « {engineLabel} ».
+        {rows.length >= 2 ? `${rows.length} derniers soirs` : "Dernier soir"} · repère « {engineLabel} ».
       </p>
 
       <div className="overflow-hidden rounded-[16px] bg-surface-2">

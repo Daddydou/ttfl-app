@@ -63,7 +63,7 @@ describe("etatSante", () => {
 describe("resumeSante", () => {
   it("compte les pannes et les retards", () => {
     expect(resumeSante([{ id: "a", titre: "", qui: "PC", derniere: null, niveau: "panne", detail: "" },
-      { id: "b", titre: "", qui: "PC", derniere: null, niveau: "retard", detail: "" }]).texte).toBe("1 tâche(s) à l'arrêt, 1 en retard.");
+      { id: "b", titre: "", qui: "PC", derniere: null, niveau: "retard", detail: "" }]).texte).toBe("1 tâche à l'arrêt, 1 en retard.");
     expect(resumeSante([{ id: "a", titre: "", qui: "PC", derniere: null, niveau: "ok", detail: "" }]).niveau).toBe("ok");
   });
 });

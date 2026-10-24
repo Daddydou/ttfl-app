@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   ACTIONS_PC, GROUPES, anneeDebutSaison, etatExecuteur, nettoyerParams, parserImport, planifierCopie,
-  planifierEcritures, validerPlage,
+  planifierEcritures, statutAffiche, validerPlage,
 } from "@/lib/admin";
 
 const action = (id: string) => ACTIONS_PC.find((a) => a.id === id)!;
@@ -164,5 +164,21 @@ describe("validerPlage", () => {
   it("pour une suppression, protège l'historique : jamais de date passée", () => {
     expect(validerPlage("2026-10-09", "2026-10-20", auj, true)).toMatch(/historique/);
     expect(validerPlage("2026-10-10", "2026-10-20", auj, true)).toBeNull();
+  });
+});
+
+describe("statutAffiche", () => {
+  it("signale une commande « ok » dont le résumé rapporte une erreur", () => {
+    expect(statutAffiche("ok", "Le processus ne peut pas accéder au fichier").label).toBe("Terminée avec erreur");
+    expect(statutAffiche("ok", "Traceback (most recent call last)").label).toBe("Terminée avec erreur");
+  });
+  it("laisse « Terminée » quand le résumé est sain, même avec « aucune erreur »", () => {
+    expect(statutAffiche("ok", "Terminée — 19 soirée(s)").label).toBe("Terminée");
+    expect(statutAffiche("ok", "9 plans écrits, aucune erreur").label).toBe("Terminée");
+    expect(statutAffiche("ok", null).label).toBe("Terminée");
+  });
+  it("garde les autres statuts et un repli pour un statut inconnu", () => {
+    expect(statutAffiche("echec", "erreur").label).toBe("Échec");
+    expect(statutAffiche("bizarre", null).label).toBe("bizarre");
   });
 });

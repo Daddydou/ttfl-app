@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { annulerCommande } from "@/app/(app)/admin/actions";
-import { ACTIONS_PC, STATUTS_COMMANDE } from "@/lib/admin";
+import { ACTIONS_PC, statutAffiche } from "@/lib/admin";
 
 export interface Commande {
   id: number;
@@ -63,7 +63,7 @@ export function HistoriqueCommandes({ commandes }: { commandes: Commande[] }) {
       ) : (
         <ul className="card overflow-hidden">
           {commandes.map((c) => {
-            const st = STATUTS_COMMANDE[c.statut] ?? { label: c.statut, classe: "bg-surface-2 text-fg-muted" };
+            const st = statutAffiche(c.statut, c.resume);
             const d = duree(c);
             return (
               <li key={c.id} className="border-b border-line px-4 py-3 last:border-0">

@@ -32,7 +32,7 @@ describe("Importer des picks", () => {
     render(<PicksEnMasse aujourdhui="2026-10-10" />);
     await coller("21/10 Nikola Jokic\npas une date\n22/10 Luka Doncic");
     expect(screen.getByText(/2/, { selector: "span.font-semibold" })).toBeInTheDocument();
-    expect(screen.getByText(/1 ligne\(s\) à corriger/)).toBeInTheDocument();
+    expect(screen.getByText(/1 ligne à corriger/)).toBeInTheDocument();
     expect(screen.getByText(/Ligne 2 : format non reconnu/)).toBeInTheDocument();
   });
 

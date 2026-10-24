@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { freshness } from "@/lib/format";
+import { DEBUT_CALCUL_SOIR, freshness } from "@/lib/format";
 
 const TONE = {
   fresh: {
@@ -18,6 +18,12 @@ const TONE = {
     bg: "bg-out/10",
     text: "text-out",
     dot: "bg-out",
+  },
+  // Avant 16 h : aucun calcul attendu, ton neutre (pas d'alarme).
+  waiting: {
+    bg: "bg-fill/60",
+    text: "text-fg-muted",
+    dot: "bg-fg-muted",
   },
 } as const;
 
@@ -53,7 +59,9 @@ export function FreshnessBanner({
       <div className={`flex-1 text-[14px] font-medium ${t.text}`}>
         Calculé {f.label}
         <span className="text-fg/40"> · </span>
-        {injuryFresh ? (
+        {f.tone === "waiting" ? (
+          <span>prochain calcul dès {DEBUT_CALCUL_SOIR} h</span>
+        ) : injuryFresh ? (
           <span>injury report frais</span>
         ) : (
           <span className="font-semibold">report non rafraîchi</span>

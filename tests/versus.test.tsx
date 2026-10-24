@@ -61,6 +61,6 @@ describe("VersusEngineCard", () => {
     // 40-55 + 50-50 = -15 ; le soir non noté est ignoré.
     expect(screen.getAllByText("-15")).toHaveLength(2);
     expect(screen.getByText("même choix")).toBeInTheDocument();
-    expect(screen.getByText(/3 dernier\(s\) soir\(s\)/)).toBeInTheDocument();
+    expect(screen.getByText(/3 derniers soirs/)).toBeInTheDocument();
   });
 });

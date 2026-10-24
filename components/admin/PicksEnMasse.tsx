@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { copierPicks, importerPicks, supprimerPicks, type ResultatAdmin } from "@/app/(app)/admin/actions";
 import { SelecteurComptes } from "@/components/admin/SelecteurComptes";
 import { MOT_CONFIRMATION, parserImport } from "@/lib/admin";
+import { nb } from "@/lib/format";
 import { COMPTES_EQUIPE, ajouterJours } from "@/lib/planning";
 
 type Onglet = "importer" | "copier" | "supprimer";
@@ -107,8 +108,9 @@ function Importer({ aujourdhui }: { aujourdhui: string }) {
         />
       </label>
       <p className="mt-1.5 text-[13px] text-fg-muted">
-        <span className="font-semibold text-fg">{analyse.lignes.length}</span> pick(s) reconnu(s)
-        {analyse.erreurs.length > 0 && <span className="text-out"> · {analyse.erreurs.length} ligne(s) à corriger</span>}
+        <span className="font-semibold text-fg">{analyse.lignes.length}</span>{" "}
+        {analyse.lignes.length >= 2 ? "picks reconnus" : "pick reconnu"}
+        {analyse.erreurs.length > 0 && <span className="text-out"> · {nb(analyse.erreurs.length, "ligne")} à corriger</span>}
       </p>
       {analyse.erreurs.length > 0 && (
         <ul className="mt-1 space-y-0.5 text-[13px] text-out">
@@ -127,7 +129,7 @@ function Importer({ aujourdhui }: { aujourdhui: string }) {
           {pending ? "…" : "Vérifier"}
         </button>
         <button onClick={importer} disabled={!verifie || pending} className={principal}>
-          Importer {lignes.length} pick(s) sur {comptes.length} compte(s)
+          Importer {nb(lignes.length, "pick")} sur {nb(comptes.length, "compte")}
         </button>
       </div>
       <Resultat res={verif?.cle === cle ? verif.res : fini} />
@@ -188,7 +190,7 @@ function Copier({ aujourdhui }: { aujourdhui: string }) {
           {pending ? "…" : "Vérifier"}
         </button>
         <button onClick={copier} disabled={!verifie || pending} className={principal}>
-          Copier vers {destinations.filter((c) => c !== source).length} compte(s)
+          Copier vers {nb(destinations.filter((c) => c !== source).length, "compte")}
         </button>
       </div>
       <Resultat res={verif?.cle === cle ? verif.res : fini} />
