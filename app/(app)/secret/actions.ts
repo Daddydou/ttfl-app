@@ -12,7 +12,7 @@ function revalider() {
   revalidatePath("/");
   revalidatePath("/ce-soir");
   revalidatePath("/picks");
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout"); // et ses sous-pages (Actions, Cookies, Secret…)
 }
 
 // Force la révélation du pick du compte 02 pour UNE soirée (à venir ou en cours). Pas de notification : tu le vois

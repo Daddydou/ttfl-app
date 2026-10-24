@@ -7,12 +7,12 @@ import { ACTIONS_PC, GROUPES, type ActionPC } from "@/lib/admin";
 
 type Retour = { ok: boolean; texte: string };
 
-// Les actions que l'application peut demander à ton PC. Elles ne s'exécutent pas ici : la demande est déposée en base,
-// l'exécuteur du PC la prend en charge dans la minute (liste fermée : rien d'autre ne peut être lancé).
+// Les actions que l'application peut demander au moteur (cloud ou PC). Elles ne s'exécutent pas ici : la demande est déposée en base,
+// le moteur la prend en charge (liste fermée : rien d'autre ne peut être lancé).
 export function ActionsPC({ actives }: { actives: string[] }) {
   return (
     <section className="space-y-4">
-      <h2 className="section-label">Actions sur le PC</h2>
+      <h2 className="section-label">Lancer une action</h2>
       {GROUPES.map((g) => (
         <div key={g.id} className="space-y-1.5">
           <h3 className="section-label !normal-case !tracking-normal">{g.titre}</h3>

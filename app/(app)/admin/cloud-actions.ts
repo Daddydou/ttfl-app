@@ -21,6 +21,6 @@ export async function reglerCloud(mode: string): Promise<ResultatCloud> {
     .update({ mode, maj_le: new Date().toISOString() })
     .eq("id", 1);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout"); // et ses sous-pages (Actions, Cookies, Secret…)
   return { ok: true, message: MESSAGES[mode as ModeCloud] };
 }

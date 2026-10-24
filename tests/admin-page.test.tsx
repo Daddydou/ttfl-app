@@ -10,6 +10,9 @@ vi.mock("@/app/(app)/admin/actions", () => ({
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const { default: AdminPage } = await import("@/app/(app)/admin/page");
+const { default: ActionsPage } = await import("@/app/(app)/admin/actions/page");
+const { default: MassePage } = await import("@/app/(app)/admin/masse/page");
+const { default: CloudPage } = await import("@/app/(app)/admin/cloud/page");
 
 beforeEach(() => {
   createClient.mockReset();
@@ -35,7 +38,6 @@ describe("Page Admin", () => {
     await rendre({ ttfl_commandes: [], ttfl_robot_etat: pouls("2026-10-10T13:20:00Z") });
     expect(screen.getByText("PC hors ligne")).toBeInTheDocument();
     expect(screen.getByText(/s'exécutent quand même .* les autres attendront le PC/)).toBeInTheDocument();
-    expect(screen.getAllByText("Cloud").length).toBeGreaterThanOrEqual(3); // badges des 3 actions cloud
   });
 
   it("affiche la santé des tâches : PC muet depuis 40 min = en retard", async () => {
@@ -50,9 +52,28 @@ describe("Page Admin", () => {
     expect(screen.getByText("Aucun passage reçu")).toBeInTheDocument();
   });
 
+  it("liste les rubriques en sous-pages, façon Réglages", async () => {
+    await rendre({ ttfl_commandes: [], ttfl_robot_etat: [] });
+    for (const [nom, href] of [
+      ["Actions", "/admin/actions"],
+      ["Journal d'envoi", "/admin/envois"],
+      ["Pick secret", "/admin/secret"],
+      ["Picks en masse", "/admin/masse"],
+      ["Cookies TTFL", "/admin/cookies"],
+    ]) {
+      expect(screen.getByRole("link", { name: new RegExp(`^${nom}`) })).toHaveAttribute("href", href);
+    }
+  });
+});
+
+describe("Admin > Actions", () => {
+  async function rendreActions(tables: Record<string, unknown[]>) {
+    createClient.mockResolvedValue(fakeSupabase(tables));
+    render(await ActionsPage());
+  }
+
   it("affiche l'historique et désactive les actions déjà en attente ou en cours", async () => {
-    await rendre({
-      ttfl_robot_etat: pouls("2026-10-10T13:59:30Z"),
+    await rendreActions({
       ttfl_commandes: [
         { id: 2, type: "benchmarks", params: {}, statut: "en_cours", demande_le: "2026-10-10T13:58:00Z", debut_le: "2026-10-10T13:58:10Z", fin_le: null, resume: null, sortie: null },
         { id: 1, type: "calendrier", params: {}, statut: "ok", demande_le: "2026-10-10T13:00:00Z", debut_le: "2026-10-10T13:00:05Z", fin_le: "2026-10-10T13:00:50Z", resume: "Terminée — 19 soirée(s)", sortie: "x" },
@@ -64,18 +85,26 @@ describe("Page Admin", () => {
     expect(screen.getByRole("button", { name: "Lancer : Mettre à jour le calendrier TTFL" })).toBeEnabled(); // terminée : relançable
   });
 
-  it("propose les trois blocs : actions du PC, historique et picks en masse", async () => {
-    await rendre({ ttfl_commandes: [], ttfl_robot_etat: [] });
-    expect(screen.getByRole("heading", { name: "Actions sur le PC" })).toBeInTheDocument();
+  it("propose les actions (dont au moins 3 « Cloud ») et l'historique", async () => {
+    await rendreActions({ ttfl_commandes: [] });
+    expect(screen.getByRole("heading", { name: "Lancer une action" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Historique des demandes" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Picks en masse" })).toBeInTheDocument();
+    expect(screen.getAllByText("Cloud").length).toBeGreaterThanOrEqual(3);
   });
 });
 
-describe("Page Admin — moteur cloud", () => {
+describe("Admin > Picks en masse", () => {
+  it("affiche le bloc", async () => {
+    render(MassePage());
+    expect(screen.getByRole("heading", { name: "Picks en masse", level: 2 })).toBeInTheDocument();
+  });
+});
+
+describe("Admin — moteur cloud", () => {
   it("affiche l'interrupteur à 3 positions avec le mode courant", async () => {
-    await rendre({ ttfl_commandes: [], ttfl_robot_etat: [], ttfl_cloud_reglage: [{ id: 1, mode: "simulation" }] });
-    expect(screen.getByRole("heading", { name: "Moteur dans le cloud" })).toBeInTheDocument();
+    createClient.mockResolvedValue(fakeSupabase({ ttfl_robot_etat: [], ttfl_cloud_reglage: [{ id: 1, mode: "simulation" }] }));
+    render(await CloudPage());
+    expect(screen.getByRole("heading", { name: "Moteur dans le cloud", level: 2 })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Essai à blanc" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("radio", { name: "Cloud en charge" })).toHaveAttribute("aria-checked", "false");
   });

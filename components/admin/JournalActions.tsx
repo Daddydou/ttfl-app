@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   LIBELLES_CATEGORIE, LIBELLES_ORIGINE, LIBELLES_RESULTAT, TON_RESULTAT, quand,
   type EntreeJournal, type GroupeJournal,
@@ -46,22 +45,5 @@ export function ListeJournal({ groupes, vide }: { groupes: GroupeJournal[]; vide
         </li>
       ))}
     </ul>
-  );
-}
-
-// Aperçu dans l'Admin : les dernières lignes + lien vers le journal complet.
-export function JournalApercu({ groupes, disponible }: { groupes: GroupeJournal[]; disponible: boolean }) {
-  return (
-    <section className="space-y-2" aria-labelledby="titre-journal">
-      <div className="flex items-baseline justify-between">
-        <h2 id="titre-journal" className="section-label">Journal des actions</h2>
-        <Link href="/admin/journal" className="text-[13px] font-semibold text-court-400">Tout voir</Link>
-      </div>
-      {!disponible ? (
-        <p className="card px-4 py-6 text-center text-sm text-fg-muted">Journal pas encore activé (migration « journal » à appliquer sur Supabase).</p>
-      ) : (
-        <ListeJournal groupes={groupes} vide="Rien à signaler pour l'instant." />
-      )}
-    </section>
   );
 }

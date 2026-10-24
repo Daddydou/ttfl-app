@@ -29,7 +29,7 @@ function revalider() {
   revalidatePath("/ce-soir");
   revalidatePath("/picks");
   revalidatePath("/stats");
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout"); // et ses sous-pages (Actions, Cookies, Secret…)
 }
 
 function comptesValides(comptes: string[]): string[] | null {
@@ -95,7 +95,7 @@ export async function lancerCommande(type: string, params: Record<string, unknow
 
   const { error } = await supabase.from("ttfl_commandes").insert({ type, params: propres.params });
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout"); // et ses sous-pages (Actions, Cookies, Secret…)
   return {
     ok: true,
     message: action.cloud
@@ -114,7 +114,7 @@ export async function annulerCommande(id: number): Promise<ResultatAdmin> {
     .eq("id", id)
     .eq("statut", "en_attente");
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout"); // et ses sous-pages (Actions, Cookies, Secret…)
   return { ok: true, message: "Annulée.", details: [] };
 }
 

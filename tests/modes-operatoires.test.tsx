@@ -57,7 +57,7 @@ describe("page Mode opératoire", () => {
     expect(screen.getByText(cookies.titre)).toBeInTheDocument();
     const fiche = document.getElementById("cookies")!;
     expect(within(fiche).getAllByRole("listitem").length).toBeGreaterThanOrEqual(cookies.etapes.length);
-    expect(within(fiche).getByText(/Mis à jour le 23\/10\/2026/)).toBeInTheDocument();
+    expect(within(fiche).getByText(/Mis à jour le 24\/10\/2026/)).toBeInTheDocument();
   });
 
   it("propose un raccourci vers l'écran concerné", () => {

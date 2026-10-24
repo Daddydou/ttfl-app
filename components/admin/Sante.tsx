@@ -6,7 +6,7 @@ const PASTILLE: Record<NiveauSante, { point: string; texte: string; label: strin
   retard: { point: "bg-quest", texte: "text-quest", label: "En retard" },
   panne: { point: "bg-out", texte: "text-out", label: "À l'arrêt" },
   inconnu: { point: "bg-ink-600", texte: "text-fg-muted", label: "Jamais vu" },
-  info: { point: "bg-court-400", texte: "text-fg-muted", label: "" },
+  info: { point: "bg-fg-muted", texte: "text-fg-muted", label: "" }, // simple information : neutre (orange = action)
 };
 
 const BANDEAU: Record<NiveauSante, string> = {

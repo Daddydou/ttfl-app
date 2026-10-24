@@ -1,25 +1,15 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { ActionsPC } from "@/components/admin/ActionsPC";
-import { HistoriqueCommandes, type Commande } from "@/components/admin/HistoriqueCommandes";
-import { JournalEnvois, type EntreeJournal } from "@/components/admin/JournalEnvois";
-import { PicksEnMasse } from "@/components/admin/PicksEnMasse";
-import { SecretPick, type SoireeSecreteVue } from "@/components/admin/SecretPick";
-import { chargerSecret, heureCloture, masquerLignes, soireeSecrete } from "@/lib/secret";
 import { maintenantMs as heureServeur } from "@/lib/plan30";
 import { etatExecuteur } from "@/lib/admin";
 import { ageMs, humanAge } from "@/lib/format";
 import { aujourdhuiNY } from "@/lib/planning";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Icon, type NomIcone } from "@/components/ui/Icon";
 import { Sante } from "@/components/admin/Sante";
 import { etatSante, type LigneEtat } from "@/lib/sante";
-import { MoteurCloud } from "@/components/admin/MoteurCloud";
-import { Cookies } from "@/components/admin/Cookies";
-import { PushToggle } from "@/components/admin/PushToggle";
-import { secretsConfigures } from "@/lib/github-secrets";
-import type { LigneCookie } from "@/lib/cookies";
 import { lireModeCloud } from "@/lib/cloud";
-import { JournalApercu } from "@/components/admin/JournalActions";
-import { COLONNES_JOURNAL, grouperParCause, masquerJournal, type EntreeJournal as LigneJournalActions } from "@/lib/journal";
+import { chargerSecret } from "@/lib/secret";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin — TTFL" };
@@ -31,11 +21,12 @@ const PILULES = {
   inconnu: { classe: "bg-surface text-fg-muted", titre: "Aucun passage reçu" },
 } as const;
 
+// Admin : un aperçu court (qui fait tourner le moteur, santé des tâches), puis une liste façon Réglages d'iOS vers
+// une sous-page par rubrique (avant : une seule page d'une dizaine d'écrans).
 export default async function AdminPage() {
   const supabase = await createClient();
-  const aujourdhui = aujourdhuiNY();
-  const [commandesRes, etatsRes, runRes, planRes, cotesRes, cloudRes, journalRes, apercuRes, secret] = await Promise.all([
-    supabase.from("ttfl_commandes").select("*").order("id", { ascending: false }).limit(30).returns<Commande[]>(),
+  const [commandesRes, etatsRes, runRes, planRes, cotesRes, cloudRes, secret] = await Promise.all([
+    supabase.from("ttfl_commandes").select("statut").in("statut", ["en_attente", "en_cours"]).returns<{ statut: string }[]>(),
     supabase.from("ttfl_robot_etat").select("cle,valeur,maj_le").returns<LigneEtat[]>(),
     supabase.from("ttfl_runs").select("computed_at").eq("mode", "regular").order("computed_at", { ascending: false }).limit(1)
       .maybeSingle<{ computed_at: string }>(),
@@ -44,40 +35,10 @@ export default async function AdminPage() {
     supabase.from("ttfl_vainqueurs_releves").select("releve_le").order("releve_le", { ascending: false }).limit(1)
       .maybeSingle<{ releve_le: string }>(),
     supabase.from("ttfl_cloud_reglage").select("mode").eq("id", 1).maybeSingle<{ mode: string }>(),
-    supabase
-      .from("ttfl_envois_journal")
-      .select("id,le,pick_date,compte,joueur,statut,message")
-      .order("id", { ascending: false })
-      .limit(40)
-      .returns<EntreeJournal[]>(),
-    supabase.from("ttfl_journal").select(COLONNES_JOURNAL).order("id", { ascending: false }).limit(40).returns<LigneJournalActions[]>(),
-    chargerSecret(supabase, aujourdhui),
+    chargerSecret(supabase, aujourdhuiNY()),
   ]);
   const maintenantMs = heureServeur();
-  // Âge des cookies TTFL (table absente = liste vide : la carte s'affiche quand même, avec « date inconnue »).
-  const { data: cookiesData } = await supabase
-    .from("ttfl_cookie_renouvellements")
-    .select("compte,renouvele_le,estime")
-    .returns<LigneCookie[]>();
-  // Pick secret du compte 02 : ses lignes du journal d'envoi (joueur !) sont retirées tant que la soirée est secrète.
-  const journal = masquerLignes(journalRes.data ?? [], secret, aujourdhui, maintenantMs);
-  // Journal des actions et conséquences : mêmes règles de masquage ; on n'affiche ici que les 5 dernières entrées.
-  const apercu = grouperParCause(masquerJournal(apercuRes.data ?? [], secret, aujourdhui, maintenantMs)).slice(0, 5);
-  const soireesSecretes: SoireeSecreteVue[] = Object.keys(secret.lignes)
-    .sort()
-    .filter((d) => d >= aujourdhui)
-    .map((d) => {
-      const l = secret.lignes[d];
-      const secrete = soireeSecrete(secret, secret.compte, d, aujourdhui, maintenantMs);
-      return {
-        soiree: d,
-        libelle: new Date(`${d}T00:00:00Z`).toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit", timeZone: "UTC" }),
-        cloture: heureCloture(secret, d),
-        etat: secrete ? "secrete" : l.revele_le && l.motif === "force" ? "revelee_force" : "revelee_cloture",
-      };
-    });
 
-  const commandes = commandesRes.data ?? [];
   const etats = etatsRes.data ?? [];
   const pouls = etats.find((e) => e.cle === "commandes");
   const dernierPassage = pouls?.valeur?.dernier_passage;
@@ -93,24 +54,44 @@ export default async function AdminPage() {
     maintenantMs,
   );
   const modeCloud = lireModeCloud(cloudRes.data?.mode);
-  const lancement = etats.find((e) => e.cle === "reveil_moteur_envoi");
-  const tacheLancee = (lancement?.valeur?.inputs as { tache?: string } | undefined)?.tache;
-  const dernierLancement = lancement
-    ? `${new Date(lancement.maj_le).toLocaleString("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}${tacheLancee ? ` (${tacheLancee})` : ""}`
-    : null;
   const { etat, minutes } = etatExecuteur(dernier ? Math.round(ageMs(dernier) / 60000) : null);
   const pilule = modeCloud === "reel"
-    ? { classe: "bg-court-500/15 text-court-400", titre: "Cloud en charge — le PC est au repos" }
+    ? { classe: "bg-avail/10 text-avail", titre: "Cloud en charge — le PC est au repos" }
     : PILULES[etat];
-  const actives = commandes.filter((c) => c.statut === "en_attente" || c.statut === "en_cours").map((c) => c.type);
+  const enCours = (commandesRes.data ?? []).length;
+
+  const rubriques: { href: string; titre: string; detail: string; icone: NomIcone }[] = [
+    {
+      href: "/admin/actions",
+      titre: "Actions",
+      detail: enCours > 0 ? `${enCours} en cours · historique des demandes` : "Recalculs, synchronisation · historique",
+      icone: "eclair",
+    },
+    { href: "/admin/journal", titre: "Journal des actions", detail: "Ce que chaque action a provoqué", icone: "livre" },
+    { href: "/admin/envois", titre: "Journal d'envoi", detail: "Statut des picks envoyés sur TTFL, par compte", icone: "picks" },
+    {
+      href: "/admin/secret",
+      titre: "Pick secret",
+      detail: secret.actif ? `Activé · compte ${secret.compte}` : "Désactivé",
+      icone: "cadenas",
+    },
+    { href: "/admin/cloud", titre: "Moteur dans le cloud", detail: "Essai à blanc, cloud en charge ou PC", icone: "reglages" },
+    { href: "/admin/masse", titre: "Picks en masse", detail: "Importer, copier ou supprimer des picks", icone: "plus" },
+    { href: "/admin/notifications", titre: "Notifications", detail: "Alertes sur ce téléphone", icone: "cloche" },
+    { href: "/admin/cookies", titre: "Cookies TTFL", detail: "Âge des connexions et renouvellement", icone: "sortie" },
+  ];
 
   return (
     <div className="space-y-5">
-      <PageHeader titre="Admin" sousTitre="Actions à distance sur ton PC et opérations en masse sur les picks." />
+      <PageHeader
+        titre="Admin"
+        sousTitre="Surveillance du moteur et actions à distance."
+        retour={{ href: "/plus", libelle: "Plus" }}
+      />
 
       <section className={`rounded-[20px] px-4 py-3.5 ${pilule.classe}`}>
         <p className="text-sm font-semibold">{pilule.titre}</p>
-        <p className="mt-0.5 text-[13px] opacity-80">
+        <p className="mt-0.5 text-[13px] opacity-90">
           {modeCloud === "reel"
             ? "Toutes les actions s'exécutent dans le cloud (environ 2 à 5 min). Le PC peut rester éteint."
             : etat === "inconnu"
@@ -122,20 +103,28 @@ export default async function AdminPage() {
       </section>
 
       <Sante taches={taches} maintenantMs={maintenantMs} />
-      <MoteurCloud mode={modeCloud} dernier={dernierLancement} />
 
-      {commandesRes.error && (
-        <p className="rounded-[14px] bg-out/10 px-3 py-2 text-[13px] text-out">{commandesRes.error.message}</p>
-      )}
-
-      <ActionsPC actives={actives} />
-      <HistoriqueCommandes commandes={commandes} />
-      <JournalApercu groupes={apercu} disponible={!apercuRes.error} />
-      <SecretPick actif={secret.actif} compte={secret.compte} soirees={soireesSecretes} lisible={secret.lisible} />
-      <JournalEnvois entrees={journal} disponible={!journalRes.error} />
-      <PicksEnMasse aujourdhui={aujourdhuiNY()} />
-      <PushToggle />
-      <Cookies lignes={cookiesData ?? []} secretsPrets={secretsConfigures()} maintenantMs={maintenantMs} />
+      <section aria-labelledby="titre-rubriques">
+        <h2 id="titre-rubriques" className="section-label mb-2">
+          Rubriques
+        </h2>
+        <ul className="card overflow-hidden">
+          {rubriques.map((r) => (
+            <li key={r.href} className="list-row !p-0">
+              <Link href={r.href} className="flex w-full items-center gap-3 px-4 py-3 active:bg-fill/60">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-fill text-fg">
+                  <Icon name={r.icone} size={18} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[17px] text-fg">{r.titre}</span>
+                  <span className="block truncate text-[13px] text-fg-muted">{r.detail}</span>
+                </span>
+                <Icon name="chevron" size={16} className="shrink-0 text-fg-faint" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

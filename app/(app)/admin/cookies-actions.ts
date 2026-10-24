@@ -33,7 +33,7 @@ export async function renouvelerCookie(compte: string, cookieBrut: string): Prom
     .from("ttfl_commandes").select("id").eq("type", "cookies").in("statut", ["en_attente", "en_cours"]).limit(1);
   if (!actives || actives.length === 0) await supabase.from("ttfl_commandes").insert({ type: "cookies", params: {} });
 
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout"); // et ses sous-pages (Actions, Cookies, Secret…)
   return {
     ok: true,
     message: `Cookie du compte ${compte} enregistré sur GitHub. Vérification des connexions lancée (environ 2 min)${error ? " — mais la date n'a pas pu être notée." : "."}`,
