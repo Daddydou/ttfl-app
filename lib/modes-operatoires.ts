@@ -65,6 +65,26 @@ export const MODES: ModeOperatoire[] = [
     lien: { href: "/stars", libelle: "Voir les stars bloquées" },
     misAJour: "2026-10-24",
   },
+  {
+    id: "fourchette",
+    section: "comprendre",
+    titre: "Lire la fourchette « S’il joue »",
+    pourQuoi: "Comprendre ce que vaut vraiment la projection : ce n'est pas un score moyen attendu.",
+    quand: "Quand tu compares deux joueurs conseillés, ou que tu hésites entre un pari sûr et un joueur à gros plafond.",
+    etapes: [
+      "Sur chaque carte de l'onglet Conseillés, la ligne « S’il joue » donne trois chiffres : mauvais soir, soir moyen, bon soir.",
+      "Mauvais soir : 1 soir sur 10 fait moins que ce chiffre. Bon soir : 1 soir sur 10 fait plus. Soir moyen : la moyenne réelle.",
+      "La chance de faire 40 ou plus est aussi indiquée. Exemple : une projection de 42 donne en moyenne ≈ 34, avec ≈ 36 % de chances d'atteindre 40.",
+      "Ces chiffres ont été mesurés sur 4 saisons NBA (2022-23 à 2025-26) avec les scores TTFL réels.",
+    ],
+    attention: [
+      "La projection du moteur contient volontairement une part de « plafond » (le bon soir du joueur) : elle est plus haute que la moyenne réelle.",
+      "Les chiffres supposent que le joueur joue. S'il est absent, le score est 0 : c'est le rôle du contrôle de 23 h 30.",
+      "Affichage seulement : cela ne change ni le classement ni les picks. Pour recalibrer (début de saison suivante), relancer l'étude ttfl/recherche/etude_b14_fourchette.py et mettre à jour lib/fourchette.ts.",
+    ],
+    misAJour: "2026-10-24",
+  },
+
 
   // ── Chaque jour, chaque soir ───────────────────────────────────────────────────────────────────────────────
   {

@@ -2,6 +2,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { PickZoneButton } from "@/components/PickZoneButton";
 import { Icon } from "@/components/ui/Icon";
 import { fmtNum } from "@/lib/format";
+import { phraseFourchette } from "@/lib/fourchette";
 import type { Conseille } from "@/lib/conseilles";
 import type { Mode, TtflCotes } from "@/lib/types";
 
@@ -25,6 +26,7 @@ export function CarteConseille({
   const aDesCotes =
     !!cotes && (cotes.ligne_points != null || cotes.ligne_rebonds != null || cotes.ligne_passes != null);
   const premier = c.rang === 1;
+  const phrase = mode === "playoffs" ? null : phraseFourchette(c.projection); // calibrage mesuré en saison régulière
 
   return (
     <article className={`card p-4 ${premier ? "ring-2 ring-court-500/50" : ""}`}>
@@ -69,6 +71,12 @@ export function CarteConseille({
           </dd>
         </div>
       </dl>
+
+      {phrase && (
+        <p className="mt-3 text-[13px] text-fg-muted" title="Mesuré sur 4 saisons NBA, quand le joueur joue. La projection n'est pas une moyenne.">
+          <span className="font-medium text-fg">S’il joue :</span> {phrase}
+        </p>
+      )}
 
       {aDesCotes && cotes && (
         <p className="mt-3 text-[13px] text-fg-muted">
