@@ -196,6 +196,7 @@ export default async function DashboardPage() {
     const joueur = secretCeSoir ? null : joueurDuSoir(compte);
     return {
       label: `Cpt ${compte}`,
+      href: `/ce-soir?pour=c${compte}`,
       joueur,
       secret: secretCeSoir,
       pose: !!captureDuPick(captures, compte, aujourdhui, joueur),
@@ -221,7 +222,8 @@ export default async function DashboardPage() {
       <CeSoirCard
         titreDate={titreDate}
         lignes={[ligneCeSoir(COMPTE_REF), ligneCeSoir("02"), ligneCeSoir("13")]}
-        equipe={{ posees: equipePosees, total: COMPTES_EQUIPE.length }}
+        equipe={{ posees: equipePosees, total: COMPTES_EQUIPE.length, href: "/ce-soir?pour=equipe" }}
+        cloture={secret.lignes[aujourdhui]?.cloture ?? null}
         projection={mode === "regular" ? projectionC1 : null}
         fraicheur={
           run ? (
@@ -235,7 +237,7 @@ export default async function DashboardPage() {
       />
 
       {/* Bloc 2 — pick secret (révéler) puis les soirées suivantes ---- */}
-      <BandeauSecret etat={secret} dates={datesSecretes} />
+      <BandeauSecret etat={secret} dates={datesSecretes} discret />
       <PicksValidesCard
         titre="Prochains soirs"
         picks={picksValides.filter((p) => p.pick_date > aujourdhui)}

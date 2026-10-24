@@ -37,3 +37,13 @@ describe("carte Pourquoi ce pick", () => {
     expect(screen.getByText(/×1.10/)).toBeInTheDocument();
   });
 });
+
+describe("plafond absent (0)", () => {
+  it("un plafond à 0 est traité comme inconnu : pas d'écart, jamais l'atout", () => {
+    const c = comparerPicks({ ...A, ceiling: 42 }, { ...B, ceiling: 0 });
+    const plafond = c.lignes.find((l) => l.id === "plafond")!;
+    expect(plafond.b).toBeNull();
+    expect(plafond.ecart).toBeNull();
+    expect(c.atout?.id).not.toBe("plafond");
+  });
+});

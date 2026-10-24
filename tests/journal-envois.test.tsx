@@ -16,6 +16,6 @@ describe("JournalEnvois", () => {
       <JournalEnvois disponible entrees={[{ id: 1, le: "2026-10-11T09:00:00Z", pick_date: "2026-10-20", compte: "03", joueur: "Victor Wembanyama", statut: "confirme", message: null }]} />,
     );
     expect(screen.getByText(/Wembanyama/)).toBeTruthy();
-    expect(screen.getByText("confirme")).toBeTruthy();
+    expect(screen.getByText("Posé sur TTFL")).toBeTruthy();
   });
 });

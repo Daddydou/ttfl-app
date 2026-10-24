@@ -1,3 +1,5 @@
+import { libelleStatutEnvoi } from "@/lib/planning";
+
 export interface EntreeJournal {
   id: number;
   le: string;
@@ -14,6 +16,12 @@ const TON: Record<string, string> = {
   refuse: "text-out",
   conflit: "text-quest",
 };
+
+// Soirée « 2026-10-25 » → « dim. 25/10 » (même format de date que le reste de l'app).
+const jourCourt = (d: string) =>
+  new Date(`${d.slice(0, 10)}T00:00:00Z`).toLocaleDateString("fr-FR", {
+    weekday: "short", day: "2-digit", month: "2-digit", timeZone: "UTC",
+  });
 
 const quand = (iso: string) =>
   new Date(iso).toLocaleString("fr-FR", {
@@ -38,9 +46,14 @@ export function JournalEnvois({ entrees, disponible }: { entrees: EntreeJournal[
             <li key={e.id} className="px-4 py-2.5 text-[13px]">
               <div className="flex items-baseline justify-between gap-3">
                 <span className="font-semibold text-fg">
-                  {e.joueur ?? "—"} <span className="font-normal text-fg-muted">· compte {e.compte} · {e.pick_date}</span>
+                  {e.joueur ?? "—"}{" "}
+                  <span className="font-normal text-fg-muted">
+                    · compte {e.compte} · <span className="num">{jourCourt(e.pick_date)}</span>
+                  </span>
                 </span>
-                <span className={`shrink-0 font-semibold ${TON[e.statut ?? ""] ?? "text-fg-muted"}`}>{e.statut ?? "—"}</span>
+                <span className={`shrink-0 font-semibold ${TON[e.statut ?? ""] ?? "text-fg-muted"}`}>
+                  {libelleStatutEnvoi(e.statut)}
+                </span>
               </div>
               <div className="mt-0.5 text-fg-muted">
                 {quand(e.le)}

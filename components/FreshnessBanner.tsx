@@ -57,14 +57,23 @@ export function FreshnessBanner({
         <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${t.dot}`} />
       </span>
       <div className={`flex-1 text-[14px] font-medium ${t.text}`}>
-        Calculé {f.label}
-        <span className="text-fg/40"> · </span>
         {f.tone === "waiting" ? (
-          <span>prochain calcul dès {DEBUT_CALCUL_SOIR} h</span>
-        ) : injuryFresh ? (
-          <span>injury report frais</span>
+          // Avant 16 h, l'âge brut (« il y a 18 h ») se lisait comme « périmé » : on dit de quoi il s'agit.
+          <>
+            {f.minutes <= 26 * 60 ? "Classement d'hier soir" : `Dernier calcul ${f.label}`}
+            <span className="text-fg/40"> · </span>
+            <span>prochain calcul à {DEBUT_CALCUL_SOIR} h</span>
+          </>
         ) : (
-          <span className="font-semibold">report non rafraîchi</span>
+          <>
+            Calculé {f.label}
+            <span className="text-fg/40"> · </span>
+            {injuryFresh ? (
+              <span>blessures à jour</span>
+            ) : (
+              <span className="font-semibold">blessures non rafraîchies</span>
+            )}
+          </>
         )}
       </div>
     </div>

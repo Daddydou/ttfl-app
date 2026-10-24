@@ -41,7 +41,7 @@ export function PourquoiPick({ n1, n2 }: { n1: ChiffresJoueur; n2: ChiffresJoueu
         <div className="flex items-baseline justify-between text-[13px]">
           <span className="font-medium text-fg">Matchup</span>
           <span className="text-fg-muted">
-            ×{fmtNum(matchup.a, 2)} <span className="text-fg-faint">contre</span> ×{fmtNum(matchup.b, 2)}
+            ×{fmtNum(matchup.a, 2)} <span className="text-fg-muted">contre</span> ×{fmtNum(matchup.b, 2)}
           </span>
         </div>
       </div>

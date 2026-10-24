@@ -6,7 +6,16 @@ import { revelerSoiree } from "@/app/(app)/secret/actions";
 
 // « Révéler maintenant » : force la révélation du pick du compte secret pour une soirée. Deux clics (le second
 // confirme), pour qu'un geste malheureux au pouce ne gâche pas le secret.
-export function RevelerBouton({ soiree, libelle = "Révéler maintenant" }: { soiree: string; libelle?: string }) {
+// `discret` : bouton gris (Accueil), pour ne pas tenter le pouce juste avant le lock.
+export function RevelerBouton({
+  soiree,
+  libelle = "Révéler maintenant",
+  discret = false,
+}: {
+  soiree: string;
+  libelle?: string;
+  discret?: boolean;
+}) {
   const router = useRouter();
   const [arme, setArme] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -25,7 +34,7 @@ export function RevelerBouton({ soiree, libelle = "Révéler maintenant" }: { so
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       {!arme ? (
-        <button type="button" onClick={() => setArme(true)} className="btn btn-secondary btn-sm">
+        <button type="button" onClick={() => setArme(true)} className={`btn btn-sm ${discret ? "btn-plain" : "btn-secondary"}`}>
           {libelle}
         </button>
       ) : (

@@ -3,6 +3,7 @@ import { PickZoneButton } from "@/components/PickZoneButton";
 import { Icon } from "@/components/ui/Icon";
 import { fmtNum, nb } from "@/lib/format";
 import { phraseFourchette } from "@/lib/fourchette";
+import { plafondConnu } from "@/lib/pourquoi";
 import type { Conseille } from "@/lib/conseilles";
 import type { Mode, TtflCotes } from "@/lib/types";
 
@@ -58,7 +59,7 @@ export function CarteConseille({
 
       <dl className="mt-4 grid grid-cols-4 gap-2 text-center">
         <Stat label="forme" valeur={fmtNum(c.forme)} />
-        <Stat label="plafond" valeur={fmtNum(c.ceiling)} />
+        <Stat label="plafond" valeur={fmtNum(plafondConnu(c.ceiling))} />
         <Stat label="matchup" valeur={`×${fmtNum(c.matchup_factor, 2)}`} />
         <div className="rounded-[12px] bg-surface-2 px-1 py-2">
           <dt className="text-[11px] font-medium uppercase tracking-[0.05em] text-fg-muted">statut</dt>

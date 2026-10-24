@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Semaine } from "@/lib/semaine";
 import { frDate } from "@/lib/format";
+import { libelleStatutEnvoi } from "@/lib/planning";
 
 // « Jayson Tatum » → « J. Tatum » ; les suffixes (Jr., III…) restent avec le nom.
 export function nomCourt(nom: string): string {
@@ -21,7 +22,7 @@ const COULEUR_STATUT: Record<string, string> = {
 export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
   return (
     <div className="space-y-4">
-      <div className="card overflow-x-auto" role="region" aria-label="Grille des picks de l'équipe" tabIndex={0}>
+      <div className="card rail overflow-x-auto" role="region" aria-label="Grille des picks de l'équipe" tabIndex={0}>
         <table className="w-full min-w-[640px] border-collapse text-[12px]">
           <thead>
             <tr className="text-fg-muted">
@@ -50,20 +51,22 @@ export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
                           {c.statut && (
                             <span
                               className={`h-1.5 w-1.5 shrink-0 rounded-full ${COULEUR_STATUT[c.statut] ?? "bg-fg-faint"}`}
-                              aria-label={c.statut}
+                              role="img"
+                              aria-label={libelleStatutEnvoi(c.statut)}
+                              title={libelleStatutEnvoi(c.statut)}
                             />
                           )}
                           {nomCourt(c.joueur)}
                         </span>
                         {c.auto && (
                           <span
-                            className="mt-0.5 inline-block rounded-full bg-quest/15 px-1.5 text-[10px] font-semibold text-quest"
-                            title="Auto-remplissage : posé par le robot, pas validé par toi"
+                            className="mt-0.5 inline-block rounded-full bg-fill px-1.5 text-[11px] font-semibold text-fg-muted"
+                            title="Choisi par le robot"
                           >
                             auto
                           </span>
                         )}
-                        {c.cycle && <span className="block text-[10px]">cycle ≤ 30 j</span>}
+                        {c.cycle && <span className="block text-[11px]">cycle ≤ 30 j</span>}
                       </div>
                     ) : (
                       <span className="text-fg-faint">—</span>
@@ -77,8 +80,9 @@ export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
       </div>
 
       <p className="px-1 text-[12px] text-fg-muted">
-        <span className="rounded-full bg-quest/15 px-1.5 text-[10px] font-semibold text-quest">auto</span> = posé par le
-        robot (case vide remplie à 23 h 30, joueur indisponible remplacé, ou pick automatique) : pas validé par toi.
+        <span className="rounded-full bg-fill px-1.5 text-[11px] font-semibold text-fg-muted">auto</span> = choisi par le
+        robot (case vide remplie à 23 h 30, joueur indisponible remplacé, ou pick automatique), pas par toi. Point vert :
+        posé sur TTFL ; jaune : en cours d&apos;envoi ; rouge : conflit ou échec.
         Tu peux le changer jusqu&apos;à la clôture de la soirée (début du premier match, au plus tard minuit).
       </p>
 

@@ -322,9 +322,11 @@ function PlanningVue({
                 </p>
               )}
               {n.envoi.detail && <p className="mt-1 text-[13px] text-out">{n.envoi.detail}</p>}
+              {/* Qui a choisi : une information neutre, pas un avertissement (l'état d'envoi est dans le badge). */}
               {n.autos.length > 0 && (
-                <p className="mt-1 text-[13px] font-medium text-quest">
-                  Auto-remplissage, pas validé par toi : {n.autos.length > 1 ? "comptes" : "compte"} {n.autos.join(", ")}
+                <p className="mt-1 text-[13px] text-fg-muted">
+                  Choisi par le robot ({n.autos.length > 1 ? "comptes" : "compte"} {n.autos.join(", ")}) : « Changer » pour
+                  imposer le tien.
                 </p>
               )}
 

@@ -190,6 +190,18 @@ export interface EnvoiLigne {
 
 export type EtatEnvoi = "aucun" | "a_envoyer" | "pose" | "partiel" | "conflit" | "echec";
 
+// Vocabulaire UNIQUE de l'état d'un envoi sur le site TTFL (statut de ttfl_envois), partout dans l'app.
+// « Qui a choisi » (robot ou toi) est une autre information, jamais mélangée à celle-ci.
+export const LIBELLES_STATUT_ENVOI: Record<string, string> = {
+  confirme: "Posé sur TTFL",
+  propose: "En cours d'envoi",
+  conflit: "Conflit",
+  echec: "Échec d'envoi",
+  refuse: "Échec d'envoi",
+};
+export const libelleStatutEnvoi = (statut: string | null): string =>
+  statut ? (LIBELLES_STATUT_ENVOI[statut] ?? statut) : "—";
+
 export interface ResumeEnvoi {
   etat: EtatEnvoi;
   label: string;

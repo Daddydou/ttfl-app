@@ -33,11 +33,14 @@ const ligne = (id: LigneComparaison["id"], libelle: string, a: number | null, b:
 const pct = (x: number) => `${x >= 0 ? "+" : "−"}${Math.round(Math.abs(x) * 100)} %`;
 const pts = (x: number) => `${x >= 0 ? "+" : "−"}${Math.abs(x).toFixed(1).replace(".", ",")} pts`;
 
+// Un plafond à 0 n'est pas une mesure (aucun joueur qui joue n'a 0 pour meilleur soir) : c'est une donnée absente.
+export const plafondConnu = (c: number | null): number | null => (c !== null && c > 0 ? c : null);
+
 export function comparerPicks(n1: ChiffresJoueur, n2: ChiffresJoueur): Comparaison {
   const lignes = [
     ligne("projection", "Projection", n1.projection, n2.projection),
     ligne("forme", "Forme récente", n1.forme, n2.forme),
-    ligne("plafond", "Plafond", n1.ceiling, n2.ceiling),
+    ligne("plafond", "Plafond", plafondConnu(n1.ceiling), plafondConnu(n2.ceiling)),
     ligne("matchup", "Matchup", n1.matchup_factor, n2.matchup_factor),
   ];
   const causes = lignes.filter((l) => l.id !== "projection" && l.relatif !== null);
