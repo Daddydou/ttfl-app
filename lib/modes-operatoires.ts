@@ -54,7 +54,7 @@ export const MODES: ModeOperatoire[] = [
     pourQuoi: "Savoir quel compte est piloté comment (pick automatique, formule, équipe).",
     quand: "Quand tu te demandes pourquoi un compte a (ou n'a pas) un pick.",
     etapes: [
-      "Compte 01 (principal) : pas de pick automatique le jour J, sauf pré-pick intact. Le contrôle de 23 h 30 met le meilleur joueur conseillé en bonne santé.",
+      "Compte 01 (principal) : ton choix à la main n'est jamais changé, sauf si ton joueur devient Out, Doubtful ou absent : le contrôle d'avant-clôture (ou de 23 h 30) met alors le meilleur joueur conseillé en bonne santé, pour ne pas faire 0. Il remplit aussi une case vide. Un pré-pick que tu n'as pas touché est remplacé le jour même par le n°1 de ton Plan 30.",
       "Compte 02 : pick automatique = n°1 du Plan 30, formule Prudente, avec pick secret (voir « Le pick secret »).",
       "Compte 13 : pick automatique = n°1 du Plan 30, formule Ambitieuse.",
       "Comptes 03 à 12 (équipe) : cases vides remplies dès 18 h avec les 2-3 premiers joueurs conseillés, 6 comptes au maximum par joueur.",
@@ -63,7 +63,7 @@ export const MODES: ModeOperatoire[] = [
     ],
     attention: ["Un joueur pické ne peut plus l'être pendant 30 jours sur le même compte (page Stats > Stars)."],
     lien: { href: "/stars", libelle: "Voir les stars bloquées" },
-    misAJour: "2026-10-23",
+    misAJour: "2026-10-24",
   },
 
   // ── Chaque jour, chaque soir ───────────────────────────────────────────────────────────────────────────────
@@ -97,10 +97,11 @@ export const MODES: ModeOperatoire[] = [
       "Si un pick manque ou paraît faux, ouvre Admin et regarde le Journal des envois (statut de chaque compte).",
       "Pour renvoyer tes picks sur le site : Admin > Actions > Synchronisation avec TTFL > « Envoyer mes picks sur le site TTFL ».",
       "Attends 2 à 5 minutes puis regarde l'historique des commandes (statut « Terminée »).",
+      "Le lendemain : « Mes picks » > Historique montre les points de chaque compte (choisis le compte en haut), remplis automatiquement vers 9 h 45.",
     ],
     attention: ["Si l'envoi est en « Échec », regarde d'abord que les connexions TTFL sont valides (voir « Renouveler les cookies »)."],
     lien: { href: "/picks", libelle: "Ouvrir Mes picks" },
-    misAJour: "2026-10-23",
+    misAJour: "2026-10-24",
   },
   {
     id: "controle-2330",
@@ -109,13 +110,13 @@ export const MODES: ModeOperatoire[] = [
     pourQuoi: "Remplacer automatiquement un joueur blessé ou absent et remplir les cases vides, pour les 13 comptes.",
     quand: "Il part tout seul en fin de soirée ; tu ne le lances à la main que si tu as un doute.",
     etapes: [
-      "Rien à faire en temps normal : le cloud le lance vers 23 h 28 et 23 h 48.",
+      "Rien à faire en temps normal : le cloud le lance 30 min avant la clôture (si elle est avant 23 h), puis vers 23 h 28 et 23 h 48. Après la clôture, il ne peut plus rien remplacer : il vérifie seulement.",
       "Pour le lancer toi-même : Admin > Actions > Synchronisation avec TTFL > « Lancer le contrôle de 23 h 30 maintenant ».",
       "Ensuite, regarde Admin > Journal : tu y vois ce qui a été remplacé et pourquoi.",
     ],
     attention: ["Un pick que tu as choisi à la main est remplacé seulement s'il devient Out, Doubtful ou absent."],
     lien: { href: "/admin", libelle: "Ouvrir Admin" },
-    misAJour: "2026-10-23",
+    misAJour: "2026-10-24",
   },
   {
     id: "pick-secret",
@@ -145,12 +146,12 @@ export const MODES: ModeOperatoire[] = [
     etapes: [
       "Ouvre l'onglet Vainqueurs et repère le match.",
       "Modifie le vainqueur et enregistre.",
-      "Le message « Envoi chez Thomas en cours » s'affiche : ton choix part dans l'application de Thomas en 2 à 4 minutes.",
-      "Quand le message disparaît, c'est parti. En cas de doute, regarde le Journal dans Admin.",
+      "Le message « Envoi chez Thomas en cours » s'affiche : ton choix arrive dans l'application de Thomas en 3 minutes environ (mesuré le 23/10 : 2 min 45 s), jusqu'à 6-7 minutes si le moteur cloud est déjà en train de tourner.",
+      "Quand « ✓ Validé chez Thomas » s'affiche, c'est enregistré chez lui. En cas de doute, regarde le Journal dans Admin.",
     ],
     attention: ["Chaque match se ferme à son coup d'envoi : modifie ton choix avant, l'envoi se fait match par match."],
     lien: { href: "/vainqueurs", libelle: "Ouvrir Vainqueurs" },
-    misAJour: "2026-10-23",
+    misAJour: "2026-10-24",
   },
 
   // ── Surveillance et alertes ────────────────────────────────────────────────────────────────────────────────

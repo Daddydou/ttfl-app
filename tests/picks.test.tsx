@@ -17,9 +17,9 @@ function pick(p: Partial<TtflPick>): TtflPick {
   };
 }
 
-async function renderPage(mode: string, picks: TtflPick[]) {
+async function renderPage(mode: string, picks: TtflPick[], compte?: string) {
   createClient.mockResolvedValue(fakeSupabase({ ttfl_picks: picks, ttfl_runs: [] }));
-  render(await PicksPage({ searchParams: Promise.resolve({ mode, vue: "historique" }) }));
+  render(await PicksPage({ searchParams: Promise.resolve({ mode, vue: "historique", compte }) }));
 }
 
 // Tuile de stat (valeur + libellé) à partir de son libellé.
@@ -53,5 +53,26 @@ describe("Page « Mes picks » (historique)", () => {
   it("affiche le compteur d'usage unique en playoffs", async () => {
     await renderPage("playoffs", [pick({ id: 1, mode: "playoffs", player: "Jayson Tatum" })]);
     expect(screen.getByText("Usage unique")).toBeInTheDocument();
+  });
+
+  it("montre les 13 comptes avec leurs points et l'historique du compte choisi", async () => {
+    await renderPage("regular", [
+      pick({ id: 1, player: "Jayson Tatum", score: 50 }),
+      pick({ id: 2, compte: "13", player: "Kawhi Leonard", score: 15 }),
+      pick({ id: 3, compte: "13", player: "Nikola Jokić", score: 11, pick_date: "2026-03-09" }),
+    ], "13");
+    const choix = screen.getByLabelText("Choisir un compte");
+    expect(within(choix).getAllByRole("link")).toHaveLength(13);
+    expect(within(choix).getByText("26 pts")).toBeInTheDocument();     // compte 13
+    expect(within(choix).getByText("50 pts")).toBeInTheDocument();     // compte 01
+    expect(screen.getByText("Kawhi Leonard")).toBeInTheDocument();
+    expect(screen.queryByText("Jayson Tatum")).not.toBeInTheDocument();
+    expect(within(stat("Total")).getByText("26")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Supprimer le pick Kawhi Leonard")).not.toBeInTheDocument();   // suppression : compte 01 seulement
+  });
+
+  it("revient au compte 01 si le compte demandé n'existe pas", async () => {
+    await renderPage("regular", [pick({ id: 1, player: "Jayson Tatum", score: 50 })], "99");
+    expect(screen.getByText("Jayson Tatum")).toBeInTheDocument();
   });
 });

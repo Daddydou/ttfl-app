@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { COMPTE_REF } from "@/lib/compte";
+import { compteValide, resumerComptes, type ResumeCompte } from "@/lib/historique";
 import { ScoreInput } from "@/components/ScoreInput";
 import { ModeTabs } from "@/components/ModeTabs";
 import { DeletePickButton } from "@/components/DeletePickButton";
@@ -157,17 +158,27 @@ async function chargerPlanning(
   return { zone, mois, moisCourant, nuits: nuitsDuMois, erreur };
 }
 
-// --- Chargement : historique (compte 1) -------------------------------------------
+// --- Chargement : historique (les 13 comptes) ----------------------------------------
 
+// Tous les picks du mode, tous comptes (par pages de 1 000 : Supabase tronque au-delà), sans les soirées encore
+// secrètes du compte 02.
 async function chargerHistorique(supabase: Supabase, mode: Mode): Promise<TtflPick[]> {
-  const { data: picks } = await supabase
-    .from("ttfl_picks")
-    .select("*")
-    .eq("mode", mode)
-    .eq("compte", COMPTE_REF)
-    .order("pick_date", { ascending: false })
-    .returns<TtflPick[]>();
-  return picks ?? [];
+  const tous: TtflPick[] = [];
+  for (let a = 0; ; a += 1000) {
+    const { data } = await supabase
+      .from("ttfl_picks")
+      .select("*")
+      .eq("mode", mode)
+      .order("pick_date", { ascending: false })
+      .range(a, a + 999)
+      .returns<TtflPick[]>();
+    const lot = data ?? [];
+    tous.push(...lot);
+    if (lot.length < 1000) break;
+  }
+  const aujourdhui = aujourdhuiNY();
+  const secret = await chargerSecret(supabase, aujourdhui);
+  return masquerLignes(tous, secret, aujourdhui, heureServeur());
 }
 
 // --- Page --------------------------------------------------------------------------
@@ -175,9 +186,9 @@ async function chargerHistorique(supabase: Supabase, mode: Mode): Promise<TtflPi
 export default async function PicksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; vue?: string; zone?: string; mois?: string }>;
+  searchParams: Promise<{ mode?: string; vue?: string; zone?: string; mois?: string; compte?: string }>;
 }) {
-  const { mode: explicitMode, vue: vueParam, zone: zoneParam, mois: moisParam } = await searchParams;
+  const { mode: explicitMode, vue: vueParam, zone: zoneParam, mois: moisParam, compte: compteParam } = await searchParams;
   const mode = await resolveMode(explicitMode);
   const supabase = await createClient();
 
@@ -201,14 +212,17 @@ export default async function PicksPage({
     );
   }
 
-  const rows = await chargerHistorique(supabase, mode);
+  const tous = await chargerHistorique(supabase, mode);
+  const compte = compteValide(compteParam);
+  const rows = tous.filter((p) => p.compte === compte);
   const params: ParamsPicks = { mode, vue, zone: zoneDe(zoneParam).id };
   return (
     <div className="space-y-4">
-      <PageHeader titre="Mes picks" sousTitre="Historique du compte 1" />
+      <PageHeader titre="Mes picks" sousTitre="Historique et points de tes 13 comptes" />
       <ModeTabs base="/picks" current={mode} />
       {mode === "regular" && <VueTabs courant={params} />}
-      <HistoriqueVue rows={rows} mode={mode} />
+      <ChoixCompte resume={resumerComptes(tous)} courant={compte} mode={mode} />
+      <HistoriqueVue rows={rows} mode={mode} compte={compte} />
     </div>
   );
 }
@@ -358,9 +372,33 @@ function PlanningVue({
   );
 }
 
-// --- Vue historique (compte 1) -----------------------------------------------------
+// --- Vue historique (un compte au choix) ----------------------------------------------
 
-function HistoriqueVue({ rows, mode }: { rows: TtflPick[]; mode: Mode }) {
+// Les 13 comptes avec leur total : touche un compte pour voir ses picks et ses points.
+function ChoixCompte({ resume, courant, mode }: { resume: ResumeCompte[]; courant: string; mode: Mode }) {
+  return (
+    <div className="grid grid-cols-5 gap-1.5" aria-label="Choisir un compte">
+      {resume.map((r) => {
+        const actif = r.compte === courant;
+        return (
+          <Link
+            key={r.compte}
+            href={`/picks?mode=${mode}&vue=historique&compte=${r.compte}`}
+            aria-current={actif ? "page" : undefined}
+            className={`rounded-[12px] px-1 py-1.5 text-center ${actif ? "bg-court-500 text-white" : "bg-surface-2 text-fg"}`}
+          >
+            <div className="text-[13px] font-bold tabular-nums">{r.compte}</div>
+            <div className={`text-[11px] tabular-nums ${actif ? "text-white/90" : "text-fg-muted"}`}>
+              {r.notes ? `${r.total} pts` : "—"}
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function HistoriqueVue({ rows, mode, compte }: { rows: TtflPick[]; mode: Mode; compte: string }) {
   const scored = rows.filter((p) => p.score !== null);
   const total = scored.reduce((s, p) => s + (p.score ?? 0), 0);
   const avg = scored.length ? total / scored.length : null;
@@ -389,8 +427,8 @@ function HistoriqueVue({ rows, mode }: { rows: TtflPick[]; mode: Mode }) {
       {rows.length === 0 ? (
         <div className="card px-4 py-10 text-center">
           <p className="text-sm text-fg-muted">
-            Aucun pick en {mode === "playoffs" ? "playoffs" : "saison régulière"} pour
-            l&apos;instant.
+            Aucun pick en {mode === "playoffs" ? "playoffs" : "saison régulière"} pour le compte {compte}
+            pour l&apos;instant.
           </p>
         </div>
       ) : (
@@ -405,15 +443,16 @@ function HistoriqueVue({ rows, mode }: { rows: TtflPick[]; mode: Mode }) {
                 <div className="text-[13px] text-fg-muted">{frDate(p.pick_date)}</div>
               </div>
               <ScoreInput pickId={p.id} score={p.score} />
-              <DeletePickButton pickId={p.id} player={p.player} />
+              {compte === COMPTE_REF && <DeletePickButton pickId={p.id} player={p.player} />}
             </div>
           ))}
         </div>
       )}
 
       <p className="px-1 text-[13px] text-fg-muted">
-        Historique du compte 1. Saisis le score réel après la soirée : touche le champ, tape le
-        total TTFL, valide. Il alimente tes stats et confirme le blocage du joueur.
+        Historique du compte {compte}. Les points sont remplis automatiquement chaque matin (vers 9 h 45) : score TTFL
+        réel du joueur, 0 s&apos;il n&apos;a pas joué ; le bonus x2 n&apos;est pas compté. Pour corriger un score :
+        touche le champ, tape le total TTFL, valide.
       </p>
     </>
   );
