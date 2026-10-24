@@ -122,6 +122,7 @@ export function CarteConseille({
           comptes={c.comptesLibres}
           zoneLabel={zoneLabel}
           dejaPicke={picke}
+          variante={premier ? "primary" : "plain"}
         />
       </div>
     </article>

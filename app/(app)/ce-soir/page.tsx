@@ -11,6 +11,7 @@ import { chargerSoiree } from "@/lib/conseilles-data";
 import { zoneMemorisee } from "@/lib/zone-memo";
 import { captureDuPick, chargerCaptures } from "@/lib/captures";
 import { PickDuSoirResume } from "@/components/PickDuSoirResume";
+import { PickZoneButton } from "@/components/PickZoneButton";
 import { BandeauSecret } from "@/components/BandeauSecret";
 import { RevelerBouton } from "@/components/RevelerBouton";
 import { chargerSecret, heureCloture, masquerLignes, soireeSecrete, soireesSecretes } from "@/lib/secret";
@@ -39,6 +40,8 @@ import type { Mode, TtflManualAbsent, TtflRun } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Picks conseillés — TTFL" };
+
+const VISIBLES = 3; // cartes dépliées d'emblée ; les suivantes sont repliées
 
 const RAISONS: Record<Masque["raison"], string> = {
   cycle: "déjà pické à ≤ 30 jours",
@@ -167,6 +170,17 @@ export default async function PicksConseillesPage({
     : null;
   const ligneDe = (joueur: string) => lignes.find((l) => normaliserNom(l.player) === normaliserNom(joueur));
   const etiquette = etiquetteJour(date, aujourdhui);
+  const carte = (c: (typeof conseilles)[number]) => (
+    <CarteConseille
+      key={c.player}
+      c={c}
+      mode={mode}
+      date={date}
+      zoneLabel={zone.label}
+      cotes={cotesParJoueur.get(c.player)}
+      picke={pickeSurTous(c.player, c.comptesLibres)}
+    />
+  );
 
   return (
     <div className="space-y-4">
@@ -203,6 +217,23 @@ export default async function PicksConseillesPage({
           projectionPick={pickResume ? (ligneDe(pickResume)?.projection ?? null) : null}
           pose={!!captureDuPick(captures, compteResume, date, pickResume)}
           n1={conseilles[0] ? { player: conseilles[0].player, projection: conseilles[0].projection } : null}
+          action={
+            // Une seule grande action, en tête : poser le n° 1 (s'il diffère du pick et reste libre pour ce compte).
+            conseilles[0] &&
+            conseilles[0].player !== pickResume &&
+            conseilles[0].comptesLibres.includes(compteResume) ? (
+              <PickZoneButton
+                mode={mode}
+                date={date}
+                player={conseilles[0].player}
+                comptes={[compteResume]}
+                zoneLabel={zone.label}
+                dejaPicke={false}
+                variante="large"
+                libelle={pickResume ? `Prendre ${conseilles[0].player} à la place` : `Picker ${conseilles[0].player}`}
+              />
+            ) : undefined
+          }
         />
       )}
 
@@ -268,17 +299,17 @@ export default async function PicksConseillesPage({
       ) : (
         <div className="space-y-3">
           {conseilles.length >= 2 && <PourquoiPick n1={conseilles[0]} n2={conseilles[1]} />}
-          {conseilles.map((c) => (
-            <CarteConseille
-              key={c.player}
-              c={c}
-              mode={mode}
-              date={date}
-              zoneLabel={zone.label}
-              cotes={cotesParJoueur.get(c.player)}
-              picke={pickeSurTous(c.player, c.comptesLibres)}
-            />
-          ))}
+          {conseilles.slice(0, VISIBLES).map(carte)}
+          {/* Au-delà du n° 3 : replié (une recommandation, ses suivants proches, puis le reste à la demande). */}
+          {conseilles.length > VISIBLES && (
+            <details className="group space-y-3">
+              <summary className="btn btn-plain w-full cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <span className="group-open:hidden">Voir les {conseilles.length - VISIBLES} suivants</span>
+                <span className="hidden group-open:inline">Masquer les suivants</span>
+              </summary>
+              <div className="mt-3 space-y-3">{conseilles.slice(VISIBLES).map(carte)}</div>
+            </details>
+          )}
         </div>
       )}
 

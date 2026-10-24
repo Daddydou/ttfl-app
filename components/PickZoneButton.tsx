@@ -16,6 +16,8 @@ export function PickZoneButton({
   comptes,
   zoneLabel,
   dejaPicke,
+  libelle = "Picker",
+  variante = "plain",
 }: {
   mode: Mode;
   date: string;
@@ -23,6 +25,9 @@ export function PickZoneButton({
   comptes: string[]; // comptes sur lesquels il est encore disponible
   zoneLabel: string;
   dejaPicke: boolean; // déjà pické sur tous ces comptes pour cette soirée
+  libelle?: string;
+  // « large » : action principale pleine largeur (résumé en tête de Conseillés) ; « primary » : n° 1 ; « plain » : les autres.
+  variante?: "large" | "primary" | "plain";
 }) {
   const router = useRouter();
   const [confirmer, setConfirmer] = useState(false);
@@ -50,9 +55,11 @@ export function PickZoneButton({
     <>
       <button
         onClick={() => setConfirmer(true)}
-        className="btn btn-primary btn-sm"
+        className={
+          variante === "large" ? "btn btn-primary w-full" : variante === "primary" ? "btn btn-primary btn-sm" : "btn btn-plain btn-sm"
+        }
       >
-        Picker
+        {libelle}
       </button>
       {confirmer && (
         <div

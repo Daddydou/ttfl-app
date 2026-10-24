@@ -315,6 +315,7 @@ function DetailJour({
           comptes={[compte]}
           zoneLabel={zoneLabel}
           dejaPicke={jour.statut === "valide"}
+          variante="primary"
         />
       </div>
 

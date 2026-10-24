@@ -34,6 +34,7 @@ export function AlertesPicks({ alertes, mode, date }: { alertes: AlertePick[]; m
                   comptes={a.comptes}
                   zoneLabel={a.zoneLabel}
                   dejaPicke={false}
+                  variante="primary"
                 />
               </div>
             ) : (

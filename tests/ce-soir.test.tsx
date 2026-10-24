@@ -75,6 +75,11 @@ describe("Picks conseillés", () => {
     const resume = screen.getByRole("region", { name: /· Compte 1$/ });
     expect(within(resume).getByText("Pas encore de pick pour cette soirée.")).toBeInTheDocument();
     expect(within(resume).getByText("Joueur 1")).toBeInTheDocument();
+    // Une seule grande action en tête ; le n° 1 garde son bouton orange, les autres cartes un bouton gris.
+    expect(within(resume).getByRole("button", { name: "Picker Joueur 1" })).toHaveClass("btn-primary", "w-full");
+    const cartes = screen.getAllByRole("article");
+    expect(within(cartes[0]).getByRole("button", { name: "Picker" })).toHaveClass("btn-primary");
+    expect(within(cartes[1]).getByRole("button", { name: "Picker" })).toHaveClass("btn-plain");
     expect(screen.queryByText("Joueur 11")).not.toBeInTheDocument();
     // Stats détaillées visibles d'emblée (aucun dépli) : forme, plafond, matchup
     for (const carte of screen.getAllByRole("article")) {

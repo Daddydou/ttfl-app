@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { fmtNum } from "@/lib/format";
 
@@ -9,12 +10,14 @@ export function PickDuSoirResume({
   projectionPick,
   pose,
   n1,
+  action,
 }: {
   titre: string; // « Ce soir · Compte 1 »
   pick: string | null; // joueur posé (null = pas encore de pick)
   projectionPick: number | null;
   pose: boolean; // case TTFL confirmée (capture reçue)
   n1: { player: string; projection: number | null } | null; // n° 1 du classement pour cette zone
+  action?: ReactNode; // bouton « Picker X » (absent si le n° 1 est déjà posé ou indisponible pour ce compte)
 }) {
   const memeJoueur = !!pick && !!n1 && n1.player === pick;
   const ecart = pick && n1 && !memeJoueur && n1.projection != null && projectionPick != null ? n1.projection - projectionPick : null;
@@ -57,7 +60,7 @@ export function PickDuSoirResume({
                   {fmtNum(ecart)} pts de projection)
                 </span>
               )}
-              . Pour changer, utilise le bouton de sa carte ci-dessous.
+              .
             </>
           ) : (
             <>
@@ -66,6 +69,8 @@ export function PickDuSoirResume({
           )}
         </p>
       )}
+
+      {action && <div className="mt-3">{action}</div>}
     </section>
   );
 }
