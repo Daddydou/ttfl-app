@@ -83,7 +83,7 @@ export default async function PicksConseillesPage({
   const avecPlan = zone.id === "c01" || zone.id === "c02" || zone.id === "c13";
   const compteAuto = zone.id === "c02" || zone.id === "c13"; // comptes gérés par le robot (verrou « validé à la main »)
 
-  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes, secret] = await Promise.all([
+  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes, secret, capturesBrutes] = await Promise.all([
     chargerSoiree(supabase, mode, date),
     supabase
       .from("ttfl_picks")
@@ -114,12 +114,13 @@ export default async function PicksConseillesPage({
           .returns<LigneSuivi[]>()
       : Promise.resolve({ data: [] as LigneSuivi[], error: null }),
     chargerSecret(supabase, aujourdhui),
+    avecPlan ? chargerCaptures(supabase) : Promise.resolve([] as Awaited<ReturnType<typeof chargerCaptures>>),
   ]);
   const nowMs = maintenantMs();
   // Pick secret du compte 02 : tout ce qui trahirait son joueur (picks, cycle, plan, verrous, suivi, captures) est
   // retiré tant que la soirée n'est ni close, ni révélée (lib/secret.ts).
   const estSecret = (compte: string, d: string) => soireeSecrete(secret, compte, d, aujourdhui, nowMs);
-  const captures = avecPlan ? masquerLignes(await chargerCaptures(supabase), secret, aujourdhui, nowMs) : [];
+  const captures = avecPlan ? masquerLignes(capturesBrutes, secret, aujourdhui, nowMs) : [];
   const verrous = Object.fromEntries(
     (verrousRes.data ?? [])
       .filter((v) => !estSecret(zone.comptes[0], String(v.pick_date).slice(0, 10)))

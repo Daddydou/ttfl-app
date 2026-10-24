@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
@@ -9,14 +10,12 @@ import { modeLabel } from "@/lib/format";
 import { signOut } from "@/app/login/actions";
 import type { Mode } from "@/lib/types";
 
-export default async function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// Badge du mode (Saison régulière / Playoffs) : lu à part pour que l'en-tête et la page s'affichent tout de suite
+// (la requête n'est plus sur le chemin de l'affichage ; un emplacement vide le remplace pendant la lecture).
+async function ModeBadge() {
   const supabase = await createClient();
 
-  // Mode du dernier run, tous modes confondus : sert le badge de l'en-tête.
+  // Mode du dernier run, tous modes confondus.
   const { data: lastRun } = await supabase
     .from("ttfl_latest_run")
     .select("mode")
@@ -26,6 +25,22 @@ export default async function AppLayout({
 
   const mode = (lastRun?.mode as Mode) ?? "regular";
 
+  return (
+    <span
+      className={`rounded-full px-2.5 py-1 text-[13px] font-semibold ${
+        mode === "playoffs" ? "bg-court-500/15 text-court-400" : "bg-fill text-fg-muted"
+      }`}
+    >
+      {modeLabel(mode)}
+    </span>
+  );
+}
+
+export default function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
       <header className="pt-safe glass sticky top-0 z-30 border-x-0 border-t-0">
@@ -38,13 +53,9 @@ export default async function AppLayout({
           </Link>
           <div className="flex items-center gap-3">
             <NotifyToggle />
-            <span
-              className={`rounded-full px-2.5 py-1 text-[13px] font-semibold ${
-                mode === "playoffs" ? "bg-court-500/15 text-court-400" : "bg-fill text-fg-muted"
-              }`}
-            >
-              {modeLabel(mode)}
-            </span>
+            <Suspense fallback={<span className="inline-block h-[26px] w-[88px] rounded-full bg-fill" aria-hidden="true" />}>
+              <ModeBadge />
+            </Suspense>
             <form action={signOut}>
               <button
                 type="submit"

@@ -37,7 +37,7 @@ export default async function DashboardPage() {
   const aujourdhui = aujourdhuiNY(); // une soirée NBA se date à New York
 
   // --- Ce qui doit peindre en premier : le run + les alertes qui en dépendent.
-  const [{ data: run }, { data: expiredAbsents }, { data: etatsRobot }] = await Promise.all([
+  const [{ data: run }, { data: expiredAbsents }, { data: etatsRobot }, { data: cloud }] = await Promise.all([
     supabase
       .from("ttfl_latest_run")
       .select("*")
@@ -55,11 +55,28 @@ export default async function DashboardPage() {
       .select("cle,valeur,maj_le")
       .in("cle", ["cookies", "commandes"])
       .returns<{ cle: string; valeur: Record<string, unknown> | null; maj_le: string }[]>(),
+    supabase.from("ttfl_cloud_reglage").select("mode").eq("id", 1).maybeSingle<{ mode: string }>(),
   ]);
 
   const mode: Mode = run?.mode ?? "regular";
 
-  const [pickRes, aVenirRes, secret] = await Promise.all([
+  // Données des alertes avant matchs : lancées tout de suite, EN MÊME TEMPS que le reste (elles ne dépendent que du run).
+  const alertesData =
+    run && run.mode === "regular" && run.game_date >= aujourdhui
+      ? Promise.all([
+          chargerSoiree(supabase, run.mode, run.game_date),
+          supabase
+            .from("ttfl_picks")
+            .select("pick_date,player,compte")
+            .eq("mode", run.mode)
+            .gte("pick_date", ajouterJours(run.game_date, -JOURS_CYCLE))
+            .lte("pick_date", ajouterJours(run.game_date, JOURS_CYCLE))
+            .returns<PickLigne[]>(),
+          supabase.from("ttfl_manual_absents").select("*").returns<TtflManualAbsent[]>(),
+        ])
+      : null;
+
+  const [pickRes, aVenirRes, secret, capturesBrutes] = await Promise.all([
     run
       ? supabase
           .from("ttfl_picks")
@@ -78,6 +95,7 @@ export default async function DashboardPage() {
       .limit(800)
       .returns<PickCompte[]>(),
     chargerSecret(supabase, aujourdhui),
+    chargerCaptures(supabase),
   ]);
   const maintenantMs = heureServeur();
   // Pick secret du compte 02 : ses picks, captures et alertes des soirées pas encore closes sont retirés (lib/secret.ts).
@@ -88,7 +106,7 @@ export default async function DashboardPage() {
     maintenantMs,
   );
   const pickedPlayer = pickRes.data?.player ?? null;
-  const captures = masquerLignes(await chargerCaptures(supabase), secret, aujourdhui, maintenantMs);
+  const captures = masquerLignes(capturesBrutes, secret, aujourdhui, maintenantMs);
   const tousPicks = picksAVenir(masquerLignes(aVenirRes.data ?? [], secret, aujourdhui, maintenantMs), aujourdhui);
   const picksValides = tousPicks.filter((p) => p.compte === COMPTE_REF); // compte 1 : alertes et photo hors-ligne
   const picksAutres = tousPicks.filter((p) => p.compte !== COMPTE_REF);
@@ -132,18 +150,8 @@ export default async function DashboardPage() {
 
   // --- Alertes avant matchs : picks de ce soir devenus Out / incertains, comptes sans pick, remplaçant proposé.
   let alertesPicks: AlertePick[] = [];
-  if (run && run.mode === "regular" && run.game_date >= aujourdhui) {
-    const [soiree, voisinsRes, absentsRes] = await Promise.all([
-      chargerSoiree(supabase, run.mode, run.game_date),
-      supabase
-        .from("ttfl_picks")
-        .select("pick_date,player,compte")
-        .eq("mode", run.mode)
-        .gte("pick_date", ajouterJours(run.game_date, -JOURS_CYCLE))
-        .lte("pick_date", ajouterJours(run.game_date, JOURS_CYCLE))
-        .returns<PickLigne[]>(),
-      supabase.from("ttfl_manual_absents").select("*").returns<TtflManualAbsent[]>(),
-    ]);
+  if (run && alertesData) {
+    const [soiree, voisinsRes, absentsRes] = await alertesData;
     const voisins = masquerLignes(voisinsRes.data ?? [], secret, aujourdhui, maintenantMs);
     // Ce soir encore secret : aucune alerte pour le compte secret (« sans pick » serait faux, « Out » trahirait le joueur).
     const zonesAlertes = soireeSecrete(secret, secret.compte, run.game_date, aujourdhui, maintenantMs)
@@ -166,7 +174,6 @@ export default async function DashboardPage() {
   if (alerteCk) alerts.push(alerteCk);
   const pouls = etatsRobot?.find((e) => e.cle === "commandes");
   // Cloud en charge (migration sans PC) : le PC se tait exprès, ce n'est pas une alerte.
-  const { data: cloud } = await supabase.from("ttfl_cloud_reglage").select("mode").eq("id", 1).maybeSingle<{ mode: string }>();
   const alertePc = cloud?.mode === "reel"
     ? null
     : alertePcSilencieux((pouls?.valeur as { dernier_passage?: string } | null)?.dernier_passage ?? pouls?.maj_le);

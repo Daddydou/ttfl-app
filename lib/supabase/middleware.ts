@@ -29,11 +29,12 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // IMPORTANT : ne rien exécuter entre createServerClient et getUser(), sinon
+  // IMPORTANT : ne rien exécuter entre createServerClient et getClaims(), sinon
   // la session peut ne pas être rafraîchie et l'utilisateur déconnecté au hasard.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() vérifie la signature du jeton EN LOCAL (clés asymétriques ES256 du projet Supabase) : plus d'aller-retour
+  // réseau vers Supabase à chaque page (getUser() en faisait un). La session expirée est toujours rafraîchie.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const user = claimsData?.claims?.sub ? claimsData.claims : null;
 
   const path = request.nextUrl.pathname;
   const isPublic =

@@ -109,16 +109,20 @@ export async function refusSecret(supabase: unknown, comptes: string[], dates: s
 export async function chargerSecret(supabase: unknown, aujourdhui: string): Promise<EtatSecret> {
   try {
     const sb = supabase as SupabaseClient;
-    const reg = await sb.from("ttfl_secret_reglage").select("actif,compte,profil").eq("id", 1).maybeSingle();
-    if (reg.error) return ETAT_ILLISIBLE;
-    if (!reg.data) return ETAT_ILLISIBLE;
     const veille = new Date(`${aujourdhui}T00:00:00Z`);
     veille.setUTCDate(veille.getUTCDate() - 1);
-    const lg = await sb
-      .from("ttfl_secret_pick")
-      .select("soiree,cloture,revele_le,motif")
-      .gte("soiree", veille.toISOString().slice(0, 10))
-      .returns<LigneSecret[]>();
+    // Les deux lectures sont indépendantes : lancées ensemble (un aller-retour de moins). Règle inchangée : si l'une des
+    // deux échoue ou si le réglage manque, l'état est « illisible » et tout reste caché.
+    const [reg, lg] = await Promise.all([
+      sb.from("ttfl_secret_reglage").select("actif,compte,profil").eq("id", 1).maybeSingle(),
+      sb
+        .from("ttfl_secret_pick")
+        .select("soiree,cloture,revele_le,motif")
+        .gte("soiree", veille.toISOString().slice(0, 10))
+        .returns<LigneSecret[]>(),
+    ]);
+    if (reg.error) return ETAT_ILLISIBLE;
+    if (!reg.data) return ETAT_ILLISIBLE;
     if (lg.error) return ETAT_ILLISIBLE;
     const lignes: Record<string, LigneSecret> = {};
     for (const l of lg.data ?? []) lignes[jour(l.soiree)] = { ...l, soiree: jour(l.soiree) };
