@@ -54,5 +54,5 @@ export function phraseFourchette(projection: number | null | undefined): string 
   const f = fourchette(projection);
   if (!f) return null;
   const pct = Math.round(f.chance40 * 100);
-  return `Mauvais soir ≈ ${Math.round(f.mauvais)} · moyen ≈ ${Math.round(f.moyen)} · bon soir ≈ ${Math.round(f.bon)} — ${pct} % de chances de faire 40 ou plus`;
+  return `Mauvais soir ≈ ${Math.round(f.mauvais)} · moyen ≈ ${Math.round(f.moyen)} · bon soir ≈ ${Math.round(f.bon)}. ${pct} % de chances de faire 40 ou plus`;
 }

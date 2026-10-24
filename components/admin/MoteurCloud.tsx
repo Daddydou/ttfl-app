@@ -37,7 +37,7 @@ export function MoteurCloud({ mode, dernier }: { mode: ModeCloud | null; dernier
 
   return (
     <section className="space-y-2" aria-labelledby="titre-cloud">
-      <h2 id="titre-cloud" className="section-label">Moteur dans le cloud</h2>
+      <h2 id="titre-cloud" className="sr-only">Moteur dans le cloud</h2>
       <div className="card space-y-3 px-4 py-3.5">
         <p className="text-[13px] leading-snug text-fg-muted">
           {mode ? LIBELLES_CLOUD[mode].detail : "Réglage illisible : le PC reste en charge."}

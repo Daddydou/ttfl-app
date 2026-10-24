@@ -58,6 +58,12 @@ export function freshness(
   return { label: humanAge(minutes), minutes, tone };
 }
 
+// « sam. 24 oct. » → « Sam. 24 oct. » : majuscule à la première lettre seulement (CSS `capitalize` en met une à
+// chaque mot : « Comprendre Le Système »).
+export function majuscule(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
 // « 1 tâche », « 3 tâches » : remplace les « tâche(s) ». `pluriel` sert aux formes irrégulières.
 export function nb(n: number, singulier: string, pluriel = `${singulier}s`): string {
   return `${n} ${Math.abs(n) >= 2 ? pluriel : singulier}`;

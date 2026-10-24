@@ -9,7 +9,7 @@ import { NuitPicker } from "@/components/NuitPicker";
 import { RepartitionEquipe } from "@/components/RepartitionEquipe";
 import { EditionComptes } from "@/components/EditionComptes";
 import { MoisTabs, VueTabs, ZoneTabs, type ParamsPicks } from "@/components/PlanningTabs";
-import { frDate } from "@/lib/format";
+import { frDate, majuscule } from "@/lib/format";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { RevelerBouton } from "@/components/RevelerBouton";
 import { chargerSecret, heureCloture, masquerLignes, soireeSecrete } from "@/lib/secret";
@@ -273,8 +273,8 @@ function PlanningVue({
         <div className="card px-4 py-10 text-center">
           <p className="text-sm text-fg-muted">Aucune soirée connue ce mois-ci.</p>
           <p className="mt-1 text-[13px] text-fg-muted">
-            Les soirées à venir apparaissent après{" "}
-            <code className="text-court-400">python -m pont.push_avance</code> sur le PC.
+            Les soirées à venir apparaissent après « Recalculer les prochaines soirées » (Plus &gt; Admin &gt;
+            Actions), lancé aussi automatiquement par le moteur.
           </p>
         </div>
       ) : (
@@ -286,7 +286,7 @@ function PlanningVue({
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h2 className="text-[19px] font-bold capitalize tracking-[-0.01em] text-fg">{frDate(n.date)}</h2>
+                  <h2 className="text-[19px] font-bold tracking-[-0.01em] text-fg">{majuscule(frDate(n.date))}</h2>
                   <p className="text-[13px] text-fg-muted">
                     {!n.nuit
                       ? "Soirée sans projection"
@@ -308,7 +308,7 @@ function PlanningVue({
                 // Pick secret (compte 02) : ni joueur, ni état d'envoi, ni sélecteur — rien qui permette de le deviner
                 // ou de l'écraser à l'aveugle. « Révéler maintenant » le montre tout de suite.
                 <div className="mt-2 space-y-2">
-                  <p className="text-sm font-semibold text-court-400">
+                  <p className="text-sm font-semibold text-fg">
                     <Icon name="cadenas" size={15} strokeWidth={2} className="mr-1.5 inline-block -translate-y-px" />
                     Pick secret{n.clotureSecret ? ` · révélé à ${n.clotureSecret} (Paris)` : " · révélé à la clôture de la soirée"}
                   </p>
@@ -411,13 +411,13 @@ function HistoriqueVue({ rows, mode, compte }: { rows: TtflPick[]; mode: Mode; c
       <div className="grid grid-cols-3 gap-2">
         <Stat label="Picks" value={rows.length.toString()} />
         <Stat label="Total" value={scored.length ? total.toString() : "—"} />
-        <Stat label="Moyenne" value={avg !== null ? avg.toFixed(1) : "—"} accent />
+        <Stat label="Moyenne" value={avg !== null ? avg.toFixed(1) : "—"} />
       </div>
 
       {mode === "playoffs" && (
         <div className="rounded-[20px] bg-court-500/10 px-4 py-3">
           <div className="flex items-baseline justify-between">
-            <span className="text-sm font-semibold text-court-400">Usage unique</span>
+            <span className="text-sm font-semibold text-fg-muted">Usage unique</span>
             <span className="text-2xl font-bold tabular-nums text-fg">{rows.length}</span>
           </div>
           <p className="mt-0.5 text-[13px] text-fg-muted">
@@ -461,10 +461,10 @@ function HistoriqueVue({ rows, mode, compte }: { rows: TtflPick[]; mode: Mode; c
   );
 }
 
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card px-3 py-3 text-center">
-      <div className={`text-2xl font-bold tabular-nums ${accent ? "text-court-400" : "text-fg"}`}>
+      <div className="text-2xl font-bold tabular-nums text-fg">
         {value}
       </div>
       <div className="text-[11px] uppercase tracking-wide text-fg-muted">{label}</div>

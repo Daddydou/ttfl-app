@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { reglerSecret } from "@/app/(app)/secret/actions";
 import { RevelerBouton } from "@/components/RevelerBouton";
 import { Icon } from "@/components/ui/Icon";
+import { majuscule } from "@/lib/format";
 
 export interface SoireeSecreteVue {
   soiree: string;
@@ -58,7 +59,7 @@ export function SecretPick({ actif, compte, soirees, lisible }: { actif: boolean
             {soirees.map((s) => (
               <li key={s.soiree} className="flex flex-wrap items-center justify-between gap-2 py-2">
                 <span className="text-fg">
-                  <span className="font-semibold capitalize">{s.libelle}</span>
+                  <span className="font-semibold">{majuscule(s.libelle)}</span>
                   <span className="text-fg-muted">{s.cloture ? ` · clôture ${s.cloture}` : " · clôture inconnue"}</span>
                 </span>
                 {s.etat === "secrete" ? (

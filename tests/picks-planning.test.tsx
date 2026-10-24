@@ -146,7 +146,7 @@ describe("Page « Mes picks » — planning", () => {
   it("explique comment alimenter le planning quand le mois est vide", async () => {
     await renderPage({ mois: "2026-12" });
     expect(screen.getByText("Aucune soirée connue ce mois-ci.")).toBeInTheDocument();
-    expect(screen.getByText(/pont\.push_avance/)).toBeInTheDocument();
+    expect(screen.getByText(/Recalculer les prochaines soirées/)).toBeInTheDocument();
   });
 
   it("propose les trois zones et un onglet par mois", async () => {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ZONES, libelleMois, type ZoneId } from "@/lib/planning";
 import type { Mode } from "@/lib/types";
+import { majuscule } from "@/lib/format";
 
 // Paramètres d'URL de la page « Mes picks » (rendu serveur : tout passe par ?…).
 export interface ParamsPicks {
@@ -80,7 +81,7 @@ export function MoisTabs({ courant, mois }: { courant: ParamsPicks; mois: string
           href={hrefPicks({ ...courant, vue: "planning", mois: m })}
           className={`chip ${courant.mois === m ? "chip-on" : ""}`}
         >
-          {libelleMois(m)}
+          {majuscule(libelleMois(m))}
         </Link>
       ))}
     </div>

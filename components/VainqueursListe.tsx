@@ -70,7 +70,7 @@ export function VainqueursListe({
         return (
           <section key={s.date} className="card space-y-3 px-4 py-4" aria-label={`Soirée du ${s.date}`}>
             <div>
-              <p className="section-label capitalize">{frDate(s.date)}</p>
+              <p className="section-label">{frDate(s.date)}</p>
               <p className="mt-0.5 text-[13px] text-fg-muted">
                 {b.nbMatchs} match{b.nbMatchs > 1 ? "s" : ""}
                 {b.nbSerres > 0 ? ` · ${b.nbSerres} serré${b.nbSerres > 1 ? "s" : ""}` : ""}

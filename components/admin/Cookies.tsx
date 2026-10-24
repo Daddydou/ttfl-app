@@ -33,7 +33,7 @@ export function Cookies({ lignes, secretsPrets, maintenantMs }: { lignes: LigneC
 
   return (
     <section className="space-y-2" aria-labelledby="titre-cookies">
-      <h2 id="titre-cookies" className="section-label">Cookies TTFL</h2>
+      <h2 id="titre-cookies" className="sr-only">Cookies TTFL</h2>
       <div className="card space-y-3 px-4 py-3.5">
         <p className="text-[13px] leading-snug text-fg-muted">
           Chaque compte garde sa connexion avec un cookie qui dure environ 2 mois.{" "}

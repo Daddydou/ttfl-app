@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { etiquetteJour } from "@/lib/conseilles";
 import { ZONES, type ZoneId } from "@/lib/planning";
+import { majuscule } from "@/lib/format";
 
 export function hrefConseilles(date: string | null, pour: ZoneId): string {
   const q = new URLSearchParams();
@@ -34,7 +35,7 @@ export function JoursConseilles({
             aria-selected={actif}
             className={`chip !rounded-[20px] !px-3.5 !py-2 ${actif ? "chip-on" : ""}`}
           >
-            <span className="block">{e.court}</span>
+            <span className="block">{majuscule(e.court)}</span>
             {e.relatif && <span className="block text-[11px] font-medium normal-case opacity-80">{e.relatif}</span>}
           </Link>
         );

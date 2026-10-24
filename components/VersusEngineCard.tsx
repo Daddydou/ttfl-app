@@ -82,7 +82,7 @@ export function VersusEngineCard({
           );
         })}
       </div>
-      <p className="mt-2 text-[11px] text-fg-muted">
+      <p className="mt-2 text-[13px] text-fg-muted">
         Colonne 1 : ton pick · colonne 2 : celui du moteur ce soir-là.
       </p>
     </section>

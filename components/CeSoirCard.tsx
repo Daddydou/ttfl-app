@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
-import { fmtNum } from "@/lib/format";
+import { fmtNum, majuscule } from "@/lib/format";
 import { fourchette } from "@/lib/fourchette";
 import { Cloture } from "@/components/Cloture";
 
@@ -38,7 +38,7 @@ export function CeSoirCard({
           <h2 id="titre-ce-soir" className="title-2">
             Ce soir
           </h2>
-          <span className="text-[15px] capitalize text-fg-muted">{titreDate}</span>
+          <span className="text-[15px] text-fg-muted">{majuscule(titreDate)}</span>
         </div>
         <Cloture iso={cloture} />
       </div>

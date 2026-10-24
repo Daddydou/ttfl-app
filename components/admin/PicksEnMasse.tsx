@@ -28,7 +28,7 @@ export function PicksEnMasse({ aujourdhui }: { aujourdhui: string }) {
   ];
   return (
     <section className="space-y-3">
-      <h2 className="section-label">Picks en masse</h2>
+      <h2 className="sr-only">Picks en masse</h2>
       <div className="seg" role="tablist" aria-label="Opération">
         {onglets.map((o) => (
           <button

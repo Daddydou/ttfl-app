@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { adversairesAvecPicks, derniersChoix, fmtRang, scoresParAdversaire, type ScoreSuivi } from "@/lib/adversaires";
-import { frDate } from "@/lib/format";
+import { frDate, majuscule } from "@/lib/format";
 import type { TtflSuivi, TtflSuiviPick } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +60,7 @@ export default async function AdversairesPage() {
 
       {dernier && (
         <section className="card p-4">
-          <h2 className="text-[15px] font-semibold text-fg capitalize">Picks du {frDate(dernier.date)}</h2>
+          <h2 className="text-[15px] font-semibold text-fg">Picks du {frDate(dernier.date)}</h2>
           <ul className="mt-2 space-y-1.5">
             {dernier.choix.map((c) => (
               <li key={c.joueur} className="flex items-baseline justify-between gap-3 text-[14px]">
@@ -96,13 +96,13 @@ export default async function AdversairesPage() {
                   <p className="mt-1 text-[13px] text-fg-muted">Aucun pick gardé pour l&apos;instant.</p>
                 ) : (
                   <details className="mt-1">
-                    <summary className="cursor-pointer text-[13px] font-medium text-court-400">
+                    <summary className="cursor-pointer text-[13px] font-medium text-fg-muted">
                       Dernier pick : {ps[0].joueur} · {ps.length} gardé{ps.length > 1 ? "s" : ""}
                     </summary>
                     <ul className="mt-1.5 space-y-0.5">
                       {ps.map((p) => (
                         <li key={p.pick_date} className="flex justify-between gap-3 text-[13px]">
-                          <span className="capitalize text-fg-muted">{frDate(p.pick_date)}</span>
+                          <span className="text-fg-muted">{majuscule(frDate(p.pick_date))}</span>
                           <span className="min-w-0 flex-1 truncate font-medium text-fg">{p.joueur}</span>
                           {resume?.parSoiree.has(p.pick_date) && (
                             <span className="w-10 shrink-0 text-right font-semibold num text-fg">{resume.parSoiree.get(p.pick_date)}</span>

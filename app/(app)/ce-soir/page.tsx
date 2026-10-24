@@ -24,7 +24,7 @@ import {
   nbMatchs,
   type Masque,
 } from "@/lib/conseilles";
-import { frDate } from "@/lib/format";
+import { frDate, majuscule } from "@/lib/format";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Icon } from "@/components/ui/Icon";
 import {
@@ -190,7 +190,7 @@ export default async function PicksConseillesPage({
         titre="Picks conseillés"
         sousTitre={
           <>
-            <span className="font-semibold capitalize text-fg">{jourComplet(date)}</span>
+            <span className="font-semibold text-fg">{majuscule(jourComplet(date))}</span>
             {matchs > 0 ? ` · ${matchs} match${matchs > 1 ? "s" : ""}` : ""}
           </>
         }

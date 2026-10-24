@@ -46,6 +46,6 @@ describe("fourchette de score", () => {
   });
 
   it("la phrase est lisible", () => {
-    expect(phraseFourchette(42)).toBe("Mauvais soir ≈ 16 · moyen ≈ 34 · bon soir ≈ 53 — 36 % de chances de faire 40 ou plus");
+    expect(phraseFourchette(42)).toBe("Mauvais soir ≈ 16 · moyen ≈ 34 · bon soir ≈ 53. 36 % de chances de faire 40 ou plus");
   });
 });

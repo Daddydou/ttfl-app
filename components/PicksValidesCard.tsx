@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { etiquetteJour } from "@/lib/conseilles";
-import { frDate } from "@/lib/format";
+import { frDate, majuscule } from "@/lib/format";
 import { COMPTES_EQUIPE } from "@/lib/planning";
 import { Icon } from "@/components/ui/Icon";
 import { CaptureVignette } from "@/components/CaptureVignette";
@@ -16,7 +16,7 @@ function Tuile({ iso }: { iso: string }) {
       className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-[12px] bg-surface-2"
       aria-hidden="true"
     >
-      <span className="text-[11px] font-semibold uppercase leading-none tracking-[0.06em] text-court-400">{jour}</span>
+      <span className="text-[11px] font-semibold uppercase leading-none tracking-[0.06em] text-fg-muted">{jour}</span>
       <span className="mt-0.5 text-[20px] font-bold leading-none num text-fg">{num}</span>
     </span>
   );
@@ -127,13 +127,12 @@ export function PicksValidesCard({
                       <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} />
                     </div>
                   )}
-                  <div className="mt-0.5 text-[13px] capitalize text-fg-muted">
-                    {frDate(date)}
-                    {rel && <span className="ml-1 normal-case text-court-400">· {rel}</span>}
-                  </div>
+                  {/* La tuile donne déjà le jour : on n'ajoute que « demain » / « aujourd'hui ». */}
+                  <span className="sr-only">{frDate(date)}</span>
+                  {rel && <div className="mt-0.5 text-[13px] text-fg-muted">{majuscule(rel)}</div>}
                   {autres && (
                     <details className="mt-1.5">
-                      <summary className="cursor-pointer text-[13px] font-medium text-court-400">
+                      <summary className="cursor-pointer text-[13px] font-medium text-fg-muted">
                         Équipe · {nEquipe}/{COMPTES_EQUIPE.length} comptes
                       </summary>
                       <div className="mt-1.5 space-y-0.5">

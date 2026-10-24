@@ -33,7 +33,7 @@ const quand = (iso: string) =>
 export function JournalEnvois({ entrees, disponible }: { entrees: EntreeJournal[]; disponible: boolean }) {
   return (
     <section className="space-y-2">
-      <h2 className="section-label">Journal d&apos;envoi</h2>
+      <h2 className="sr-only">Journal d&apos;envoi</h2>
       {!disponible ? (
         <p className="card px-4 py-6 text-center text-sm text-fg-muted">
           Journal pas encore activé (migration « journal_envois » à appliquer sur Supabase).

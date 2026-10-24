@@ -22,8 +22,8 @@ describe("PicksValidesCard", () => {
     const premiere = screen.getAllByRole("listitem")[0];
     expect(within(premiere).getByText("Nikola Jokic")).toBeInTheDocument();
     expect(premiere).toHaveTextContent(/20 oct/);
-    expect(premiere).toHaveTextContent("aujourd'hui");
-    expect(screen.getAllByRole("listitem")[1]).toHaveTextContent("demain");
+    expect(premiere).toHaveTextContent(/aujourd'hui/i);
+    expect(screen.getAllByRole("listitem")[1]).toHaveTextContent(/demain/i);
   });
 
   it("renvoie vers Mes picks pour gérer", () => {

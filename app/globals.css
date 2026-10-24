@@ -215,7 +215,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
   /* Pastilles de sélection (jours, mois) */
   .chip {
-    @apply shrink-0 rounded-full bg-fill/80 px-3.5 py-1.5 text-center text-[13px] font-semibold capitalize text-fg transition duration-150;
+    @apply shrink-0 rounded-full bg-fill/80 px-3.5 py-1.5 text-center text-[13px] font-semibold text-fg transition duration-150;
   }
   .chip-on {
     @apply bg-court-500 text-on-accent;
