@@ -114,7 +114,7 @@ export default async function StatsPage({
           </p>
         </div>
         {benchmarkRows.length > 0 && (
-          <BenchmarksCard rows={benchmarkRows} userTotal={0} userAvg={null} />
+          <BenchmarksCard rows={benchmarkRows} userPicks={[]} />
         )}
       </div>
     );
@@ -155,7 +155,7 @@ export default async function StatsPage({
 
       {/* Repères modèle */}
       {benchmarkRows.length > 0 && (
-        <BenchmarksCard rows={benchmarkRows} userTotal={total} userAvg={avg} />
+        <BenchmarksCard rows={benchmarkRows} userPicks={all} />
       )}
 
       {/* Mon pick vs pick du moteur, derniers soirs */}

@@ -90,3 +90,9 @@ poussé dans Supabase.
 - TOUT le contenu est dans UN fichier : `lib/modes-operatoires.ts` (`MODES`, `SECTIONS`). Pour modifier ou ajouter une fiche : éditer ce fichier, mettre à jour `misAJour`, lancer les tests (`tests/modes-operatoires.test.tsx` vérifie fiches complètes, ancres uniques, aucun secret, aucun Telegram), publier. Ne jamais y mettre de cookie, clé, jeton, ni le joueur d'un pick secret.
 - Quand une procédure change dans l'app (Admin, cookies, notifications, mode cloud...), mettre la fiche correspondante à jour dans la même modification.
 - Telegram est abandonné définitivement par l'utilisateur : ne jamais le proposer.
+
+## Rapidité (24/10/2026)
+- `vercel.json` : fonctions en région `dub1` (Dublin), à côté de la base Supabase (eu-west-1). Avant : `iad1` (Washington) = un aller-retour transatlantique par requête. Ne pas remettre une autre région.
+- `lib/supabase/middleware.ts` : `getClaims()` (vérification locale du jeton, clés ES256 du projet) à la place de `getUser()` (appel réseau à chaque page). Si les clés de signature du projet Supabase repassent en secret partagé, `getClaims()` retombe tout seul sur un appel réseau.
+- Règle pour les pages : toute requête indépendante va dans un `Promise.all` (jamais d'`await` à la suite) ; ce qui n'est pas nécessaire au premier affichage va dans un `<Suspense>` (ex. badge de mode de `app/(app)/layout.tsx`).
+- « Toi vs les repères » (`lib/benchmarks.ts`) compare à soirées égales : seules les soirées où le compte 01 ET le repère ont un score comptent.

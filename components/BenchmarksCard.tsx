@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { frDate } from "@/lib/format";
+import { comparerSurMemesSoirees, type PickScore } from "@/lib/benchmarks";
 import type { BenchmarkStrategy, TtflBenchmark } from "@/lib/types";
 
 // Ordre d'affichage voulu : le glouton d'abord (le repère "sans intelligence
@@ -40,12 +41,10 @@ const META: Record<
 
 export function BenchmarksCard({
   rows,
-  userTotal,
-  userAvg,
+  userPicks,
 }: {
   rows: TtflBenchmark[];
-  userTotal: number;
-  userAvg: number | null;
+  userPicks: PickScore[]; // picks du compte 01 avec leur score (null = pas encore joué)
 }) {
   const ordered = ORDER
     .map((s) => rows.find((r) => r.strategy === s))
@@ -59,34 +58,30 @@ export function BenchmarksCard({
         Toi vs les repères modèle
       </h2>
       <p className="mb-3 text-[13px] text-fg-muted">
-        Calculés côté moteur, indépendants de tes picks. Delta = ton total −
-        celui du repère.
+        Comparaison sur les mêmes soirées : seules comptent celles où ton compte 01 et le repère ont un score. Delta =
+        ton total − celui du repère, sur ces soirées.
       </p>
       <div className="space-y-2">
         {ordered.map((r) => (
-          <BenchmarkLine key={r.strategy} row={r} userTotal={userTotal} />
+          <BenchmarkLine key={r.strategy} row={r} userPicks={userPicks} />
         ))}
       </div>
-      {userAvg !== null && (
-        <p className="mt-3 text-[11px] text-fg-muted">
-          Ta moyenne / pick : {userAvg.toFixed(1)}
-        </p>
-      )}
     </section>
   );
 }
 
 function BenchmarkLine({
   row,
-  userTotal,
+  userPicks,
 }: {
   row: TtflBenchmark;
-  userTotal: number;
+  userPicks: PickScore[];
 }) {
   const [open, setOpen] = useState(false);
   const [showTip, setShowTip] = useState(false);
   const meta = META[row.strategy];
-  const delta = userTotal - row.total;
+  const cmp = comparerSurMemesSoirees(row.detail_json, userPicks);
+  const delta = cmp.delta;
   const good = delta >= 0;
 
   return (
@@ -118,20 +113,27 @@ function BenchmarkLine({
           ?
         </button>
         <div className="shrink-0 text-right">
-          <div className="text-sm font-bold tabular-nums text-fg">
-            {row.total}
-            <span className="ml-1 text-[11px] font-normal text-fg-muted">
-              ({row.avg?.toFixed(1) ?? "—"}/pick)
-            </span>
-          </div>
-          <div
-            className={`text-[13px] font-semibold tabular-nums ${
-              good ? "text-avail" : "text-out"
-            }`}
-          >
-            {delta >= 0 ? "+" : ""}
-            {delta}
-          </div>
+          {cmp.n === 0 ? (
+            <div className="text-[13px] text-fg-muted">pas de soirée en commun</div>
+          ) : (
+            <>
+              <div className="text-sm font-bold tabular-nums text-fg">
+                {cmp.repere}
+                <span className="ml-1 text-[11px] font-normal text-fg-muted">
+                  ({cmp.moyenneRepere?.toFixed(1)}/pick · {cmp.n} soirée{cmp.n > 1 ? "s" : ""})
+                </span>
+              </div>
+              <div
+                className={`text-[13px] font-semibold tabular-nums ${
+                  good ? "text-avail" : "text-out"
+                }`}
+              >
+                {delta >= 0 ? "+" : ""}
+                {delta}
+                <span className="ml-1 text-[11px] font-normal text-fg-muted">(toi : {cmp.toi})</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

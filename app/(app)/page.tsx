@@ -23,7 +23,8 @@ import { picksAVenir } from "@/lib/conseilles";
 import { aujourdhuiNY } from "@/lib/planning";
 import { chargerCaptures } from "@/lib/captures";
 import { ageMs, todayISO } from "@/lib/format";
-import type { Mode, TtflBenchmark, TtflRun, TtflSeasonStats } from "@/lib/types";
+import type { Mode, TtflBenchmark, TtflRun } from "@/lib/types";
+import type { PickScore } from "@/lib/benchmarks";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Tableau de bord - TTFL" };
@@ -230,18 +231,21 @@ export default async function DashboardPage() {
 async function BenchmarksBlock({ mode }: { mode: Mode }) {
   const supabase = await createClient();
 
-  const [{ data: benchmarks }, { data: stats }] = await Promise.all([
+  const [{ data: benchmarks }, { data: mesPicks }] = await Promise.all([
     supabase
       .from("ttfl_benchmarks")
       .select("*")
       .eq("mode", mode)
       .order("computed_at", { ascending: false })
       .returns<TtflBenchmark[]>(),
+    // Les picks scorés du compte 01 : la carte compare à soirées égales avec chaque repère (lib/benchmarks.ts).
     supabase
-      .from("ttfl_season_stats")
-      .select("*")
+      .from("ttfl_picks")
+      .select("pick_date,score")
       .eq("mode", mode)
-      .maybeSingle<TtflSeasonStats>(),
+      .eq("compte", COMPTE_REF)
+      .not("score", "is", null)
+      .returns<PickScore[]>(),
   ]);
 
   // Un seul tournoi par mode pour l'instant (ttfl_picks ne distingue pas
@@ -258,13 +262,7 @@ async function BenchmarksBlock({ mode }: { mode: Mode }) {
   // bloc proprement plutôt que d'afficher des zéros.
   if (rows.length === 0) return null;
 
-  return (
-    <BenchmarksCard
-      rows={rows}
-      userTotal={stats?.total ?? 0}
-      userAvg={stats?.avg ?? null}
-    />
-  );
+  return <BenchmarksCard rows={rows} userPicks={mesPicks ?? []} />;
 }
 
 function BlockSkeleton() {
