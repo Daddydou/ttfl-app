@@ -4,15 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type NomIcone } from "@/components/ui/Icon";
 
+// 5 onglets (limite iOS) : les usages du soir d'abord ; Stats, Admin et Mode op. sont rangés dans « Plus ».
 // `aussi` : sous-pages rattachées à l'onglet (on garde sa place en y entrant).
 const TABS: { href: string; label: string; icon: NomIcone; aussi?: string[] }[] = [
   { href: "/", label: "Accueil", icon: "accueil" },
   { href: "/ce-soir", label: "Conseillés", icon: "ballon" },
   { href: "/picks", label: "Mes picks", icon: "picks", aussi: ["/equipe"] },
   { href: "/vainqueurs", label: "Vainqueurs", icon: "trophee" },
-  { href: "/stats", label: "Stats", icon: "stats", aussi: ["/stars", "/adversaires", "/absents"] },
-  { href: "/admin", label: "Admin", icon: "reglages" },
-  { href: "/mode-operatoire", label: "Mode op.", icon: "livre" },
+  {
+    href: "/plus",
+    label: "Plus",
+    icon: "autres",
+    aussi: ["/stats", "/stars", "/adversaires", "/absents", "/admin", "/mode-operatoire"],
+  },
 ];
 
 // Barre d'onglets flottante en verre dépoli (façon iOS récent).

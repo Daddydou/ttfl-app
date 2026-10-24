@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { chargerSecret, masquerLignes } from "@/lib/secret";
@@ -37,7 +36,7 @@ export default async function StarsPage() {
       <PageHeader
         titre="Stars"
         sousTitre={`Joueurs bloqués par le cycle de ${JOURS_CYCLE} jours, compte par compte`}
-        action={<Link href="/stats" className="text-[13px] font-semibold text-court-400">← Stats</Link>}
+        retour={{ href: "/plus", libelle: "Plus" }}
       />
 
       {res.error && (

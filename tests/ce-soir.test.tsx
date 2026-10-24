@@ -60,7 +60,7 @@ describe("Picks conseillés", () => {
   it("affiche un état vide quand rien n'a été poussé", async () => {
     await rendre({ ttfl_runs: [], ttfl_nuits: [] });
     expect(screen.getByText("Aucun calcul pour ce soir")).toBeInTheDocument();
-    expect(screen.getByText("python push_to_supabase.py")).toBeInTheDocument();
+    expect(screen.getByText(/toutes les 30 min à partir de 16 h/)).toBeInTheDocument();
   });
 
   it("montre les 10 meilleurs avec leurs stats détaillées, la date des matchs et le nombre de matchs", async () => {
@@ -69,8 +69,12 @@ describe("Picks conseillés", () => {
     expect(screen.getByText(/mardi 20 octobre/i)).toBeInTheDocument();
     expect(screen.getByText(/1 match\b/)).toBeInTheDocument(); // LAL–GSW pour tous les joueurs fictifs
     expect(screen.getAllByRole("article")).toHaveLength(10);
-    expect(screen.getByText("Joueur 1")).toBeInTheDocument();
+    expect(within(screen.getAllByRole("article")[0]).getByText("Joueur 1")).toBeInTheDocument();
     expect(screen.getByText("Joueur 10")).toBeInTheDocument();
+    // Résumé en tête (compte 1, aucun pick posé) : il le dit, puis cite le n° 1 du classement.
+    const resume = screen.getByRole("region", { name: /· Compte 1$/ });
+    expect(within(resume).getByText("Pas encore de pick pour cette soirée.")).toBeInTheDocument();
+    expect(within(resume).getByText("Joueur 1")).toBeInTheDocument();
     expect(screen.queryByText("Joueur 11")).not.toBeInTheDocument();
     // Stats détaillées visibles d'emblée (aucun dépli) : forme, plafond, matchup
     for (const carte of screen.getAllByRole("article")) {
@@ -131,7 +135,7 @@ describe("Picks conseillés", () => {
       { pour: "equipe" },
     );
     expect(screen.getByText("Joueur 1")).toBeInTheDocument();
-    expect(screen.getByText(/Bloqué \(≤ 30 jours\) sur le\(s\) compte\(s\) 03/)).toBeInTheDocument();
+    expect(screen.getByText(/Bloqué \(≤ 30 jours\) sur le compte 03/)).toBeInTheDocument();
   });
 
   it("signale que les projections sont à l'avance (blessures inconnues) quand il n'y a pas de run du soir", async () => {

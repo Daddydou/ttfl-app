@@ -8,13 +8,15 @@ import { PlanTrenteJours } from "@/components/PlanTrenteJours";
 import { SuiviFormules } from "@/components/SuiviFormules";
 import type { LigneSuivi } from "@/lib/suivi-formules";
 import { chargerSoiree } from "@/lib/conseilles-data";
-import { chargerCaptures } from "@/lib/captures";
+import { captureDuPick, chargerCaptures } from "@/lib/captures";
+import { PickDuSoirResume } from "@/components/PickDuSoirResume";
 import { BandeauSecret } from "@/components/BandeauSecret";
 import { RevelerBouton } from "@/components/RevelerBouton";
 import { chargerSecret, heureCloture, masquerLignes, soireeSecrete, soireesSecretes } from "@/lib/secret";
 import { maintenantMs, type TtflPlan30 } from "@/lib/plan30";
 import {
   construireConseilles,
+  etiquetteJour,
   fusionnerSoiree,
   joursProposes,
   nbMatchs,
@@ -156,6 +158,15 @@ export default async function PicksConseillesPage({
   const matchs = nbMatchs(lignes);
   const erreur = soiree.erreur ?? picksRes.error?.message ?? null;
 
+  // Résumé « Ce soir · Compte X » (comptes 01, 02, 13) : le pick posé d'abord, l'avis du classement ensuite.
+  // Soirée encore secrète pour ce compte : pas de résumé (le bandeau secret s'en charge).
+  const compteResume = avecPlan && !estSecret(zone.comptes[0], date) ? zone.comptes[0] : null;
+  const pickResume = compteResume
+    ? picks.find((p) => p.pick_date === date && p.compte === compteResume)?.player ?? null
+    : null;
+  const ligneDe = (joueur: string) => lignes.find((l) => normaliserNom(l.player) === normaliserNom(joueur));
+  const etiquette = etiquetteJour(date, aujourdhui);
+
   return (
     <div className="space-y-4">
       <RealtimeRuns />
@@ -173,7 +184,26 @@ export default async function PicksConseillesPage({
       <JoursConseilles jours={jours} courant={date} pour={zone.id} aujourdhui={aujourdhui} />
       <ZonesConseilles courant={zone.id} date={date} />
 
+      {soiree.runSoir ? (
+        <FreshnessBanner computedAt={soiree.runSoir.computed_at} injuryFresh={soiree.runSoir.injury_report_fresh} />
+      ) : (
+        <p className="rounded-[14px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
+          Projections calculées à l&apos;avance : les blessures ne sont pas encore connues. Le classement du soir (avec
+          les blessures) les remplace le jour J, dès 16 h.
+        </p>
+      )}
+
       <BandeauSecret etat={secret} dates={datesSecretes} />
+
+      {compteResume && (
+        <PickDuSoirResume
+          titre={`${etiquette.relatif === "aujourd'hui" ? "Ce soir" : `Pick du ${etiquette.court}`} · ${zone.label}`}
+          pick={pickResume}
+          projectionPick={pickResume ? (ligneDe(pickResume)?.projection ?? null) : null}
+          pose={!!captureDuPick(captures, compteResume, date, pickResume)}
+          n1={conseilles[0] ? { player: conseilles[0].player, projection: conseilles[0].projection } : null}
+        />
+      )}
 
       {avecPlan && planCache && (
         <section className="card space-y-2 px-4 py-4" aria-label="Plan 30 jours caché">
@@ -190,36 +220,39 @@ export default async function PicksConseillesPage({
         </section>
       )}
 
-      {avecPlan && !planCache && (
-        <PlanTrenteJours
-          plans={plansVisibles}
-          compte={zone.comptes[0]}
-          zoneLabel={zone.label}
-          mode={mode}
-          aujourdhui={aujourdhui}
-          maintenantMs={maintenantMs()}
-          verrous={verrous}
-          captures={captures}
-        />
+      {/* Plan 30 jours et suivi des formules : le détail, replié par défaut (le résumé ci-dessus suffit avant le lock). */}
+      {avecPlan && (
+        <details className="group">
+          <summary className="card flex cursor-pointer list-none items-center justify-between px-4 py-3 [&::-webkit-details-marker]:hidden">
+            <span className="text-[17px] font-semibold text-fg">Plan 30 jours et formules</span>
+            <Icon name="chevron" size={16} className="shrink-0 text-fg-faint transition-transform group-open:rotate-90" />
+          </summary>
+          <div className="mt-3 space-y-4">
+            {!planCache && (
+              <PlanTrenteJours
+                plans={plansVisibles}
+                compte={zone.comptes[0]}
+                zoneLabel={zone.label}
+                mode={mode}
+                aujourdhui={aujourdhui}
+                maintenantMs={maintenantMs()}
+                verrous={verrous}
+                captures={captures}
+              />
+            )}
+            <SuiviFormules lignes={suiviVisible} />
+          </div>
+        </details>
       )}
-      {avecPlan && <SuiviFormules lignes={suiviVisible} />}
 
       {ancien && (
         <div className="rounded-[20px] bg-quest/10 px-4 py-3">
           <p className="text-sm font-semibold text-quest">Aucun calcul pour ce soir</p>
-          <p className="mt-0.5 text-[13px] text-quest/80">
-            Lance le push sur ton PC. Ci-dessous, le dernier classement connu ({frDate(date)}).
+          <p className="mt-0.5 text-[13px] text-fg">
+            Le moteur n&apos;a encore rien publié pour les prochains soirs. Ci-dessous, le dernier classement connu (
+            {frDate(date)}).
           </p>
         </div>
-      )}
-
-      {soiree.runSoir ? (
-        <FreshnessBanner computedAt={soiree.runSoir.computed_at} injuryFresh={soiree.runSoir.injury_report_fresh} />
-      ) : (
-        <p className="rounded-[14px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
-          Projections calculées à l&apos;avance : les blessures ne sont pas encore connues. Le classement du soir (avec
-          les blessures) les remplace le jour J.
-        </p>
       )}
 
       {erreur && <p className="rounded-[14px] bg-out/10 px-3 py-2 text-[13px] text-out">{erreur}</p>}
@@ -279,9 +312,9 @@ function AucunCalcul() {
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[18px] bg-court-500 text-on-accent"><Icon name="ballon" size={34} strokeWidth={1.8} /></div>
       <h1 className="title-2">Aucun calcul pour ce soir</h1>
       <p className="mt-2 max-w-xs text-sm text-fg-muted">
-        Lance le push sur ton PC pour voir apparaître les picks conseillés ici :
+        Le moteur calcule toutes les 30 min à partir de 16 h (heure de Paris). Les picks conseillés apparaîtront ici
+        dès le premier calcul. En cas de doute : Plus &gt; Admin &gt; Santé des tâches.
       </p>
-      <code className="mt-3 rounded-[10px] bg-surface-2 px-3 py-2 text-[13px] text-court-400">python push_to_supabase.py</code>
     </div>
   );
 }

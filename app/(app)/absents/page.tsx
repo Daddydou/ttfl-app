@@ -27,7 +27,7 @@ export default async function AbsentsPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader titre="Absents" sousTitre="Joueurs à exclure du classement" />
+      <PageHeader titre="Absents" sousTitre="Joueurs à exclure du classement" retour={{ href: "/plus", libelle: "Plus" }} />
       <div className="card px-4 py-3">
         <p className="text-[13px] leading-relaxed text-fg-muted">
           Ces absents sont pris en compte au{" "}

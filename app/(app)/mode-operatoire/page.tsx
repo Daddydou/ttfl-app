@@ -19,6 +19,7 @@ export default function ModeOperatoirePage() {
       <PageHeader
         titre="Mode opératoire"
         sousTitre={`${MODES.length} fiches : pour quoi faire, quand, et quoi faire pas à pas.`}
+        retour={{ href: "/plus", libelle: "Plus" }}
       />
 
       <nav aria-label="Sections du mode opératoire" className="flex flex-wrap gap-2">

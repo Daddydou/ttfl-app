@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { COMPTE_REF } from "@/lib/compte";
 import { ModeTabs } from "@/components/ModeTabs";
@@ -29,16 +28,6 @@ async function resolveMode(explicit?: string): Promise<Mode> {
     .limit(1)
     .maybeSingle();
   return (data?.mode as Mode) ?? "regular";
-}
-
-function LiensStats() {
-  return (
-    <div className="flex gap-3">
-      <Link href="/adversaires" className="text-[13px] font-semibold text-court-400">Adversaires →</Link>
-      <Link href="/stars" className="text-[13px] font-semibold text-court-400">Stars →</Link>
-      <Link href="/absents" className="text-[13px] font-semibold text-court-400">Absents →</Link>
-    </div>
-  );
 }
 
 export default async function StatsPage({
@@ -103,7 +92,7 @@ export default async function StatsPage({
         <PageHeader
           titre="Stats"
           sousTitre="Tes scores, comparés aux repères du moteur"
-          action={<LiensStats />}
+          retour={{ href: "/plus", libelle: "Plus" }}
         />
         <ModeTabs base="/stats" current={mode} />
         <div className="card px-4 py-10 text-center">
@@ -125,7 +114,7 @@ export default async function StatsPage({
       <PageHeader
         titre="Stats"
         sousTitre="Tes scores, comparés aux repères du moteur"
-        action={<LiensStats />}
+        retour={{ href: "/plus", libelle: "Plus" }}
       />
       <ModeTabs base="/stats" current={mode} />
 

@@ -33,7 +33,7 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
       <PageHeader
         titre="Journal"
         sousTitre="Chaque action et ce qu'elle a provoqué, que ça vienne du téléphone, du PC ou du cloud."
-        action={<Link href="/admin" className="text-[13px] font-semibold text-court-400">Admin</Link>}
+        retour={{ href: "/admin", libelle: "Admin" }}
       />
 
       <nav aria-label="Filtres" className="space-y-2">

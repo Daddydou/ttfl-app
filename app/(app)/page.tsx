@@ -1,6 +1,8 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { CeSoirCard, type LigneCeSoir } from "@/components/CeSoirCard";
+import { captureDuPick } from "@/lib/captures";
 import { COMPTE_REF } from "@/lib/compte";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
@@ -14,7 +16,7 @@ import { SauvegardeHorsLigne } from "@/components/SauvegardeHorsLigne";
 import { alertesPicksDuSoir, type AlertePick } from "@/lib/alertes-picks";
 import { chargerSoiree } from "@/lib/conseilles-data";
 import { fusionnerSoiree } from "@/lib/conseilles";
-import { JOURS_CYCLE, ZONES, ajouterJours, type PickLigne } from "@/lib/planning";
+import { COMPTES_EQUIPE, JOURS_CYCLE, ZONES, ajouterJours, normaliserNom, type PickLigne } from "@/lib/planning";
 import { BandeauSecret } from "@/components/BandeauSecret";
 import { chargerSecret, masquerLignes, soireeSecrete, soireesSecretes } from "@/lib/secret";
 import { maintenantMs as heureServeur } from "@/lib/plan30";
@@ -22,15 +24,16 @@ import type { TtflManualAbsent } from "@/lib/types";
 import { picksAVenir } from "@/lib/conseilles";
 import { aujourdhuiNY } from "@/lib/planning";
 import { chargerCaptures } from "@/lib/captures";
-import { ageMs, todayISO } from "@/lib/format";
+import { ageMs, nb, todayISO } from "@/lib/format";
 import type { Mode, TtflBenchmark, TtflRun } from "@/lib/types";
 import type { PickScore } from "@/lib/benchmarks";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Tableau de bord - TTFL" };
+export const metadata = { title: "Accueil — TTFL" };
 
-// LECTURE SEULE : cette page ne calcule ni score ni projection. Elle montre les picks validés à venir (compte 1),
-// les alertes et les repères ; le classement conseillé est dans l'onglet « Picks conseillés ».
+// LECTURE SEULE : cette page ne calcule ni score ni projection. En tête, la carte « Ce soir » (un compte par ligne,
+// fraîcheur, fourchette du moteur) ; dessous, les soirées suivantes, les alertes et les repères.
+// Le classement conseillé est dans l'onglet « Conseillés ».
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -130,7 +133,7 @@ export default async function DashboardPage() {
       alerts.push({
         id: "stale-calcul",
         tone: "danger",
-        message: `Dernier calcul il y a ${Math.floor(ageHours)} h : le PC n'a pas poussé depuis. Vérifie qu'il est allumé et que la tâche « TTFL push » tourne.`,
+        message: `Dernier calcul il y a ${Math.floor(ageHours)} h : le moteur n'a rien publié depuis. Regarde Plus > Admin > Santé des tâches.`,
       });
     }
     if (!pickedPlayer) {
@@ -145,14 +148,20 @@ export default async function DashboardPage() {
     alerts.push({
       id: "expired-absents",
       tone: "info",
-      message: `${expiredAbsents!.length} absent(s) dont la date de fin est dépassée — à retirer ?`,
+      message: `${nb(expiredAbsents!.length, "absent")} dont la date de fin est dépassée : à retirer dans Plus > Absents ?`,
     });
   }
 
   // --- Alertes avant matchs : picks de ce soir devenus Out / incertains, comptes sans pick, remplaçant proposé.
   let alertesPicks: AlertePick[] = [];
+  let projectionC1: number | null = null; // projection du moteur pour le pick du compte 01 ce soir (carte « Ce soir »)
   if (run && alertesData) {
     const [soiree, voisinsRes, absentsRes] = await alertesData;
+    if (run.game_date === aujourdhui) {
+      const c1 = tousPicks.find((p) => p.pick_date === aujourdhui && p.compte === COMPTE_REF)?.player;
+      const ligne = c1 ? fusionnerSoiree(soiree.avance, soiree.soir).find((l) => normaliserNom(l.player) === normaliserNom(c1)) : null;
+      projectionC1 = ligne?.projection ?? null;
+    }
     const voisins = masquerLignes(voisinsRes.data ?? [], secret, aujourdhui, maintenantMs);
     // Ce soir encore secret : aucune alerte pour le compte secret (« sans pick » serait faux, « Out » trahirait le joueur).
     const zonesAlertes = soireeSecrete(secret, secret.compte, run.game_date, aujourdhui, maintenantMs)
@@ -180,43 +189,63 @@ export default async function DashboardPage() {
     : alertePcSilencieux((pouls?.valeur as { dernier_passage?: string } | null)?.dernier_passage ?? pouls?.maj_le);
   if (alertePc) alerts.push(alertePc);
 
+  // --- Carte « Ce soir » : un compte par ligne (le compte secret n'affiche qu'un cadenas, jamais de joueur).
+  const joueurDuSoir = (compte: string) => tousPicks.find((p) => p.pick_date === aujourdhui && p.compte === compte)?.player ?? null;
+  const ligneCeSoir = (compte: string): LigneCeSoir => {
+    const secretCeSoir = compte === secret.compte && datesSecretes.includes(aujourdhui);
+    const joueur = secretCeSoir ? null : joueurDuSoir(compte);
+    return {
+      label: `Cpt ${compte}`,
+      joueur,
+      secret: secretCeSoir,
+      pose: !!captureDuPick(captures, compte, aujourdhui, joueur),
+    };
+  };
+  const equipePosees = COMPTES_EQUIPE.filter((c) => joueurDuSoir(c)).length;
+  const titreDate = new Date(`${aujourdhui}T00:00:00Z`).toLocaleDateString("fr-FR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+
   return (
     <div className="space-y-5">
       <RealtimeRuns />
       <SauvegardeHorsLigne soiree={run?.game_date ?? null} pickDuSoir={pickedPlayer} aVenir={picksValides} />
+      <PageHeader titre="Accueil" />
       <AlertsBanner alerts={alerts} />
-      <InstallerApp />
       {run && <AlertesPicks alertes={alertesPicks} mode={run.mode} date={run.game_date} />}
 
-      {/* Bloc 1 — mes picks validés (comptes 1 et 2 visibles, équipe dépliable) : une ligne par soirée, avec sa date ---- */}
+      {/* Bloc 1 — ce soir : chaque compte, la fourchette du compte 01, la fraîcheur, l'accès aux conseillés ---- */}
+      <CeSoirCard
+        titreDate={titreDate}
+        lignes={[ligneCeSoir(COMPTE_REF), ligneCeSoir("02"), ligneCeSoir("13")]}
+        equipe={{ posees: equipePosees, total: COMPTES_EQUIPE.length }}
+        projection={mode === "regular" ? projectionC1 : null}
+        fraicheur={
+          run ? (
+            <FreshnessBanner computedAt={run.computed_at} injuryFresh={run.injury_report_fresh} />
+          ) : (
+            <p className="rounded-[16px] bg-fill/60 px-4 py-3 text-[14px] font-medium text-fg-muted">
+              Aucun calcul pour l&apos;instant : le moteur calcule toutes les 30 min à partir de 16 h.
+            </p>
+          )
+        }
+      />
+
+      {/* Bloc 2 — pick secret (révéler) puis les soirées suivantes ---- */}
       <BandeauSecret etat={secret} dates={datesSecretes} />
       <PicksValidesCard
-        picks={picksValides}
-        autres={picksAutres}
+        titre="Prochains soirs"
+        picks={picksValides.filter((p) => p.pick_date > aujourdhui)}
+        autres={picksAutres.filter((p) => p.pick_date > aujourdhui)}
         aujourdhui={aujourdhui}
         captures={captures}
         datesSecretes={datesSecretes}
       />
 
-      {/* Bloc 2 — fraîcheur du dernier calcul + accès aux picks conseillés ------------- */}
-      <section className="space-y-3">
-        {run ? (
-          <FreshnessBanner computedAt={run.computed_at} injuryFresh={run.injury_report_fresh} />
-        ) : (
-          <div className="card px-4 py-8 text-center">
-            <p className="text-sm font-semibold text-fg">Aucun calcul — lance le push sur ton PC</p>
-            <code className="mt-3 inline-block rounded-[10px] bg-surface-2 px-3 py-2 text-[13px] text-court-400">
-              python push_to_supabase.py
-            </code>
-          </div>
-        )}
-        <Link
-          href="/ce-soir"
-          className="block text-center text-[13px] font-medium text-fg-muted active:text-court-400"
-        >
-          Picks conseillés des 7 prochains jours →
-        </Link>
-      </section>
+      <InstallerApp />
 
       {/* Bloc 3 — toi vs les repères modèle ------------------------------ */}
       <Suspense fallback={<BlockSkeleton />}>

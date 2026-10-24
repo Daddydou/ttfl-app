@@ -64,7 +64,11 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-4">
-      <PageHeader titre="Semaine de l'équipe" sousTitre="10 comptes × 7 soirées : doublons, cycle de 30 jours, comptes sans pick" />
+      <PageHeader
+        titre="Semaine de l'équipe"
+        sousTitre="10 comptes × 7 soirées : doublons, cycle de 30 jours, comptes sans pick"
+        retour={{ href: "/picks", libelle: "Mes picks" }}
+      />
       <NavSemaine precedent={ajouterJours(debut, -7)} suivant={ajouterJours(debut, 7)} />
       {erreur && <p className="rounded-[14px] bg-out/10 px-3 py-2 text-[13px] text-out">{erreur}</p>}
       <GrilleSemaine semaine={semaine} />

@@ -64,7 +64,9 @@ export function PicksValidesCard({
   aujourdhui,
   captures,
   datesSecretes = [],
+  titre = "Mes picks validés",
 }: {
+  titre?: string;
   datesSecretes?: string[]; // soirées dont le pick du compte 2 est secret (affiché « secret » avec un cadenas au lieu de « pas de pick »)
   picks: { pick_date: string; player: string }[];
   autres?: PickCompte[];
@@ -82,7 +84,7 @@ export function PicksValidesCard({
     <section>
       <div className="mb-2 flex items-baseline justify-between px-1">
         <h2 className="title-2">
-          Mes picks validés
+          {titre}
           <span className="ml-2 align-middle rounded-full bg-fill px-2.5 py-0.5 text-[13px] font-semibold num text-fg-muted">
             {dates.length}
           </span>

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { adversairesAvecPicks, derniersChoix, fmtRang, scoresParAdversaire, type ScoreSuivi } from "@/lib/adversaires";
@@ -40,7 +39,7 @@ export default async function AdversairesPage() {
       <PageHeader
         titre="Adversaires"
         sousTitre="Les joueurs de ton Centre de surveillance TTFL"
-        action={<Link href="/stats" className="text-[13px] font-semibold text-court-400">← Stats</Link>}
+        retour={{ href: "/plus", libelle: "Plus" }}
       />
 
       {erreur && (

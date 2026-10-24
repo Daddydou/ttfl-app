@@ -1,7 +1,7 @@
 import { StatusBadge } from "@/components/StatusBadge";
 import { PickZoneButton } from "@/components/PickZoneButton";
 import { Icon } from "@/components/ui/Icon";
-import { fmtNum } from "@/lib/format";
+import { fmtNum, nb } from "@/lib/format";
 import { phraseFourchette } from "@/lib/fourchette";
 import type { Conseille } from "@/lib/conseilles";
 import type { Mode, TtflCotes } from "@/lib/types";
@@ -49,7 +49,7 @@ export function CarteConseille({
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <div className="text-[28px] font-bold leading-none tracking-[-0.02em] text-court-400 num">
+          <div className="text-[28px] font-bold leading-none tracking-[-0.02em] text-fg num">
             {fmtNum(c.projection)}
           </div>
           <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.06em] text-fg-muted">projection</div>
@@ -98,12 +98,18 @@ export function CarteConseille({
         </p>
       )}
 
-      {c.explanation && <p className="mt-2 text-[14px] leading-snug text-fg-muted">{c.explanation}</p>}
+      {/* Le détail du calcul (souvent 4-5 lignes) est replié : il se répétait sur les 10 cartes. */}
+      {c.explanation && (
+        <details className="mt-2">
+          <summary className="cursor-pointer text-[13px] font-medium text-fg-muted">Détail du calcul</summary>
+          <p className="mt-1.5 text-[14px] leading-snug text-fg-muted">{c.explanation}</p>
+        </details>
+      )}
 
       {c.comptesBloques.length > 0 && (
         <p className="mt-3 rounded-[12px] bg-quest/10 px-3 py-2 text-[13px] text-quest">
-          Bloqué (≤ 30 jours) sur le(s) compte(s) {c.comptesBloques.join(", ")} — disponible sur{" "}
-          {c.comptesLibres.length}.
+          Bloqué (≤ 30 jours) sur {c.comptesBloques.length >= 2 ? "les comptes" : "le compte"} {c.comptesBloques.join(", ")}{" "}
+          — disponible sur {nb(c.comptesLibres.length, "compte")}.
         </p>
       )}
 
