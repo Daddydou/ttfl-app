@@ -23,19 +23,28 @@ const base = "seg-item";
 const actif = "seg-item-on";
 const inactif = "";
 
-// Planning (picks à l'avance, par soirée) / Historique (scores et stats du compte 1).
+// Une seule rangée au lieu de deux (Saison/Playoffs + Planning/Historique) :
+// saison régulière → Planning | Historique | Playoffs ; playoffs (pas de planning) → Saison régulière | Playoffs.
 export function VueTabs({ courant }: { courant: ParamsPicks }) {
-  const onglets: { vue: ParamsPicks["vue"]; label: string }[] = [
-    { vue: "planning", label: "Planning" },
-    { vue: "historique", label: "Historique" },
-  ];
+  const onglets: { id: string; label: string; href: string; on: boolean }[] =
+    courant.mode === "regular"
+      ? [
+          { id: "planning", label: "Planning", href: hrefPicks({ ...courant, vue: "planning" }), on: courant.vue === "planning" },
+          { id: "historique", label: "Historique", href: hrefPicks({ ...courant, vue: "historique" }), on: courant.vue === "historique" },
+          { id: "playoffs", label: "Playoffs", href: hrefPicks({ ...courant, mode: "playoffs", vue: "historique" }), on: false },
+        ]
+      : [
+          { id: "regular", label: "Saison régulière", href: hrefPicks({ ...courant, mode: "regular", vue: "planning" }), on: false },
+          { id: "playoffs", label: "Playoffs", href: hrefPicks({ ...courant, vue: "historique" }), on: true },
+        ];
   return (
     <div className="seg">
       {onglets.map((o) => (
         <Link
-          key={o.vue}
-          href={hrefPicks({ ...courant, vue: o.vue })}
-          className={`${base} ${courant.vue === o.vue ? actif : inactif}`}
+          key={o.id}
+          href={o.href}
+          className={`${base} ${o.on ? actif : inactif}`}
+          aria-current={o.on ? "page" : undefined}
         >
           {o.label}
         </Link>

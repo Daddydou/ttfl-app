@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { COOKIE_ZONE, zoneChoisie } from "@/lib/planning";
 
 type CookieItem = { name: string; value: string; options?: CookieOptions };
 
@@ -55,6 +56,10 @@ export async function updateSession(request: NextRequest) {
     url.pathname = "/";
     return NextResponse.redirect(url);
   }
+
+  // Compte choisi dans Conseillés / Mes picks : retenu pour le prochain passage (lib/planning.ts).
+  const zone = zoneChoisie(request.nextUrl);
+  if (zone) response.cookies.set(COOKIE_ZONE, zone, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
 
   return response;
 }

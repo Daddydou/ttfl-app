@@ -104,27 +104,25 @@ export function NuitPicker({
 
   return (
     <>
-      <div className="mt-3 flex items-center gap-2">
+      {/* Un pick posé : « Changer » / « Retirer » restent discrets (le joueur est l'information, pas le bouton).
+          Pas de pick : « Choisir un joueur » est la vraie action à faire, en orange plein. */}
+      <div className={`mt-3 flex items-center gap-2 ${aUnPick ? "justify-end" : ""}`}>
         <button
           onClick={() => setOuvert(true)}
-          className="btn btn-primary flex-1 !min-h-[44px] !text-[16px]"
+          className={aUnPick ? "btn btn-plain btn-sm" : "btn btn-primary flex-1 !min-h-[44px] !text-[16px]"}
         >
           {aUnPick ? "Changer" : "Choisir un joueur"}
         </button>
         {aUnPick &&
           (retraitArme ? (
-            <button
-              onClick={retirer}
-              disabled={pending}
-              className="btn !min-h-[44px] !text-[15px] bg-out/15 text-out"
-            >
+            <button onClick={retirer} disabled={pending} className="btn btn-sm bg-out/15 text-out">
               {pending ? "…" : dejaPose ? "Retirer ici seulement ?" : "Retirer ?"}
             </button>
           ) : (
             <button
               onClick={() => setRetraitArme(true)}
               aria-label={`Retirer le pick du ${frDate(date)}`}
-              className="btn btn-plain !min-h-[44px] !text-[15px]"
+              className="btn btn-plain btn-sm"
             >
               Retirer
             </button>

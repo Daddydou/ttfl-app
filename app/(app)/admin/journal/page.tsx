@@ -26,7 +26,7 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
     return s.toString();
   };
   const lien = (nf: string, np: number, avecQ = true) => `/admin/journal?${params(nf, np, avecQ)}`;
-  const puce = (actif: boolean) => `btn btn-sm ${actif ? "btn-primary" : "btn-secondary"}`;
+  const puce = (actif: boolean) => `chip ${actif ? "chip-on" : ""}`; // filtres : chips du système (orange = sélection seulement)
 
   return (
     <div className="space-y-5">
@@ -61,10 +61,10 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
             maxLength={60}
             placeholder="Chercher (joueur, compte, action…)"
             aria-label="Chercher dans le journal"
-            className="min-w-0 flex-1 rounded-lg border border-line bg-transparent px-3 py-1.5 text-[13px]"
+            className="field min-w-0 flex-1 !py-2"
           />
-          <button type="submit" className="btn btn-sm btn-secondary">Chercher</button>
-          {q && <Link href={lien(filtre, jours, false)} className="btn btn-sm btn-secondary">Effacer</Link>}
+          <button type="submit" className="btn btn-sm btn-plain">Chercher</button>
+          {q && <Link href={lien(filtre, jours, false)} className="btn btn-sm btn-plain">Effacer</Link>}
         </form>
       </nav>
 

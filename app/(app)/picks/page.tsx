@@ -3,8 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { COMPTE_REF } from "@/lib/compte";
 import { compteValide, resumerComptes, type ResumeCompte } from "@/lib/historique";
 import { ScoreInput } from "@/components/ScoreInput";
-import { ModeTabs } from "@/components/ModeTabs";
 import { DeletePickButton } from "@/components/DeletePickButton";
+import { zoneMemorisee } from "@/lib/zone-memo";
 import { NuitPicker } from "@/components/NuitPicker";
 import { RepartitionEquipe } from "@/components/RepartitionEquipe";
 import { EditionComptes } from "@/components/EditionComptes";
@@ -189,7 +189,8 @@ export default async function PicksPage({
 }: {
   searchParams: Promise<{ mode?: string; vue?: string; zone?: string; mois?: string; compte?: string }>;
 }) {
-  const { mode: explicitMode, vue: vueParam, zone: zoneParam, mois: moisParam, compte: compteParam } = await searchParams;
+  const { mode: explicitMode, vue: vueParam, zone: zoneUrl, mois: moisParam, compte: compteParam } = await searchParams;
+  const zoneParam = zoneUrl ?? (await zoneMemorisee()) ?? undefined;
   const mode = await resolveMode(explicitMode);
   const supabase = await createClient();
 
@@ -206,7 +207,6 @@ export default async function PicksPage({
           sousTitre="Planning et historique de tes comptes"
           action={<Link href="/equipe" className="text-[13px] font-semibold text-court-400">Semaine équipe →</Link>}
         />
-        <ModeTabs base="/picks" current={mode} />
         <VueTabs courant={params} />
         <PlanningVue params={params} data={data} mode={mode} />
       </div>
@@ -220,8 +220,7 @@ export default async function PicksPage({
   return (
     <div className="space-y-4">
       <PageHeader titre="Mes picks" sousTitre="Historique et points de tes 13 comptes" />
-      <ModeTabs base="/picks" current={mode} />
-      {mode === "regular" && <VueTabs courant={params} />}
+      <VueTabs courant={params} />
       <ChoixCompte resume={resumerComptes(tous)} courant={compte} mode={mode} />
       <HistoriqueVue rows={rows} mode={mode} compte={compte} />
     </div>

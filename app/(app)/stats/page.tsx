@@ -120,11 +120,10 @@ export default async function StatsPage({
 
       {/* Tuiles résumé */}
       <div className="grid grid-cols-2 gap-2">
-        <BigStat label="Total" value={total.toString()} accent />
+        <BigStat label="Total" value={total.toString()} />
         <BigStat
           label="Moyenne / pick"
           value={avg !== null ? avg.toFixed(1) : "—"}
-          accent
         />
         <SmallStat
           label="Meilleur"
@@ -215,10 +214,10 @@ export default async function StatsPage({
                 </span>
                 <div className="h-6 flex-1 overflow-hidden rounded-md bg-surface-2">
                   <div
-                    className="flex h-full items-center justify-end rounded-md bg-court-500 px-2"
+                    className="flex h-full items-center justify-end rounded-md bg-fill px-2"
                     style={{ width: `${(r.avg / maxRound) * 100}%` }}
                   >
-                    <span className="text-[13px] font-bold text-on-accent">
+                    <span className="text-[13px] font-bold num text-fg">
                       {r.avg.toFixed(1)}
                     </span>
                   </div>
@@ -239,22 +238,10 @@ export default async function StatsPage({
   );
 }
 
-function BigStat({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: string;
-  accent?: boolean;
-}) {
+function BigStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card px-4 py-3">
-      <div
-        className={`text-[32px] font-bold leading-tight tracking-[-0.02em] num ${
-          accent ? "text-court-400" : "text-fg"
-        }`}
-      >
+      <div className="text-[32px] font-bold leading-tight tracking-[-0.02em] num text-fg">
         {value}
       </div>
       <div className="text-[13px] uppercase tracking-wide text-fg-muted">{label}</div>

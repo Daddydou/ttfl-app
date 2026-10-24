@@ -8,6 +8,7 @@ import { PlanTrenteJours } from "@/components/PlanTrenteJours";
 import { SuiviFormules } from "@/components/SuiviFormules";
 import type { LigneSuivi } from "@/lib/suivi-formules";
 import { chargerSoiree } from "@/lib/conseilles-data";
+import { zoneMemorisee } from "@/lib/zone-memo";
 import { captureDuPick, chargerCaptures } from "@/lib/captures";
 import { PickDuSoirResume } from "@/components/PickDuSoirResume";
 import { BandeauSecret } from "@/components/BandeauSecret";
@@ -62,7 +63,7 @@ export default async function PicksConseillesPage({
   const { date: dateParam, pour } = await searchParams;
   const supabase = await createClient();
   const aujourdhui = aujourdhuiNY();
-  const zone = zoneDe(pour);
+  const zone = zoneDe(pour ?? (await zoneMemorisee()));
 
   const { data: dernier } = await supabase
     .from("ttfl_latest_run")

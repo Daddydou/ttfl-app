@@ -24,7 +24,7 @@ export default function ModeOperatoirePage() {
 
       <nav aria-label="Sections du mode opératoire" className="flex flex-wrap gap-2">
         {groupes.map(({ section }) => (
-          <a key={section.id} href={`#section-${section.id}`} className="btn btn-sm btn-secondary">
+          <a key={section.id} href={`#section-${section.id}`} className="chip">
             {section.titre}
           </a>
         ))}

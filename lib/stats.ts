@@ -15,7 +15,7 @@ export function distribution(scores: number[]): Bucket[] {
     { label: "40–50", min: 40, max: 50, color: "rgb(var(--c-avail) / 0.6)" },
     { label: "30–40", min: 30, max: 40, color: "rgb(var(--c-quest))" },
     { label: "20–30", min: 20, max: 30, color: "rgb(var(--c-doubt))" },
-    { label: "< 20", min: 1, max: 20, color: "rgb(var(--c-accent-fill))" },
+    { label: "< 20", min: 1, max: 20, color: "rgb(var(--c-out) / 0.55)" },
     { label: "Zéros", min: 0, max: 1, color: "rgb(var(--c-out))" },
   ];
   return defs.map((d) => ({

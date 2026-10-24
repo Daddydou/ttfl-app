@@ -27,6 +27,20 @@ export function zoneDe(id?: string | null): Zone {
   return ZONES.find((z) => z.id === id) ?? ZONES[0];
 }
 
+// Dernier compte choisi (Conseillés ?pour=, Mes picks ?zone=) : retenu dans un cookie par le proxy, relu par les
+// pages quand l'adresse ne précise rien. On ne change ainsi pas de compte en changeant d'onglet.
+export const COOKIE_ZONE = "ttfl_zone";
+
+export function zoneChoisie(request: { pathname: string; searchParams: URLSearchParams }): string | null {
+  const id =
+    request.pathname === "/ce-soir"
+      ? request.searchParams.get("pour")
+      : request.pathname === "/picks"
+        ? request.searchParams.get("zone")
+        : null;
+  return id && ZONES.some((z) => z.id === id) ? id : null;
+}
+
 export const COMPTE_VALIDE = /^(0[1-9]|1[0-4])$/; // 01 à 14 (le 13 existe depuis le 2026-10-18 ; 14 réservé)
 
 // Un joueur pické est indisponible pour le même compte à ≤ 30 jours, dans les deux sens

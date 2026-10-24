@@ -78,7 +78,7 @@ export default async function AdversairesPage() {
             const resume = scores.get(s.users_id);
             return (
             <li key={s.users_id} className="list-row items-start">
-              <div className="w-16 shrink-0 text-right text-[15px] font-bold num text-court-400">{fmtRang(s.rang)}</div>
+              <div className="w-16 shrink-0 text-right text-[15px] font-bold num text-fg">{fmtRang(s.rang)}</div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="truncate text-[17px] font-semibold tracking-[-0.01em] text-fg">{s.pseudo}</span>
@@ -105,7 +105,7 @@ export default async function AdversairesPage() {
                           <span className="capitalize text-fg-muted">{frDate(p.pick_date)}</span>
                           <span className="min-w-0 flex-1 truncate font-medium text-fg">{p.joueur}</span>
                           {resume?.parSoiree.has(p.pick_date) && (
-                            <span className="w-10 shrink-0 text-right font-semibold num text-court-400">{resume.parSoiree.get(p.pick_date)}</span>
+                            <span className="w-10 shrink-0 text-right font-semibold num text-fg">{resume.parSoiree.get(p.pick_date)}</span>
                           )}
                         </li>
                       ))}
