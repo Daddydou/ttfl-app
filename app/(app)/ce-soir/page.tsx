@@ -5,6 +5,7 @@ import { CarteConseille } from "@/components/CarteConseille";
 import { PourquoiPick } from "@/components/PourquoiPick";
 import { JoursConseilles, ZonesConseilles } from "@/components/ConseillesNav";
 import { PlanTrenteJours } from "@/components/PlanTrenteJours";
+import { PlanEquipe } from "@/components/PlanEquipe";
 import { SuiviFormules } from "@/components/SuiviFormules";
 import type { LigneSuivi } from "@/lib/suivi-formules";
 import { chargerSoiree } from "@/lib/conseilles-data";
@@ -85,11 +86,14 @@ export default async function PicksConseillesPage({
 
   const date = dateParam && jours.includes(dateParam) ? dateParam : jours[0];
 
-  // Plan glissant de 30 jours : seulement pour les comptes 01 et 02, pas pour la zone « Équipe ».
+  // Plan glissant de 30 jours détaillé (formules, verrous, suivi) : comptes 01, 02 et 13. La zone « Équipe » a son
+  // propre bloc, plus simple (PlanEquipe).
   const avecPlan = zone.id === "c01" || zone.id === "c02" || zone.id === "c13";
   const compteAuto = zone.id === "c02" || zone.id === "c13"; // comptes gérés par le robot (verrou « validé à la main »)
 
-  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes, secret, capturesBrutes] = await Promise.all([
+  const avecPlanEquipe = zone.id === "equipe"; // Plan 30 des comptes 03 à 12 (un plan par compte, écrit par le moteur)
+
+  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes, secret, capturesBrutes, planEquipeRes] = await Promise.all([
     chargerSoiree(supabase, mode, date),
     supabase
       .from("ttfl_picks")
@@ -121,6 +125,9 @@ export default async function PicksConseillesPage({
       : Promise.resolve({ data: [] as LigneSuivi[], error: null }),
     chargerSecret(supabase, aujourdhui),
     avecPlan ? chargerCaptures(supabase) : Promise.resolve([] as Awaited<ReturnType<typeof chargerCaptures>>),
+    avecPlanEquipe
+      ? supabase.from("ttfl_plan30").select("*").in("compte", zone.comptes).returns<TtflPlan30[]>()
+      : Promise.resolve({ data: [] as TtflPlan30[], error: null }),
   ]);
   const nowMs = maintenantMs();
   // Pick secret du compte 02 : tout ce qui trahirait son joueur (picks, cycle, plan, verrous, suivi, captures) est
@@ -275,6 +282,10 @@ export default async function PicksConseillesPage({
             <SuiviFormules lignes={suiviVisible} />
           </div>
         </details>
+      )}
+
+      {avecPlanEquipe && (
+        <PlanEquipe plans={planEquipeRes.data ?? []} aujourdhui={aujourdhui} maintenantMs={maintenantMs()} />
       )}
 
       {ancien && (

@@ -33,6 +33,7 @@ export interface ReglagesPlan {
   description?: string;
   ordre?: number;
   defaut?: boolean;
+  equipe?: boolean; // plan d'un compte d'équipe (03 à 12), écrit depuis le 2026-10-25
   actualisation?: number | null;
   poids_matchup_futur?: number | null;
   retour_moyenne?: number | null;
@@ -166,4 +167,56 @@ export function decrireReglages(r: ReglagesPlan): string[] {
   }
   if (r.exposant_presence) out.push("taux de présence récent pris en compte");
   return out;
+}
+
+// --- Plan 30 jours de l'équipe (comptes 03 à 12) ---------------------------------------------------------------------
+// Une ligne ttfl_plan30 par compte d'équipe (une seule formule). Pour l'écran « Équipe », on regroupe soirée par soirée :
+// un joueur et la liste des comptes qui le prennent, plutôt que dix plans de trente lignes.
+
+export interface GroupeEquipe {
+  joueur: string;
+  comptes: string[];
+  projection: number | null;
+}
+
+export interface JourEquipe {
+  date: string;
+  libelle: string; // « mar. 20/10 (demain) »
+  groupes: GroupeEquipe[]; // le plus de comptes d'abord, puis la meilleure projection
+  sansJoueur: string[]; // comptes sans joueur possible ce soir-là
+}
+
+export function planEquipeParJour(plans: TtflPlan30[], aujourdhui: string): JourEquipe[] {
+  // Un plan par compte (la formule choisie), au cas où plusieurs formules seraient présentes.
+  const comptes = [...new Set(plans.map((p) => p.compte))].sort();
+  const parCompte = comptes
+    .map((c) => formuleChoisie(plans.filter((p) => p.compte === c)))
+    .filter((p): p is TtflPlan30 => p !== null);
+  const dates = [...new Set(parCompte.flatMap((p) => p.jours.map((j) => j.date)))]
+    .filter((d) => d >= aujourdhui)
+    .sort();
+  return dates.map((date) => {
+    const groupes = new Map<string, GroupeEquipe>();
+    const sansJoueur: string[] = [];
+    for (const p of parCompte) {
+      const j = p.jours.find((x) => x.date === date);
+      if (!j) continue;
+      if (!j.joueur) {
+        sansJoueur.push(p.compte);
+        continue;
+      }
+      const g = groupes.get(j.joueur) ?? { joueur: j.joueur, comptes: [], projection: j.projection ?? null };
+      g.comptes.push(p.compte);
+      groupes.set(j.joueur, g);
+    }
+    const e = etiquetteJour(date, aujourdhui);
+    return {
+      date,
+      libelle: e.relatif ? `${e.court} (${e.relatif})` : e.court,
+      groupes: [...groupes.values()].sort(
+        (a, b) => b.comptes.length - a.comptes.length || (b.projection ?? 0) - (a.projection ?? 0),
+      ),
+      sansJoueur,
+    };
+  });
 }

@@ -9,6 +9,7 @@ import {
   joursNonCouverts,
   libelleFormule,
   optionsDates,
+  planEquipeParJour,
   planPerime,
   type JourPlan30,
   type TtflPlan30,
@@ -133,5 +134,42 @@ describe("décrire les réglages", () => {
 
   it("marge nulle : toujours le meilleur du soir", () => {
     expect(decrireReglages({ marge_engagement: 0 })[0]).toMatch(/meilleur disponible/);
+  });
+});
+
+describe("plan de l'équipe (comptes 03 à 12)", () => {
+  const jours = (date: string, joueur: string | null, projection = 40) => [
+    jour(date, joueur, { projection: joueur ? projection : null }),
+  ];
+  const planCompte = (compte: string, parDate: Record<string, string | null>, projection = 40): TtflPlan30 => ({
+    ...plan("prudent"),
+    compte,
+    reglages: { equipe: true } as TtflPlan30["reglages"],
+    jours: Object.entries(parDate).flatMap(([d, j]) => jours(d, j, projection)),
+  });
+
+  it("regroupe par joueur, le plus pris d'abord, et ignore les soirées passées", () => {
+    const plans = [
+      planCompte("03", { "2026-10-19": "Vieux", "2026-10-20": "Alpha", "2026-10-21": "Gamma" }),
+      planCompte("04", { "2026-10-20": "Alpha", "2026-10-21": "Beta" }, 45),
+      planCompte("05", { "2026-10-20": "Beta", "2026-10-21": "Beta" }, 30),
+    ];
+    const r = planEquipeParJour(plans, "2026-10-20");
+    expect(r.map((j) => j.date)).toEqual(["2026-10-20", "2026-10-21"]);
+    expect(r[0].groupes.map((g) => [g.joueur, g.comptes])).toEqual([
+      ["Alpha", ["03", "04"]],
+      ["Beta", ["05"]],
+    ]);
+    expect(r[1].groupes[0]).toMatchObject({ joueur: "Beta", comptes: ["04", "05"] });
+  });
+
+  it("signale les comptes sans joueur possible", () => {
+    const r = planEquipeParJour([planCompte("03", { "2026-10-20": "Alpha" }), planCompte("04", { "2026-10-20": null })], "2026-10-20");
+    expect(r[0].sansJoueur).toEqual(["04"]);
+    expect(r[0].groupes).toHaveLength(1);
+  });
+
+  it("aucun plan = aucune soirée", () => {
+    expect(planEquipeParJour([], "2026-10-20")).toEqual([]);
   });
 });
