@@ -15,7 +15,7 @@ describe("catalogue des actions du PC", () => {
   });
 
   it("les actions qui écrivent sur le site TTFL ou consomment un quota demandent une confirmation", () => {
-    for (const id of ["synchro_app", "synchro_complet", "import_cotes"]) expect(action(id).confirmer, id).toBeTruthy();
+    for (const id of ["synchro_app", "synchro_complet", "import_cotes", "vainqueurs_cotes"]) expect(action(id).confirmer, id).toBeTruthy();
     expect(action("calendrier").confirmer).toBeUndefined();
   });
 });

@@ -56,7 +56,7 @@ export function VainqueursListe({
       <section className="card space-y-2 px-4 py-4" aria-label="Vainqueurs">
         <p className="text-sm font-semibold text-fg">Aucun match relevé pour l&apos;instant.</p>
         <p className="text-[13px] text-fg-muted">
-          Le PC relève les cotes de victoire une fois par soirée. Pour forcer un relevé : <code className="text-court-400">python -m pont.vainqueurs --forcer</code>.
+          Le calendrier NBA et les vainqueurs réels sont mis à jour chaque matin. Pour le faire tout de suite : Admin, « Mettre à jour les vainqueurs ».
         </p>
       </section>
     );
@@ -92,6 +92,9 @@ export function VainqueursListe({
                         {ferme ? " · commencé" : ""}
                       </span>
                       <span className="flex items-center gap-2">
+                        {m.prob_dom == null && !m.resultat && (
+                          <span className="rounded-full bg-surface px-2 py-0.5 font-medium text-fg-muted">cotes pas encore publiées</span>
+                        )}
                         {m.serre && <span className="rounded-full bg-quest/15 px-2 py-0.5 font-semibold text-quest">serré</span>}
                         {c?.source === "manuel" && <span className="rounded-full bg-court-500/15 px-2 py-0.5 font-semibold text-court-400">manuel</span>}
                         {m.resultat && effectif && (
@@ -136,8 +139,8 @@ export function VainqueursListe({
       })}
       <p className="px-1 text-[12px] text-fg-muted">
         Favori = cote la plus basse (médiane des bookmakers, marge retirée). 1 point par bon vainqueur, pronostic possible
-        jusqu&apos;au coup d&apos;envoi. Un match n&apos;apparaît ici que lorsque les bookmakers ont publié ses cotes (en général la veille ou le jour
-        même). « Validé chez Thomas » = ce que l&apos;API de Game Tracker a enregistré, relu par le moteur à chaque passage. Quand tu changes un choix, l&apos;envoi chez Thomas part dans les 2 à 4 minutes. {dernierReleve ? `Dernier relevé il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(dernierReleve)) / 60000)))}.` : ""}
+        jusqu&apos;au coup d&apos;envoi. Tous les matchs NBA des prochains jours sont listés ; les cotes (et donc le favori) arrivent
+        quand les bookmakers les publient, en général la veille ou le jour même. Tu peux déjà pronostiquer un match sans cote. « Validé chez Thomas » = ce que l&apos;API de Game Tracker a enregistré, relu par le moteur à chaque passage. Quand tu changes un choix, l&apos;envoi chez Thomas part dans les 2 à 4 minutes. {dernierReleve ? `Dernier relevé il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(dernierReleve)) / 60000)))}.` : ""}
       </p>
     </div>
   );
