@@ -37,7 +37,8 @@ import {
   type Nuit,
   type PickLigne,
 } from "@/lib/planning";
-import type { Mode, TtflManualAbsent, TtflRun } from "@/lib/types";
+import { indexerHistoriques } from "@/lib/forme-joueur";
+import type { HistoriqueJoueur, Mode, TtflManualAbsent, TtflRun } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Picks conseillés — TTFL" };
@@ -150,6 +151,27 @@ export default async function PicksConseillesPage({
     .filter((p) => p.compte === zone.comptes[0])
     .map((p) => (planSecret ? { ...p, jours: p.jours.filter((j) => !estSecret(secret.compte, j.date)) } : p));
   const planCache = planSecret && plansVisibles.length > 0 && plansVisibles.every((p) => p.jours.length === 0);
+  // Forme du moment des joueurs du plan (5 derniers matchs, moyennes) : lue sur les projections les plus récentes qui la
+  // portent. Les plans 30 ne la contiennent pas eux-mêmes. Absente (anciennes lignes) = la section ne s'affiche pas.
+  const nomsPlan = [
+    ...new Set(
+      plansVisibles.flatMap((p) =>
+        p.jours.flatMap((j) => [j.joueur, ...(j.alternatives ?? []).map((a) => a.joueur)]).filter((n): n is string => !!n),
+      ),
+    ),
+  ];
+  let historiques: Record<string, HistoriqueJoueur> = {};
+  if (avecPlan && !planCache && nomsPlan.length > 0) {
+    const { data: lignesHisto } = await supabase
+      .from("ttfl_projections")
+      .select("player,historique")
+      .in("player", nomsPlan)
+      .not("historique", "is", null)
+      .order("run_id", { ascending: false })
+      .limit(nomsPlan.length * 6) // un joueur figure dans plusieurs soirées : on garde de la marge, le plus récent gagne
+      .returns<{ player: string; historique: HistoriqueJoueur | null }[]>();
+    historiques = indexerHistoriques(lignesHisto ?? [], normaliserNom);
+  }
   const datesSecretes = zone.comptes.includes(secret.compte) ? soireesSecretes(secret, jours, aujourdhui, nowMs) : [];
   const lignes = fusionnerSoiree(soiree.avance, soiree.soir);
   const { conseilles, masques } = construireConseilles({
@@ -277,6 +299,7 @@ export default async function PicksConseillesPage({
                 maintenantMs={maintenantMs()}
                 verrous={verrous}
                 captures={captures}
+                historiques={historiques}
               />
             )}
             <SuiviFormules lignes={suiviVisible} />

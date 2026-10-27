@@ -39,6 +39,38 @@ export interface TtflProjection {
   series_state: string | null; // playoffs "2-3"
   expected_nights_left: number | null;
   explanation: string | null;
+  historique?: HistoriqueJoueur | null; // 5 derniers matchs + moyennes (moteur/historique.py), affichage seul
+}
+
+// Historique récent d'un joueur, calculé par le moteur (moteur/historique.py) : AFFICHAGE SEUL.
+export interface MatchRecent {
+  date: string; // AAAA-MM-JJ (date du match à New York)
+  adv: string | null; // « vs LAL » (domicile) ou « @ MEM » (extérieur)
+  min: number;
+  ttfl: number; // score TTFL du match
+  pts: number;
+  reb: number;
+  pds: number;
+}
+
+export interface HistoriqueJoueur {
+  recents: MatchRecent[]; // du plus récent au plus ancien (5 au plus)
+  n10: number; // nombre de matchs réellement utilisés pour les moyennes « sur 10 » (≤ 10)
+  moy5: number | null;
+  moy10: number | null;
+  min5: number | null;
+  min10: number | null;
+  pts10: number | null;
+  reb10: number | null;
+  pds10: number | null;
+  mediane10: number | null;
+  meilleur10: number | null;
+  pire10: number | null;
+  bons_soirs10: number; // matchs à 40 ou plus parmi les n10
+  ecart10: number | null; // irrégularité (écart-type), null sous 3 matchs
+  saison: { n: number; moy: number | null };
+  prior?: number; // moyenne de la saison précédente, quand elle entre dans la forme
+  poids_prior?: number | null; // part de la saison précédente dans la forme (0 à 1)
 }
 
 // Vue ttfl_latest_projections = projection + colonnes du run.

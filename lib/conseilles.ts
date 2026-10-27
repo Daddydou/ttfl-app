@@ -37,6 +37,7 @@ function enLigne(r: TtflProjection, source: "soir" | "avance"): LigneSoiree {
     status: r.status,
     is_urgent: r.is_urgent,
     explanation: r.explanation,
+    historique: r.historique ?? null,
     series_state: r.series_state,
     expected_nights_left: r.expected_nights_left,
     source,

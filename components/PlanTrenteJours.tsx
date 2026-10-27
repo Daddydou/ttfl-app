@@ -23,7 +23,8 @@ import {
   type JourPlan30,
   type TtflPlan30,
 } from "@/lib/plan30";
-import type { Mode } from "@/lib/types";
+import { HistoriqueJoueur as FormeJoueur } from "@/components/HistoriqueJoueur";
+import type { HistoriqueJoueur, Mode } from "@/lib/types";
 
 // Plan glissant de 30 jours pour un compte (01 ou 02) : un joueur par soirée, choisi pour maximiser le total de points
 // TTFL attendu sur la fenêtre. Le plan est calculé sur le PC (moteur/plan30.py) ; ici on le lit, on change de formule et
@@ -37,7 +38,9 @@ export function PlanTrenteJours({
   maintenantMs,
   verrous,
   captures,
+  historiques,
 }: {
+  historiques?: Record<string, HistoriqueJoueur>; // forme du moment par joueur (nom normalisé), fournie par la page
   plans: TtflPlan30[];
   compte: string;
   zoneLabel: string;
@@ -158,6 +161,7 @@ export function PlanTrenteJours({
               mode={mode}
               zoneLabel={zoneLabel}
               capture={captureDuPick(captures, compte, jour.date, jour.joueur)}
+              historique={jour.joueur ? (historiques?.[normaliserNom(jour.joueur)] ?? null) : null}
               verrouille={
                 jour.statut === "valide" &&
                 !!jour.joueur &&
@@ -267,6 +271,7 @@ function DetailJour({
   zoneLabel,
   verrouille,
   capture,
+  historique,
 }: {
   jour: JourPlan30;
   compte: string;
@@ -274,6 +279,7 @@ function DetailJour({
   zoneLabel: string;
   verrouille: boolean;
   capture: Capture | null;
+  historique: HistoriqueJoueur | null;
 }) {
   if (jour.statut === "aucun" || !jour.joueur) {
     return (
@@ -318,6 +324,15 @@ function DetailJour({
           variante="primary"
         />
       </div>
+
+      {historique && (
+        <details className="border-t border-line pt-2" open>
+          <summary className="cursor-pointer text-[13px] font-medium text-fg-muted">Forme du moment</summary>
+          <div className="mt-2">
+            <FormeJoueur h={historique} />
+          </div>
+        </details>
+      )}
 
       {capture && <CaptureVignette capture={capture} />}
 

@@ -1,6 +1,7 @@
 import { StatusBadge } from "@/components/StatusBadge";
 import { PickZoneButton } from "@/components/PickZoneButton";
 import { Icon } from "@/components/ui/Icon";
+import { HistoriqueJoueur } from "@/components/HistoriqueJoueur";
 import { fmtNum, nb } from "@/lib/format";
 import { phraseFourchette } from "@/lib/fourchette";
 import { plafondConnu } from "@/lib/pourquoi";
@@ -99,11 +100,24 @@ export function CarteConseille({
         </p>
       )}
 
-      {/* Le détail du calcul (souvent 4-5 lignes) est replié : il se répétait sur les 10 cartes. */}
-      {c.explanation && (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-[13px] font-medium text-fg-muted">Détail du calcul</summary>
-          <p className="mt-1.5 text-[14px] leading-snug text-fg-muted">{c.explanation}</p>
+      {/* Détail replié (il se répétait sur les 10 cartes), ouvert d'emblée sur le n° 1 : la forme du moment réelle du
+          joueur d'abord (ce qui explique le chiffre « forme »), puis les ajustements du moteur. */}
+      {(c.historique || c.explanation) && (
+        <details className="mt-2" open={premier}>
+          <summary className="cursor-pointer text-[13px] font-medium text-fg-muted">
+            {c.historique ? "Forme du moment et détail du calcul" : "Détail du calcul"}
+          </summary>
+          <div className="mt-2 space-y-3">
+            {c.historique && <HistoriqueJoueur h={c.historique} />}
+            {c.explanation && (
+              <div>
+                {c.historique && (
+                  <p className="text-[12px] font-medium uppercase tracking-wide text-fg-muted">Calcul du moteur</p>
+                )}
+                <p className="mt-1 text-[14px] leading-snug text-fg-muted">{c.explanation}</p>
+              </div>
+            )}
+          </div>
         </details>
       )}
 
