@@ -20,6 +20,24 @@ export type ActionResult = { ok: true; message?: string } | { ok: false; error: 
 
 // --- Picks -------------------------------------------------------------------
 
+// Règle de priorité (27/10/2026) : indisponibilité (Out / Doubtful / absent) > pick validé par l'utilisateur > pré-pick.
+// Un pick enregistré ici est un pick VALIDÉ : on efface la marque « auto » (pré-pick, remplacement du contrôle…) de la
+// case, sinon valider le même joueur que le pré-pick le laisserait « provisoire » et le robot pourrait le rechoisir.
+// Le compte 02 garde son fonctionnement propre (n°1 du Plan 30 + verrou « pick manuel validé »). Erreur ignorée : la
+// marque est un confort, l'enregistrement du pick ne doit jamais échouer à cause d'elle.
+async function retirerMarquesAuto(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  mode: Mode,
+  pickDate: string,
+  comptes: string[],
+): Promise<void> {
+  try {
+    await supabase.from("ttfl_picks_auto").delete().eq("mode", mode).eq("pick_date", pickDate).in("compte", comptes);
+  } catch {
+    /* ignoré */
+  }
+}
+
 // Enregistre le pick du soir. La table a une contrainte unique (mode, pick_date, compte)
 // donc un upsert : re-picker le même soir pour le même compte remplace, il n'y a qu'un
 // pick par soir ET par compte (compte 01 par défaut = écrans actuels de l'application).
@@ -40,6 +58,7 @@ export async function pickPlayer(
     );
 
   if (error) return { ok: false, error: error.message };
+  await retirerMarquesAuto(supabase, mode, pickDate, [compte]);
   revalidatePath("/");
   revalidatePath("/ce-soir");
   revalidatePath("/picks");
@@ -228,6 +247,7 @@ export async function pickPlayerComptes(
     { onConflict: "mode,pick_date,compte" },
   );
   if (error) return { ok: false, error: error.message };
+  await retirerMarquesAuto(supabase, mode, pickDate, liste);
 
   revalidatePath("/");
   revalidatePath("/ce-soir");
@@ -416,6 +436,7 @@ export async function pickRepartition(
     { onConflict: "mode,pick_date,compte" },
   );
   if (error) return { ok: false, error: error.message };
+  await retirerMarquesAuto(supabase, mode, pickDate, liste);
 
   revalidatePath("/");
   revalidatePath("/ce-soir");
