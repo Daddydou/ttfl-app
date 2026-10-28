@@ -3,7 +3,7 @@ import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { CarteConseille } from "@/components/CarteConseille";
 import { PourquoiPick } from "@/components/PourquoiPick";
-import { JoursConseilles, ZonesConseilles } from "@/components/ConseillesNav";
+import { ComptesEquipeConseilles, JoursConseilles, ZonesConseilles } from "@/components/ConseillesNav";
 import { PlanTrenteJours } from "@/components/PlanTrenteJours";
 import { PlanEquipe } from "@/components/PlanEquipe";
 import { SuiviFormules } from "@/components/SuiviFormules";
@@ -32,6 +32,7 @@ import {
   JOURS_CYCLE,
   ajouterJours,
   aujourdhuiNY,
+  compteEquipeChoisi,
   normaliserNom,
   zoneDe,
   type Nuit,
@@ -63,12 +64,16 @@ function jourComplet(date: string): string {
 export default async function PicksConseillesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string; pour?: string }>;
+  searchParams: Promise<{ date?: string; pour?: string; compte?: string }>;
 }) {
-  const { date: dateParam, pour } = await searchParams;
+  const { date: dateParam, pour, compte: compteParam } = await searchParams;
   const supabase = await createClient();
   const aujourdhui = aujourdhuiNY();
   const zone = zoneDe(pour ?? (await zoneMemorisee()));
+  // Zone Équipe vue pour UN compte (03 à 12) : son cycle, son classement. Sinon, la zone entière.
+  const compteEquipe = compteEquipeChoisi(zone, compteParam);
+  const comptesVue = compteEquipe ? [compteEquipe] : zone.comptes;
+  const libelleVue = compteEquipe ? `Compte ${compteEquipe}` : zone.label;
 
   const { data: dernier } = await supabase
     .from("ttfl_latest_run")
@@ -100,7 +105,7 @@ export default async function PicksConseillesPage({
       .from("ttfl_picks")
       .select("pick_date,player,compte")
       .eq("mode", mode)
-      .in("compte", zone.comptes)
+      .in("compte", comptesVue)
       .gte("pick_date", ajouterJours(date, -JOURS_CYCLE))
       .lte("pick_date", ajouterJours(date, JOURS_CYCLE))
       .returns<PickLigne[]>(),
@@ -176,7 +181,7 @@ export default async function PicksConseillesPage({
   const lignes = fusionnerSoiree(soiree.avance, soiree.soir);
   const { conseilles, masques } = construireConseilles({
     lignes,
-    comptes: zone.comptes,
+    comptes: comptesVue,
     picks,
     absents: absentsRes.data ?? [],
     date,
@@ -205,7 +210,7 @@ export default async function PicksConseillesPage({
       c={c}
       mode={mode}
       date={date}
-      zoneLabel={zone.label}
+      zoneLabel={libelleVue}
       cotes={cotesParJoueur.get(c.player)}
       picke={pickeSurTous(c.player, c.comptesLibres)}
     />
@@ -225,8 +230,9 @@ export default async function PicksConseillesPage({
         }
       />
 
-      <JoursConseilles jours={jours} courant={date} pour={zone.id} aujourdhui={aujourdhui} />
+      <JoursConseilles jours={jours} courant={date} pour={zone.id} aujourdhui={aujourdhui} compte={compteEquipe} />
       <ZonesConseilles courant={zone.id} date={date} />
+      {zone.id === "equipe" && <ComptesEquipeConseilles date={date} compte={compteEquipe} />}
 
       {soiree.runSoir ? (
         <FreshnessBanner computedAt={soiree.runSoir.computed_at} injuryFresh={soiree.runSoir.injury_report_fresh} />
@@ -308,7 +314,11 @@ export default async function PicksConseillesPage({
       )}
 
       {avecPlanEquipe && (
-        <PlanEquipe plans={planEquipeRes.data ?? []} aujourdhui={aujourdhui} maintenantMs={maintenantMs()} />
+        <PlanEquipe
+          plans={(planEquipeRes.data ?? []).filter((p) => !compteEquipe || p.compte === compteEquipe)}
+          aujourdhui={aujourdhui}
+          maintenantMs={maintenantMs()}
+        />
       )}
 
       {ancien && (
@@ -365,7 +375,7 @@ export default async function PicksConseillesPage({
       )}
 
       <p className="px-1 text-[13px] text-fg-muted">
-        Classement pour {zone.label.toLowerCase()} : les joueurs pickés à {JOURS_CYCLE} jours ou moins (passé comme futur) et
+        Classement pour {libelleVue.toLowerCase()} : les joueurs pickés à {JOURS_CYCLE} jours ou moins (passé comme futur) et
         les absents n&apos;apparaissent pas.
       </p>
     </div>

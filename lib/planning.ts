@@ -27,6 +27,12 @@ export function zoneDe(id?: string | null): Zone {
   return ZONES.find((z) => z.id === id) ?? ZONES[0];
 }
 
+// Conseillés : la zone Équipe peut se voir pour UN seul compte (?compte=07). Chaque compte a son propre cycle de
+// 30 jours, donc son propre classement. Renvoie ce compte, ou null (vue de toute la zone).
+export function compteEquipeChoisi(zone: Zone, compte?: string | null): string | null {
+  return zone.id === "equipe" && compte && COMPTES_EQUIPE.includes(compte) ? compte : null;
+}
+
 // Dernier compte choisi (Conseillés ?pour=, Mes picks ?zone=) : retenu dans un cookie par le proxy, relu par les
 // pages quand l'adresse ne précise rien. On ne change ainsi pas de compte en changeant d'onglet.
 export const COOKIE_ZONE = "ttfl_zone";

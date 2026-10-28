@@ -19,7 +19,7 @@ export function fakeSupabase(tables: Tables) {
         single: async () => single,
         returns: () => query,
       };
-      for (const m of ["select", "eq", "neq", "gt", "gte", "lt", "lte", "in", "order", "limit", "range"]) {
+      for (const m of ["select", "eq", "neq", "gt", "gte", "lt", "lte", "in", "not", "or", "like", "is", "order", "limit", "range"]) {
         query[m] = () => query;
       }
       return query;

@@ -42,7 +42,7 @@ function proj(player: string, projection: number, extra: Partial<TtflProjection>
 // 12 joueurs : P1 (la plus forte projection) … P12.
 const douze = () => Array.from({ length: 12 }, (_, i) => proj(`Joueur ${i + 1}`, 60 - i * 2, { id: i + 1 }));
 
-async function rendre(tables: Record<string, unknown[]>, params: { date?: string; pour?: string } = {}) {
+async function rendre(tables: Record<string, unknown[]>, params: { date?: string; pour?: string; compte?: string } = {}) {
   createClient.mockResolvedValue(fakeSupabase(tables));
   render(await PicksConseillesPage({ searchParams: Promise.resolve(params) }));
 }
@@ -141,6 +141,33 @@ describe("Picks conseillés", () => {
     );
     expect(screen.getByText("Joueur 1")).toBeInTheDocument();
     expect(screen.getByText(/Bloqué \(≤ 30 jours\) sur le compte 03/)).toBeInTheDocument();
+  });
+
+  it("Équipe vue pour UN compte : le cycle de ce compte seul décide (un classement par compte)", async () => {
+    const picks = [{ pick_date: "2026-10-12", player: "Joueur 1", compte: "03" }];
+    // Compte 03 : Joueur 1 y est bloqué, il disparaît et Joueur 2 devient n°1.
+    await rendre({ ...base(), ttfl_picks: picks }, { pour: "equipe", compte: "03" });
+    const noms03 = screen.getAllByRole("article").map((c) => within(c).getByRole("heading").textContent);
+    expect(noms03).not.toContain("Joueur 1");
+    expect(noms03[0]).toBe("Joueur 2");
+    expect(screen.getByText(/Classement pour compte 03/)).toBeInTheDocument();
+  });
+
+  it("Équipe vue pour le compte 07 : le pick du compte 03 ne le concerne pas", async () => {
+    const picks = [{ pick_date: "2026-10-12", player: "Joueur 1", compte: "03" }];
+    await rendre({ ...base(), ttfl_picks: picks }, { pour: "equipe", compte: "07" });
+    const noms07 = screen.getAllByRole("article").map((c) => within(c).getByRole("heading").textContent);
+    expect(noms07[0]).toBe("Joueur 1");
+    expect(screen.queryByText(/Bloqué \(≤ 30 jours\)/)).not.toBeInTheDocument();
+    // Le sélecteur de comptes de l'équipe est là, avec le compte 07 actif.
+    const onglets = within(screen.getByRole("tablist", { name: "Compte de l'équipe" })).getAllByRole("tab");
+    expect(onglets).toHaveLength(11); // Tous + 03 … 12
+    expect(onglets.find((o) => o.getAttribute("aria-selected") === "true")).toHaveTextContent("07");
+  });
+
+  it("un compte inconnu dans l'adresse retombe sur la vue de toute l'Équipe", async () => {
+    await rendre(base(), { pour: "equipe", compte: "99" });
+    expect(screen.getByText(/Classement pour équipe/)).toBeInTheDocument();
   });
 
   it("signale que les projections sont à l'avance (blessures inconnues) quand il n'y a pas de run du soir", async () => {
