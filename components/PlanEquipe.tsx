@@ -1,5 +1,8 @@
+import { HistoriqueJoueur as FormeJoueur } from "@/components/HistoriqueJoueur";
 import { Icon } from "@/components/ui/Icon";
 import { planEquipeParJour, planPerime, type TtflPlan30 } from "@/lib/plan30";
+import { normaliserNom } from "@/lib/planning";
+import type { HistoriqueJoueur } from "@/lib/types";
 
 // Plan 30 jours des comptes 03 à 12 : calculé par le moteur (un plan par compte), présenté soirée par soirée avec le ou
 // les joueurs pris par l'équipe. Lecture seule : les picks eux-mêmes se changent comme d'habitude.
@@ -7,10 +10,12 @@ export function PlanEquipe({
   plans,
   aujourdhui,
   maintenantMs,
+  historiques,
 }: {
   plans: TtflPlan30[];
   aujourdhui: string;
   maintenantMs: number;
+  historiques?: Record<string, HistoriqueJoueur>; // forme du moment par joueur (nom normalisé), fournie par la page
 }) {
   const jours = planEquipeParJour(plans, aujourdhui);
 
@@ -48,17 +53,35 @@ export function PlanEquipe({
             <li key={j.date}>
               <p className="text-[13px] font-semibold text-fg">{j.libelle}</p>
               <ul className="mt-1 space-y-0.5">
-                {j.groupes.map((g) => (
-                  <li key={g.joueur} className="flex items-baseline justify-between gap-3 text-[13px]">
-                    <span className="min-w-0">
-                      <span className="text-fg">{g.joueur}</span>
-                      <span className="text-fg-muted"> · {g.comptes.join(", ")}</span>
-                    </span>
-                    {g.projection !== null && (
-                      <span className="shrink-0 tabular-nums text-fg-faint">{g.projection.toFixed(1)}</span>
-                    )}
-                  </li>
-                ))}
+                {j.groupes.map((g) => {
+                  const forme = historiques?.[normaliserNom(g.joueur)] ?? null;
+                  const ligne = (
+                    <>
+                      <span className="min-w-0">
+                        <span className="text-fg">{g.joueur}</span>
+                        <span className="text-fg-muted"> · {g.comptes.join(", ")}</span>
+                      </span>
+                      {g.projection !== null && (
+                        <span className="shrink-0 tabular-nums text-fg-faint">{g.projection.toFixed(1)}</span>
+                      )}
+                    </>
+                  );
+                  // Forme du moment (5 derniers matchs, moyennes) : dépliable, absente si le moteur ne l'a pas fournie.
+                  return forme ? (
+                    <li key={g.joueur} className="text-[13px]">
+                      <details>
+                        <summary className="flex cursor-pointer items-baseline justify-between gap-3">{ligne}</summary>
+                        <div className="mt-2 rounded-[14px] bg-surface-2 px-3 py-3">
+                          <FormeJoueur h={forme} />
+                        </div>
+                      </details>
+                    </li>
+                  ) : (
+                    <li key={g.joueur} className="flex items-baseline justify-between gap-3 text-[13px]">
+                      {ligne}
+                    </li>
+                  );
+                })}
                 {j.sansJoueur.length > 0 && (
                   <li className="text-[13px] text-fg-muted">Aucun joueur possible : {j.sansJoueur.join(", ")}</li>
                 )}

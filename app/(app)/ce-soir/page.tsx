@@ -177,6 +177,26 @@ export default async function PicksConseillesPage({
       .returns<{ player: string; historique: HistoriqueJoueur | null }[]>();
     historiques = indexerHistoriques(lignesHisto ?? [], normaliserNom);
   }
+  // Plan 30 de l'équipe (comptes 03 à 12) : même forme du moment que pour les comptes 01, 02 et 13 (29/10/2026). Ces
+  // comptes ne sont jamais le compte secret, rien à masquer ici.
+  const plansEquipe = (planEquipeRes.data ?? []).filter((p) => !compteEquipe || p.compte === compteEquipe);
+  let historiquesEquipe: Record<string, HistoriqueJoueur> = {};
+  if (avecPlanEquipe && plansEquipe.length > 0) {
+    const nomsEquipe = [
+      ...new Set(plansEquipe.flatMap((p) => p.jours.map((j) => j.joueur)).filter((n): n is string => !!n)),
+    ];
+    if (nomsEquipe.length > 0) {
+      const { data: lignesEquipe } = await supabase
+        .from("ttfl_projections")
+        .select("player,historique")
+        .in("player", nomsEquipe)
+        .not("historique", "is", null)
+        .order("run_id", { ascending: false })
+        .limit(nomsEquipe.length * 6)
+        .returns<{ player: string; historique: HistoriqueJoueur | null }[]>();
+      historiquesEquipe = indexerHistoriques(lignesEquipe ?? [], normaliserNom);
+    }
+  }
   const datesSecretes = zone.comptes.includes(secret.compte) ? soireesSecretes(secret, jours, aujourdhui, nowMs) : [];
   const lignes = fusionnerSoiree(soiree.avance, soiree.soir);
   const { conseilles, masques } = construireConseilles({
@@ -315,9 +335,10 @@ export default async function PicksConseillesPage({
 
       {avecPlanEquipe && (
         <PlanEquipe
-          plans={(planEquipeRes.data ?? []).filter((p) => !compteEquipe || p.compte === compteEquipe)}
+          plans={plansEquipe}
           aujourdhui={aujourdhui}
           maintenantMs={maintenantMs()}
+          historiques={historiquesEquipe}
         />
       )}
 
