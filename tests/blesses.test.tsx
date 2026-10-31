@@ -209,3 +209,23 @@ describe("picks de mes comptes sur les blessés (C1, C2...)", () => {
     expect(html).not.toContain(">C2<");
   });
 });
+
+describe("repère « Pick C… » dans le résumé fermé", () => {
+  const PICKS2 = indexerPicks([
+    { pick_date: "2026-10-30", compte: "03", player: "Devin Carter" },
+    { pick_date: "2026-10-30", compte: "01", player: "Devin Carter" },
+  ]);
+
+  it("affiche les comptes concernés dans le résumé, sans ouvrir la liste", () => {
+    const html = renderToStaticMarkup(<BlessesMatch m={blessesDuMatch(MATCHS[1], BLESSES)} picks={PICKS2} />);
+    const resume = html.slice(html.indexOf("<summary"), html.indexOf("</summary>"));
+    expect(resume).toContain("Pick C1 C3");
+  });
+
+  it("pas de repère quand aucun de mes picks n'est blessé dans ce match", () => {
+    const html = renderToStaticMarkup(<BlessesMatch m={blessesDuMatch(MATCHS[0], BLESSES)} picks={PICKS2} />);
+    expect(html).not.toContain("Pick C");
+    const sans = renderToStaticMarkup(<BlessesMatch m={blessesDuMatch(MATCHS[1], BLESSES)} />);
+    expect(sans).not.toContain("Pick C");
+  });
+});

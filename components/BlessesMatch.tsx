@@ -14,11 +14,23 @@ import {
 export function BlessesMatch({ m, picks = {} }: { m: MatchBlesses | null; picks?: PicksParJoueur }) {
   if (!m) return null;
   const aucun = m.nbOut + m.nbDoubtful === 0;
+  // Repère visible liste fermée : les comptes qui ont en pick un blessé de CE match (ex. « Pick C1 C3 »).
+  const mesComptes = [...new Set([...m.ext.joueurs, ...m.dom.joueurs].flatMap((b) => comptesDuBlesse(b, picks)))].sort(
+    (a, c) => Number(a) - Number(c),
+  );
   return (
     <details className="rounded-[12px] bg-surface px-3 py-2">
       <summary className="flex cursor-pointer items-center justify-between gap-2 text-[13px] font-medium text-fg">
         <span>Blessés</span>
         <span className="flex shrink-0 items-center gap-1.5 text-[12px]">
+          {mesComptes.length > 0 && (
+            <span
+              title="Comptes qui ont un blessé de ce match en pick"
+              className="rounded-full bg-fg/10 px-2 py-0.5 font-bold text-fg"
+            >
+              Pick {mesComptes.map(etiquetteCompte).join(" ")}
+            </span>
+          )}
           {m.nbOut > 0 && <span className="rounded-full bg-out/10 px-2 py-0.5 font-semibold text-out">{m.nbOut} Out</span>}
           {m.nbDoubtful > 0 && (
             <span className="rounded-full bg-quest/15 px-2 py-0.5 font-semibold text-quest">{m.nbDoubtful} Doubtful</span>
