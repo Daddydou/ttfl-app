@@ -40,11 +40,6 @@ export interface MatchBlesses {
   nbDoubtful: number;
 }
 
-// Seules la soirée du jour et celle du lendemain (New York) sont tenues à jour par le moteur.
-export function dateBlessesValide(param: string | undefined, aujourdhui: string, demain: string): string {
-  return param === demain ? demain : aujourdhui;
-}
-
 export function trierBlesses(liste: Blesse[]): Blesse[] {
   const rang = (b: Blesse) => (b.statut === "Out" ? 0 : 1);
   return [...liste].sort((a, b) => rang(a) - rang(b) || a.joueur.localeCompare(b.joueur, "fr"));
@@ -73,27 +68,18 @@ export function blessesParMatch(matchs: MatchSoiree[], blesses: Blesse[]): Match
     });
 }
 
+// Les blessés d'UN match (la page Vainqueurs liste plusieurs soirées : seuls les blessés de la date du match comptent).
+// null = aucun rapport lu pour cette soirée (le moteur ne tient à jour que ce soir et demain) : on n'affiche rien,
+// plutôt qu'un faux « aucun blessé ».
+export function blessesDuMatch(m: MatchSoiree, blesses: Blesse[]): MatchBlesses | null {
+  const dujour = blesses.filter((b) => b.game_date === m.game_date);
+  if (dujour.length === 0) return null;
+  return blessesParMatch([m], dujour)[0];
+}
+
 // Joueurs du rapport dont l'équipe n'a pas pu être identifiée : on ne les cache pas, on les montre à part.
 export function blessesSansEquipe(blesses: Blesse[]): Blesse[] {
   return trierBlesses(blesses.filter((b) => !b.equipe_abbr));
-}
-
-export interface ResumeBlesses {
-  nbOut: number;
-  nbDoubtful: number;
-  nbEquipesTouchees: number;
-}
-
-export function resumeBlesses(parMatch: MatchBlesses[]): ResumeBlesses {
-  let nbOut = 0;
-  let nbDoubtful = 0;
-  let nbEquipesTouchees = 0;
-  for (const m of parMatch) {
-    nbOut += m.nbOut;
-    nbDoubtful += m.nbDoubtful;
-    nbEquipesTouchees += (m.ext.joueurs.length > 0 ? 1 : 0) + (m.dom.joueurs.length > 0 ? 1 : 0);
-  }
-  return { nbOut, nbDoubtful, nbEquipesTouchees };
 }
 
 // Libellé du statut : « Day-To-Day » (ESPN) reste visible, il compte comme Doubtful.

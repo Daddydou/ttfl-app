@@ -1,23 +1,35 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
+  blessesDuMatch,
   blessesParMatch,
   blessesSansEquipe,
-  dateBlessesValide,
   libelleStatut,
-  resumeBlesses,
   trierBlesses,
   type Blesse,
   type MatchSoiree,
 } from "@/lib/blesses";
-import { BlessesListe, DatesBlesses, VainqueursNav } from "@/components/BlessesListe";
+import type { MatchVainqueur } from "@/lib/vainqueurs";
+import { BlessesMatch, BlessesSansEquipe } from "@/components/BlessesMatch";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+vi.mock("@/app/actions", () => ({ choisirVainqueur: vi.fn(), revenirAuFavori: vi.fn() }));
+
+const { VainqueursListe } = await import("@/components/VainqueursListe");
 
 const MAINTENANT = Date.parse("2026-10-30T18:00:00Z");
 
-function match(id: string, ext: string, dom: string, commence = "2026-10-30T23:40:00Z"): MatchSoiree {
+function match(id: string, ext: string, dom: string, commence = "2026-10-30T23:40:00Z", date = "2026-10-30"): MatchSoiree {
   return {
-    event_id: id, game_date: "2026-10-30", commence_time: commence, equipe_ext: `Equipe ${ext}`, equipe_dom: `Equipe ${dom}`,
+    event_id: id, game_date: date, commence_time: commence, equipe_ext: `Equipe ${ext}`, equipe_dom: `Equipe ${dom}`,
     abbr_ext: ext, abbr_dom: dom,
+  };
+}
+
+function matchVainqueur(m: MatchSoiree): MatchVainqueur {
+  return {
+    ...m, prob_dom: 0.6, cote_dom: 1.6, cote_ext: 2.4, nb_books: 5, favori: "dom", serre: false,
+    releve_le: "2026-10-30T14:00:00Z", resultat: null,
   };
 }
 
@@ -56,69 +68,82 @@ describe("lib/blesses", () => {
     expect(blessesSansEquipe(BLESSES).map((b) => b.joueur)).toEqual(["Bradley Beal"]);
   });
 
-  it("résume et libelle le statut", () => {
-    expect(resumeBlesses(blessesParMatch(MATCHS, BLESSES))).toEqual({ nbOut: 2, nbDoubtful: 1, nbEquipesTouchees: 2 });
+  it("libelle le statut et trie Out avant Doubtful", () => {
     expect(libelleStatut(blesse("A", "BOS", "Doubtful", { statut_brut: "Day-To-Day", source: "espn" }))).toBe("Day-To-Day");
     expect(libelleStatut(blesse("A", "BOS", "Doubtful"))).toBe("Doubtful");
     expect(trierBlesses([blesse("B", "X", "Doubtful"), blesse("A", "X", "Out")]).map((b) => b.joueur)).toEqual(["A", "B"]);
   });
 
-  it("n'accepte que ce soir ou demain", () => {
-    expect(dateBlessesValide("2026-10-31", "2026-10-30", "2026-10-31")).toBe("2026-10-31");
-    expect(dateBlessesValide("2030-01-01", "2026-10-30", "2026-10-31")).toBe("2026-10-30");
-    expect(dateBlessesValide(undefined, "2026-10-30", "2026-10-31")).toBe("2026-10-30");
+  it("blessesDuMatch : seulement la date du match ; null s'il n'y a aucun rapport pour cette soirée", () => {
+    const m = match("m1", "CHI", "BOS");
+    expect(blessesDuMatch(m, BLESSES)?.dom.joueurs.map((j) => j.joueur)).toEqual(["Devin Carter"]);
+    // Un rapport d'une autre soirée ne compte pas : pas de faux « aucun blessé ».
+    expect(blessesDuMatch(match("m9", "CHI", "BOS", "2026-11-04T00:00:00Z", "2026-11-03"), BLESSES)).toBeNull();
+    expect(blessesDuMatch(m, [])).toBeNull();
+    // Rapport lu mais personne de blessé dans ce match : on montre « aucun » (information utile).
+    const autre = blessesDuMatch(match("m3", "DEN", "PHX"), BLESSES);
+    expect(autre).not.toBeNull();
+    expect(autre!.nbOut + autre!.nbDoubtful).toBe(0);
   });
 });
 
-describe("BlessesListe", () => {
-  it("une liste déroulante fermée par match, avec les compteurs et les blessés", () => {
-    const html = renderToStaticMarkup(
-      <BlessesListe date="2026-10-30" matchs={MATCHS} blesses={BLESSES} maintenantMs={MAINTENANT} />,
-    );
-    expect((html.match(/<details/g) ?? []).length).toBe(3); // 2 matchs + « équipe non identifiée »
+describe("BlessesMatch", () => {
+  it("une liste déroulante fermée avec les compteurs et les blessés des deux équipes", () => {
+    const html = renderToStaticMarkup(<BlessesMatch m={blessesDuMatch(MATCHS[0], BLESSES)} />);
+    expect((html.match(/<details/g) ?? []).length).toBe(1);
     expect(html).not.toContain("<details open");
-    expect(html).toContain("CHI");
+    expect(html).toContain("Blessés");
     expect(html).toContain("1 Out");
     expect(html).toContain("1 Doubtful");
     expect(html).toContain("Jimmy Butler III");
     expect(html).toContain("Right Knee — Surgery");
-    expect(html).toContain("Équipe non identifiée (1)");
-    expect(html).toContain("Aucun blessé signalé");
-    expect(html).toContain("Source : rapport officiel de la NBA");
+    expect(html).toContain("Aucun blessé signalé"); // LAL n'a personne
   });
 
-  it("sans rapport : message clair, pas d'erreur", () => {
-    const html = renderToStaticMarkup(<BlessesListe date="2026-10-30" matchs={MATCHS} blesses={[]} maintenantMs={MAINTENANT} />);
-    expect(html).toContain("Aucun rapport de blessures lu");
+  it("rien du tout sans rapport pour la soirée", () => {
+    expect(renderToStaticMarkup(<BlessesMatch m={null} />)).toBe("");
   });
 
-  it("sans match : message dédié", () => {
-    const html = renderToStaticMarkup(<BlessesListe date="2026-10-30" matchs={[]} blesses={[]} maintenantMs={MAINTENANT} />);
-    expect(html).toContain("Aucun match relevé");
-  });
-
-  it("source ESPN annoncée", () => {
-    const html = renderToStaticMarkup(
-      <BlessesListe
-        date="2026-10-31"
-        matchs={MATCHS}
-        blesses={[blesse("Gui Santos", "GSW", "Doubtful", { source: "espn", statut_brut: "Day-To-Day" })]}
-        maintenantMs={MAINTENANT}
-      />,
-    );
-    expect(html).toContain("Source : ESPN");
-    expect(html).toContain("Day-To-Day");
+  it("équipe non identifiée : liste à part, rien de caché", () => {
+    const html = renderToStaticMarkup(<BlessesSansEquipe blesses={blessesSansEquipe(BLESSES)} />);
+    expect(html).toContain("Blessés d&#x27;équipe non identifiée (1)");
+    expect(html).toContain("Bradley Beal");
+    expect(renderToStaticMarkup(<BlessesSansEquipe blesses={[]} />)).toBe("");
   });
 });
 
-describe("navigation Vainqueurs", () => {
-  it("deux sous-onglets et deux soirées", () => {
-    const nav = renderToStaticMarkup(<VainqueursNav vue="blesses" />);
-    expect(nav).toContain('href="/vainqueurs"');
-    expect(nav).toContain("vue=blesses");
-    const dates = renderToStaticMarkup(<DatesBlesses courant="2026-10-31" aujourdhui="2026-10-30" demain="2026-10-31" />);
-    expect(dates).toContain("Ce soir");
-    expect(dates).toContain("Demain");
-    expect(dates).toContain("date=2026-10-31");
+describe("page Vainqueurs : les blessés sont dans chaque match", () => {
+  it("chaque match a sa liste déroulante Blessés, sans sous-onglet", () => {
+    const html = renderToStaticMarkup(
+      <VainqueursListe
+        matchs={[matchVainqueur(MATCHS[1]), matchVainqueur(MATCHS[0])]}
+        choix={[]}
+        blesses={BLESSES}
+        maintenantMs={MAINTENANT}
+      />,
+    );
+    expect((html.match(/<summary[^>]*>[^<]*<span>Blessés<\/span>/g) ?? []).length).toBe(2);
+    expect(html).toContain("Devin Carter");
+    expect(html).toContain("Jimmy Butler III");
+    expect(html).toContain("Blessés d&#x27;équipe non identifiée (1)");
+    expect(html).not.toContain("vue=blesses");
+    expect(html).not.toContain('role="tablist"');
+    expect(html).toContain("Questionable");
+  });
+
+  it("sans table ni rapport : la page des matchs reste identique, sans aucune liste Blessés", () => {
+    const html = renderToStaticMarkup(
+      <VainqueursListe matchs={[matchVainqueur(MATCHS[1])]} choix={[]} blesses={[]} maintenantMs={MAINTENANT} />,
+    );
+    expect(html).not.toContain("<span>Blessés</span>");
+    expect(html).not.toContain("Seuls les Out");
+  });
+
+  it("une soirée sans rapport (dans quelques jours) n'affiche pas de faux « aucun blessé »", () => {
+    const lointain = matchVainqueur(match("m8", "CHI", "BOS", "2026-11-04T00:00:00Z", "2026-11-03"));
+    const html = renderToStaticMarkup(
+      <VainqueursListe matchs={[lointain]} choix={[]} blesses={BLESSES} maintenantMs={MAINTENANT} />,
+    );
+    expect(html).not.toContain("<span>Blessés</span>");
   });
 });

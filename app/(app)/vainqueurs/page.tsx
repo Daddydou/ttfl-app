@@ -1,49 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { VainqueursListe } from "@/components/VainqueursListe";
-import { BlessesListe, DatesBlesses, VainqueursNav } from "@/components/BlessesListe";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { aujourdhuiNY, ajouterJours } from "@/lib/planning";
 import { maintenantMs } from "@/lib/plan30";
-import { dateBlessesValide, type Blesse, type MatchSoiree } from "@/lib/blesses";
+import type { Blesse } from "@/lib/blesses";
 import type { ChoixVainqueur, MatchVainqueur, PronoKt } from "@/lib/vainqueurs";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Vainqueurs — TTFL" };
 
-export default async function VainqueursPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ vue?: string; date?: string }>;
-}) {
-  const { vue, date: dateParam } = await searchParams;
+export default async function VainqueursPage() {
   const supabase = await createClient();
-
-  // Sous-onglet « Blessés » : Out / Doubtful des équipes qui jouent, une liste déroulante par match.
-  if (vue === "blesses") {
-    const aujourdhui = aujourdhuiNY();
-    const demain = ajouterJours(aujourdhui, 1);
-    const date = dateBlessesValide(dateParam, aujourdhui, demain);
-    const { data: matchsSoiree } = await supabase
-      .from("ttfl_vainqueurs_matchs")
-      .select("event_id,game_date,commence_time,equipe_dom,equipe_ext,abbr_dom,abbr_ext")
-      .eq("game_date", date)
-      .order("commence_time")
-      .returns<MatchSoiree[]>();
-    // Table absente ou vide : on n'affiche simplement aucun blessé (jamais d'erreur sur cette page).
-    const { data: blesses } = await supabase
-      .from("ttfl_blesses")
-      .select("game_date,joueur,joueur_norm,equipe_abbr,equipe,statut,statut_brut,motif,retour_prevu,source,maj_le")
-      .eq("game_date", date)
-      .returns<Blesse[]>();
-    return (
-      <div className="space-y-4">
-        <PageHeader titre="Vainqueurs" sousTitre="Les joueurs Out ou Doubtful, équipe par équipe" />
-        <VainqueursNav vue="blesses" />
-        <DatesBlesses courant={date} aujourdhui={aujourdhui} demain={demain} />
-        <BlessesListe date={date} matchs={matchsSoiree ?? []} blesses={blesses ?? []} maintenantMs={maintenantMs()} />
-      </div>
-    );
-  }
 
   // La veille comprise : on garde les matchs de la soirée en cours (finis ou non) avec leur résultat.
   const depuis = ajouterJours(aujourdhuiNY(), -1);
@@ -75,11 +42,18 @@ export default async function VainqueursPage({
         .returns<PronoKt[]>()
     : { data: [] as PronoKt[] };
 
+  // Blessés (Out / Doubtful) de ce soir et de demain, écrits par le moteur : affichés dans une liste déroulante de chaque
+  // match. Table absente ou vide : aucun blessé affiché, jamais d'erreur sur cette page.
+  const { data: blesses } = await supabase
+    .from("ttfl_blesses")
+    .select("game_date,joueur,joueur_norm,equipe_abbr,equipe,statut,statut_brut,motif,retour_prevu,source,maj_le")
+    .gte("game_date", depuis)
+    .returns<Blesse[]>();
+
   return (
     <div className="space-y-4">
-      <PageHeader titre="Vainqueurs" sousTitre="Le favori des bookmakers pour chaque match" />
-      <VainqueursNav vue="matchs" />
-      <VainqueursListe matchs={liste} choix={choix ?? []} kt={kt ?? []} maintenantMs={maintenantMs()} />
+      <PageHeader titre="Vainqueurs" sousTitre="Le favori des bookmakers pour chaque match, avec les blessés" />
+      <VainqueursListe matchs={liste} choix={choix ?? []} kt={kt ?? []} blesses={blesses ?? []} maintenantMs={maintenantMs()} />
     </div>
   );
 }

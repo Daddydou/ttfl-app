@@ -5,6 +5,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { choisirVainqueur, revenirAuFavori } from "@/app/actions";
 import { frDate, humanAge } from "@/lib/format";
+import { BlessesMatch, BlessesSansEquipe } from "@/components/BlessesMatch";
+import { blessesDuMatch, blessesSansEquipe, derniereMaj, type Blesse } from "@/lib/blesses";
 import {
   bilanSoiree,
   choixEffectif,
@@ -27,11 +29,13 @@ export function VainqueursListe({
   matchs,
   choix,
   kt = [],
+  blesses = [],
   maintenantMs,
 }: {
   matchs: MatchVainqueur[];
   choix: ChoixVainqueur[];
   kt?: PronoKt[];
+  blesses?: Blesse[];
   maintenantMs: number;
 }) {
   const router = useRouter();
@@ -121,6 +125,7 @@ export function VainqueursListe({
                       ))}
                     </div>
                     <LigneKt m={m} effectif={effectif} kt={parMatchKt.get(m.event_id)} choixMaj={c?.maj_le ?? null} />
+                    <BlessesMatch m={blessesDuMatch(m, blesses)} />
                     {c?.source === "manuel" && m.favori && c.choix !== m.favori && !ferme && (
                       <button
                         className="text-[12px] font-medium text-court-400"
@@ -137,13 +142,26 @@ export function VainqueursListe({
           </section>
         );
       })}
+      <BlessesSansEquipe blesses={blessesSansEquipe(blesses)} />
       <p className="px-1 text-[12px] text-fg-muted">
         Favori = cote la plus basse (médiane des bookmakers, marge retirée). 1 point par bon vainqueur, pronostic possible
         jusqu&apos;au coup d&apos;envoi. Tous les matchs NBA des prochains jours sont listés ; les cotes (et donc le favori) arrivent
         quand les bookmakers les publient, en général la veille ou le jour même. Tu peux déjà pronostiquer un match sans cote. « Validé chez Thomas » = ce que l&apos;API de Game Tracker a enregistré, relu par le moteur à chaque passage. Quand tu changes un choix, l&apos;envoi chez Thomas part dans les 2 à 4 minutes. {dernierReleve ? `Dernier relevé il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(dernierReleve)) / 60000)))}.` : ""}
       </p>
+      {blesses.length > 0 && (
+        <p className="px-1 text-[12px] text-fg-muted">
+          Blessés : seuls les Out et les Doubtful sont listés (ils sont écartés du classement), pour ce soir (rapport officiel de
+          la NBA) et demain (ESPN, « Day-To-Day » compte comme Doubtful). Les « Questionable » et « Probable » n&apos;y figurent
+          pas. {blessesMajTexte(blesses, maintenantMs)}
+        </p>
+      )}
     </div>
   );
+}
+
+function blessesMajTexte(blesses: Blesse[], maintenantMs: number): string {
+  const maj = derniereMaj(blesses);
+  return maj ? `Mis à jour il y a ${humanAge(Math.max(0, Math.round((maintenantMs - Date.parse(maj)) / 60000)))}.` : "";
 }
 
 // Ce qui est enregistré chez Thomas pour ce match, comparé à notre choix.
