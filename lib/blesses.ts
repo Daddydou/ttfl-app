@@ -4,6 +4,7 @@
 // joueurs du classement (NBA officiel, ESPN en secours ; Day-To-Day d'ESPN rangé en Doubtful). L'application ne fait que
 // l'afficher, regroupé par match de la soirée. Aucun effet sur les picks.
 import type { MatchVainqueur } from "@/lib/vainqueurs";
+import { normaliserNom } from "@/lib/planning";
 
 export type StatutBlesse = "Out" | "Doubtful";
 
@@ -96,4 +97,42 @@ export function derniereMaj(blesses: Blesse[]): string | null {
 // D'où vient le rapport : « nba » (officiel) ou « espn » (secours / lendemain). Mélange impossible dans une soirée.
 export function sourceBlesses(blesses: Blesse[]): "nba" | "espn" | null {
   return blesses[0]?.source ?? null;
+}
+
+// --- Les picks de mes comptes sur les blessés ---------------------------------------------------------------------------
+// Pour chaque joueur blessé, on affiche les comptes (C1, C2...) qui l'ont en pick pour la soirée du match. Logique PURE :
+// la page fournit les lignes de ttfl_picks DÉJÀ filtrées par le pick secret du compte 02 (lib/secret.ts).
+
+export interface PickCompte {
+  pick_date: string;
+  compte: string; // "01" .. "13"
+  player: string;
+}
+
+// clé "AAAA-MM-JJ|nom normalisé" -> numéros de compte triés
+export type PicksParJoueur = Record<string, string[]>;
+
+const clePick = (date: string, nom: string) => `${String(date).slice(0, 10)}|${normaliserNom(nom)}`;
+
+export function indexerPicks(picks: PickCompte[]): PicksParJoueur {
+  const index: PicksParJoueur = {};
+  for (const p of picks) {
+    const k = clePick(p.pick_date, p.player);
+    const liste = index[k] ?? (index[k] = []);
+    if (!liste.includes(p.compte)) liste.push(p.compte);
+  }
+  for (const liste of Object.values(index)) liste.sort((a, b) => Number(a) - Number(b));
+  return index;
+}
+
+// Comptes qui ont ce blessé en pick le soir du match (nom du rapport ou nom normalisé du moteur).
+export function comptesDuBlesse(b: Blesse, index: PicksParJoueur): string[] {
+  const tous = new Set([...(index[clePick(b.game_date, b.joueur)] ?? []), ...(index[clePick(b.game_date, b.joueur_norm)] ?? [])]);
+  return [...tous].sort((a, c) => Number(a) - Number(c));
+}
+
+// "01" -> "C1", "13" -> "C13"
+export function etiquetteCompte(compte: string): string {
+  const n = Number(compte);
+  return Number.isFinite(n) && compte.trim() !== "" ? `C${n}` : `C${compte}`;
 }

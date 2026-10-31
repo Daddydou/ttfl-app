@@ -4,6 +4,9 @@ import {
   blessesDuMatch,
   blessesParMatch,
   blessesSansEquipe,
+  comptesDuBlesse,
+  etiquetteCompte,
+  indexerPicks,
   libelleStatut,
   trierBlesses,
   type Blesse,
@@ -145,5 +148,64 @@ describe("page Vainqueurs : les blessés sont dans chaque match", () => {
       <VainqueursListe matchs={[lointain]} choix={[]} blesses={BLESSES} maintenantMs={MAINTENANT} />,
     );
     expect(html).not.toContain("<span>Blessés</span>");
+  });
+});
+
+describe("picks de mes comptes sur les blessés (C1, C2...)", () => {
+  const PICKS = indexerPicks([
+    { pick_date: "2026-10-30", compte: "03", player: "Devin Carter" },
+    { pick_date: "2026-10-30", compte: "01", player: "Devin Carter" },
+    { pick_date: "2026-10-30", compte: "01", player: "Devin Carter" }, // doublon : une seule étiquette
+    { pick_date: "2026-10-30", compte: "13", player: "Jimmy Butler" }, // Jr./III : nom normalisé tolérant
+    { pick_date: "2026-10-31", compte: "05", player: "Gui Santos" }, // autre soirée : ne compte pas
+  ]);
+
+  it("étiquette C1 pour le compte 01, C13 pour le 13", () => {
+    expect(etiquetteCompte("01")).toBe("C1");
+    expect(etiquetteCompte("13")).toBe("C13");
+  });
+
+  it("comptes triés, sans doublon, seulement pour la soirée du match", () => {
+    const carter = BLESSES.find((b) => b.joueur === "Devin Carter")!;
+    expect(comptesDuBlesse(carter, PICKS)).toEqual(["01", "03"]);
+    expect(comptesDuBlesse(BLESSES.find((b) => b.joueur === "Jimmy Butler III")!, PICKS)).toEqual(["13"]);
+    expect(comptesDuBlesse(BLESSES.find((b) => b.joueur === "Gui Santos")!, PICKS)).toEqual([]);
+    expect(comptesDuBlesse(carter, {})).toEqual([]);
+  });
+
+  it("la liste déroulante montre C1 et C3 sur le blessé, rien sur les autres", () => {
+    const html = renderToStaticMarkup(<BlessesMatch m={blessesDuMatch(MATCHS[1], BLESSES)} picks={PICKS} />);
+    expect(html).toContain(">C1<");
+    expect(html).toContain(">C3<");
+    expect(html).not.toContain(">C13<"); // C13 a Butler (GSW), pas Carter (BOS)
+    const sans = renderToStaticMarkup(<BlessesMatch m={blessesDuMatch(MATCHS[1], BLESSES)} />);
+    expect(sans).not.toContain(">C1<");
+  });
+
+  it("page Vainqueurs : étiquettes + légende seulement s'il y a des picks sur des blessés", () => {
+    const avec = renderToStaticMarkup(
+      <VainqueursListe matchs={[matchVainqueur(MATCHS[1])]} choix={[]} blesses={BLESSES} picks={PICKS} maintenantMs={MAINTENANT} />,
+    );
+    expect(avec).toContain(">C3<");
+    expect(avec).toContain("les comptes qui ont ce joueur en pick");
+    const sans = renderToStaticMarkup(
+      <VainqueursListe matchs={[matchVainqueur(MATCHS[1])]} choix={[]} blesses={BLESSES} maintenantMs={MAINTENANT} />,
+    );
+    expect(sans).not.toContain("les comptes qui ont ce joueur en pick");
+  });
+
+  it("pick secret du compte 02 : une fois ses lignes retirées par masquerLignes, aucune étiquette C2", async () => {
+    const { masquerLignes, ETAT_ILLISIBLE } = await import("@/lib/secret");
+    const lignes = [
+      { pick_date: "2026-10-30", compte: "02", player: "Devin Carter" },
+      { pick_date: "2026-10-30", compte: "04", player: "Devin Carter" },
+    ];
+    // Illisible = tout secret (fail-closed) ; même date que « aujourd'hui » : le 02 est retiré
+    const visibles = masquerLignes(lignes, ETAT_ILLISIBLE, "2026-10-30", Date.parse("2026-10-30T18:00:00Z"));
+    const html = renderToStaticMarkup(
+      <BlessesMatch m={blessesDuMatch(MATCHS[1], BLESSES)} picks={indexerPicks(visibles)} />,
+    );
+    expect(html).toContain(">C4<");
+    expect(html).not.toContain(">C2<");
   });
 });

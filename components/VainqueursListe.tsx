@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { choisirVainqueur, revenirAuFavori } from "@/app/actions";
 import { frDate, humanAge } from "@/lib/format";
 import { BlessesMatch, BlessesSansEquipe } from "@/components/BlessesMatch";
-import { blessesDuMatch, blessesSansEquipe, derniereMaj, type Blesse } from "@/lib/blesses";
+import { blessesDuMatch, blessesSansEquipe, derniereMaj, type Blesse, type PicksParJoueur } from "@/lib/blesses";
 import {
   bilanSoiree,
   choixEffectif,
@@ -30,12 +30,14 @@ export function VainqueursListe({
   choix,
   kt = [],
   blesses = [],
+  picks = {},
   maintenantMs,
 }: {
   matchs: MatchVainqueur[];
   choix: ChoixVainqueur[];
   kt?: PronoKt[];
   blesses?: Blesse[];
+  picks?: PicksParJoueur; // comptes qui ont chaque blessé en pick (C1, C2...), déjà filtrés du pick secret
   maintenantMs: number;
 }) {
   const router = useRouter();
@@ -125,7 +127,7 @@ export function VainqueursListe({
                       ))}
                     </div>
                     <LigneKt m={m} effectif={effectif} kt={parMatchKt.get(m.event_id)} choixMaj={c?.maj_le ?? null} />
-                    <BlessesMatch m={blessesDuMatch(m, blesses)} />
+                    <BlessesMatch m={blessesDuMatch(m, blesses)} picks={picks} />
                     {c?.source === "manuel" && m.favori && c.choix !== m.favori && !ferme && (
                       <button
                         className="text-[12px] font-medium text-court-400"
@@ -142,7 +144,7 @@ export function VainqueursListe({
           </section>
         );
       })}
-      <BlessesSansEquipe blesses={blessesSansEquipe(blesses)} />
+      <BlessesSansEquipe blesses={blessesSansEquipe(blesses)} picks={picks} />
       <p className="px-1 text-[12px] text-fg-muted">
         Favori = cote la plus basse (médiane des bookmakers, marge retirée). 1 point par bon vainqueur, pronostic possible
         jusqu&apos;au coup d&apos;envoi. Tous les matchs NBA des prochains jours sont listés ; les cotes (et donc le favori) arrivent
@@ -153,6 +155,7 @@ export function VainqueursListe({
           Blessés : seuls les Out et les Doubtful sont listés (ils sont écartés du classement), pour ce soir (rapport officiel de
           la NBA) et demain (ESPN, « Day-To-Day » compte comme Doubtful). Les « Questionable » et « Probable » n&apos;y figurent
           pas. {blessesMajTexte(blesses, maintenantMs)}
+          {Object.keys(picks).length > 0 ? " C1, C2, etc. = les comptes qui ont ce joueur en pick." : ""}
         </p>
       )}
     </div>

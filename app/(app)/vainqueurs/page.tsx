@@ -3,7 +3,8 @@ import { VainqueursListe } from "@/components/VainqueursListe";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { aujourdhuiNY, ajouterJours } from "@/lib/planning";
 import { maintenantMs } from "@/lib/plan30";
-import type { Blesse } from "@/lib/blesses";
+import { indexerPicks, type Blesse, type PickCompte } from "@/lib/blesses";
+import { chargerSecret, masquerLignes } from "@/lib/secret";
 import type { ChoixVainqueur, MatchVainqueur, PronoKt } from "@/lib/vainqueurs";
 
 export const dynamic = "force-dynamic";
@@ -50,10 +51,23 @@ export default async function VainqueursPage() {
     .gte("game_date", depuis)
     .returns<Blesse[]>();
 
+  // Les picks de mes comptes sur ces soirées : affichés (C1, C2...) à côté des joueurs blessés. Pick secret du compte 02 :
+  // sa ligne est retirée tant que la soirée n'est ni close ni révélée (sinon son étiquette trahirait son joueur).
+  // Lecture impossible : aucune étiquette, jamais d'erreur sur cette page.
+  const datesBlessees = [...new Set((blesses ?? []).map((b) => b.game_date))];
+  const aujourdhui = aujourdhuiNY();
+  const [secret, picksRes] = await Promise.all([
+    chargerSecret(supabase, aujourdhui),
+    datesBlessees.length
+      ? supabase.from("ttfl_picks").select("pick_date,compte,player").in("pick_date", datesBlessees).returns<PickCompte[]>()
+      : Promise.resolve({ data: [] as PickCompte[] }),
+  ]);
+  const picks = indexerPicks(masquerLignes(picksRes.data ?? [], secret, aujourdhui, maintenantMs()));
+
   return (
     <div className="space-y-4">
       <PageHeader titre="Vainqueurs" sousTitre="Le favori des bookmakers pour chaque match, avec les blessés" />
-      <VainqueursListe matchs={liste} choix={choix ?? []} kt={kt ?? []} blesses={blesses ?? []} maintenantMs={maintenantMs()} />
+      <VainqueursListe matchs={liste} choix={choix ?? []} kt={kt ?? []} blesses={blesses ?? []} picks={picks} maintenantMs={maintenantMs()} />
     </div>
   );
 }
