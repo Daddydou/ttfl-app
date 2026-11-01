@@ -21,7 +21,7 @@ export interface ActionPC {
 }
 
 // Actions que l'exécuteur cloud sait faire (miroir de CATALOGUE_CLOUD et du déclencheur Supabase ttfl_commande_reveil).
-export const ACTIONS_CLOUD = ["synchro_app", "synchro_complet", "cookies"] as const;
+export const ACTIONS_CLOUD = ["synchro_app", "synchro_complet", "cookies", "sonde_x2"] as const;
 
 export const GROUPES: { id: GroupeAction; titre: string }[] = [
   { id: "calculs", titre: "Calculs et statistiques" },
@@ -61,6 +61,8 @@ export const ACTIONS_PC: ActionPC[] = [
     confirmer: "La synchronisation complète va écrire sur le site TTFL et dans l'application. Continuer ?" },
   { id: "cookies", groupe: "synchro", libelle: "Vérifier les 13 connexions TTFL", cloud: true,
     detail: "Teste que les 13 comptes sont toujours connectés (les cookies durent environ 2 mois)." },
+  { id: "sonde_x2", groupe: "synchro", libelle: "Relever le fonctionnement du x2", cloud: true,
+    detail: "Lecture seule : relève sur le site TTFL comment le x2 se pose et se retire (adresses et paramètres), sans rien poser. Le résultat s'affiche dans l'historique, bouton « Détail » (environ 1 minute)." },
   { id: "controle_2330", groupe: "synchro", libelle: "Lancer le contrôle de 23 h 30 maintenant",
     detail: "Vérifie les blessures des comptes 01 à 12 (et du 13 une fois activé). Suit le réglage du PC : à blanc (il notifie seulement) tant que tu ne l'as pas activé en réel." },
   { id: "ombre", groupe: "suivi", libelle: "Suivi du match-up 0,6",
