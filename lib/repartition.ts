@@ -47,9 +47,11 @@ export function repartirEquipe({
   partMax?: number;
   rotation?: number; // décale l'ordre des comptes d'une soirée à l'autre (équité)
 }): Repartition {
-  // Un joueur déjà annoncé « Out » ne marque rien : jamais proposé.
+  // Un joueur annoncé « Out » ne marque rien et un « Doubtful » est écarté par le moteur comme par le contrôle de
+  // clôture : jamais proposés.
   const candidats = joueurs
-    .filter((j): j is JoueurPropose & { projection: number } => j.projection !== null && j.status !== "Out")
+    .filter((j): j is JoueurPropose & { projection: number } =>
+      j.projection !== null && j.status !== "Out" && j.status !== "OUT" && j.status !== "Doubtful")
     .sort((a, b) => b.projection - a.projection);
   const n = comptes.length;
   const dispo = new Map(

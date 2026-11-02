@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Mode, PlayerStatus } from "@/lib/types";
 import { COMPTE_REF } from "@/lib/compte";
 import { validerAffectations } from "@/lib/repartition";
+import { appliquerBlesses, type StatutBlesse } from "@/lib/blesses";
 import { chargerSecret, refusSecret } from "@/lib/secret";
 import {
   COMPTE_VALIDE,
@@ -179,7 +180,14 @@ export async function listerJoueursDuSoir(
       });
     }
   }
-  const joueurs = [...parNom.values()].sort(
+  // Rapport de blessures de la soirée : un joueur Out / Doubtful absent du calcul du soir (le moteur l'écarte) survit
+  // sinon avec le statut vide de l'ancien calcul « à l'avance » (cas Curry, 01/11/2026).
+  const { data: blesses } = await supabase
+    .from("ttfl_blesses")
+    .select("joueur,joueur_norm,statut")
+    .eq("game_date", date)
+    .returns<{ joueur: string; joueur_norm: string; statut: StatutBlesse }[]>();
+  const joueurs = appliquerBlesses([...parNom.values()], blesses ?? []).sort(
     (a, b) => (b.projection ?? -1) - (a.projection ?? -1),
   );
   return { ok: true, joueurs, avanceSeule: idSoir === undefined };

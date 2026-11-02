@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
+  appliquerBlesses,
   blessesDuMatch,
   blessesParMatch,
   blessesSansEquipe,
@@ -227,5 +228,24 @@ describe("repère « Pick C… » dans le résumé fermé", () => {
     expect(html).not.toContain("Pick C");
     const sans = renderToStaticMarkup(<BlessesMatch m={blessesDuMatch(MATCHS[1], BLESSES)} />);
     expect(sans).not.toContain("Pick C");
+  });
+});
+
+describe("appliquerBlesses (cas Curry du 01/11)", () => {
+  const blesses = [
+    { joueur: "Stephen Curry", joueur_norm: "stephencurry", statut: "Out" as const },
+    { joueur: "Jaren Jackson Jr.", joueur_norm: "jarenjacksonjr", statut: "Doubtful" as const },
+  ];
+  it("marque Out un joueur absent du calcul du soir (statut vide hérité de l'avance)", () => {
+    const r = appliquerBlesses(
+      [{ player: "Stephen Curry", status: null }, { player: "Jayson Tatum", status: null }, { player: "Jaren Jackson Jr.", status: null }],
+      blesses,
+    );
+    expect(r.map((j) => j.status)).toEqual(["Out", null, "Doubtful"]);
+  });
+  it("ne confond pas deux joueurs au nom proche et ne touche rien sans rapport", () => {
+    expect(appliquerBlesses([{ player: "Seth Curry", status: null }], blesses)[0].status).toBeNull();
+    const liste = [{ player: "Stephen Curry", status: null }];
+    expect(appliquerBlesses(liste, [])).toBe(liste);
   });
 });

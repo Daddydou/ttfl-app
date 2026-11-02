@@ -136,3 +136,30 @@ export function etiquetteCompte(compte: string): string {
   const n = Number(compte);
   return Number.isFinite(n) && compte.trim() !== "" ? `C${n}` : `C${compte}`;
 }
+
+// --- Joueurs Out / Doubtful rattachés à la liste d'une soirée -------------------------------------------------
+// Cas Curry (01/11/2026) : la liste des joueurs d'une soirée (répartition, choix manuel) est l'ancien calcul « à
+// l'avance » (statuts inconnus) complété par le dernier calcul du soir. Un joueur Out depuis le matin n'est PAS dans le
+// calcul du soir (le moteur l'écarte) : il survivait donc dans la liste avec un statut vide, et « Répartir l'équipe »
+// l'a posé sur deux comptes. On marque maintenant ces joueurs avec le rapport de blessures (ttfl_blesses).
+
+// Clé du moteur Python (accents retirés, tout ce qui n'est pas lettre ou chiffre retiré) : 'Stephen Curry' -> 'stephencurry'.
+export function clePython(nom: string): string {
+  return nom.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function memeJoueurBlesse(joueur: string, blesse: { joueur: string; joueur_norm: string }): boolean {
+  if (clePython(joueur) === blesse.joueur_norm || clePython(joueur) === clePython(blesse.joueur)) return true;
+  return normaliserNom(joueur).replace(/ /g, "") === normaliserNom(blesse.joueur).replace(/ /g, "");
+}
+
+export function appliquerBlesses<T extends { player: string; status: string | null }>(
+  joueurs: T[],
+  blesses: { joueur: string; joueur_norm: string; statut: StatutBlesse }[],
+): T[] {
+  if (blesses.length === 0) return joueurs;
+  return joueurs.map((j) => {
+    const b = blesses.find((x) => memeJoueurBlesse(j.player, x));
+    return b ? { ...j, status: b.statut } : j;
+  });
+}

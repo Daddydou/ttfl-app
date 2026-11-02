@@ -125,3 +125,13 @@ describe("validerAffectations — revérification côté serveur", () => {
     expect(validerAffectations([], [], date)).toMatch(/Aucune/);
   });
 });
+
+describe("repartirEquipe — joueurs indisponibles", () => {
+  it("n'envoie jamais un joueur Out, OUT ou Doubtful (cas Curry du 01/11)", () => {
+    const r = repartirEquipe({
+      joueurs: [J("Stephen Curry", 52, "Out"), J("Joueur Douteux", 51, "Doubtful"), J("Autre OUT", 50, "OUT"), J("Jayson Tatum", 45)],
+      comptes: COMPTES_EQUIPE, bloques: {},
+    });
+    expect(r.groupes.map((g) => g.player)).toEqual(["Jayson Tatum"]);
+  });
+});
