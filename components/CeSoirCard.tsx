@@ -4,10 +4,13 @@ import { Icon } from "@/components/ui/Icon";
 import { fmtNum, majuscule } from "@/lib/format";
 import { fourchette } from "@/lib/fourchette";
 import { Cloture } from "@/components/Cloture";
+import { BadgeX2 } from "@/components/BadgeX2";
+import type { EtatBadgeX2 } from "@/lib/x2-affichage";
 
 export interface LigneCeSoir {
   label: string; // « Cpt 01 »
   joueur: string | null;
+  x2?: EtatBadgeX2 | null; // bonus ×2 sur le pick de ce soir (posé ou prévu)
   secret?: boolean; // compte au pick secret : jamais de nom, un cadenas
   pose?: boolean; // capture de la case TTFL reçue : le pick est bien sur le site
   href: string; // conseillés de ce compte
@@ -58,7 +61,10 @@ export function CeSoirCard({
                     secret jusqu&apos;à la clôture
                   </span>
                 ) : l.joueur ? (
-                  <span className="font-semibold text-fg">{l.joueur}</span>
+                  <span className="inline-flex max-w-full items-center gap-1.5 align-middle">
+                    <span className="truncate font-semibold text-fg">{l.joueur}</span>
+                    <BadgeX2 etat={l.x2} />
+                  </span>
                 ) : (
                   <span className="font-semibold text-quest">pas encore de pick</span>
                 )}

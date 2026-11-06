@@ -12,6 +12,8 @@ import {
   versusLastNights,
 } from "@/lib/stats";
 import { frDate } from "@/lib/format";
+import { BadgeX2 } from "@/components/BadgeX2";
+import { construireCarteX2, lireLignesX2, x2Pour, type EtatBadgeX2 } from "@/lib/x2-affichage";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { Mode, TtflBenchmark, TtflPick } from "@/lib/types";
 
@@ -47,6 +49,7 @@ export default async function StatsPage({
     .order("pick_date", { ascending: true })
     .returns<TtflPick[]>();
 
+  const x2 = construireCarteX2(await lireLignesX2(supabase)); // compte 01 : pas de secret
   const { data: benchmarks } = await supabase
     .from("ttfl_benchmarks")
     .select("*")
@@ -130,6 +133,7 @@ export default async function StatsPage({
           player={best?.player ?? "—"}
           value={best?.score ?? null}
           date={best?.pick_date}
+          x2={best ? x2Pour(x2, COMPTE_REF, best.pick_date, best.player) : null}
           tone="good"
         />
         <SmallStat
@@ -137,6 +141,7 @@ export default async function StatsPage({
           player={worst?.player ?? "—"}
           value={worst?.score ?? null}
           date={worst?.pick_date}
+          x2={worst ? x2Pour(x2, COMPTE_REF, worst.pick_date, worst.player) : null}
           tone="bad"
         />
       </div>
@@ -255,12 +260,14 @@ function SmallStat({
   value,
   date,
   tone,
+  x2,
 }: {
   label: string;
   player: string;
   value: number | null;
   date?: string;
   tone: "good" | "bad";
+  x2?: EtatBadgeX2 | null;
 }) {
   return (
     <div className="card px-4 py-3">
@@ -276,8 +283,9 @@ function SmallStat({
           {value ?? "—"}
         </span>
       </div>
-      <div className="mt-0.5 truncate text-sm font-semibold text-fg">
-        {player}
+      <div className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold text-fg">
+        <span className="truncate">{player}</span>
+        <BadgeX2 etat={x2} />
       </div>
       {date && <div className="text-[11px] text-fg-muted">{frDate(date)}</div>}
     </div>

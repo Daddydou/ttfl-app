@@ -3,6 +3,8 @@ import { Icon } from "@/components/ui/Icon";
 import { planEquipeParJour, planPerime, type TtflPlan30 } from "@/lib/plan30";
 import { normaliserNom } from "@/lib/planning";
 import type { HistoriqueJoueur } from "@/lib/types";
+import { BadgeX2 } from "@/components/BadgeX2";
+import { x2Pour, type CarteX2 } from "@/lib/x2-affichage";
 
 // Plan 30 jours des comptes 03 à 12 : calculé par le moteur (un plan par compte), présenté soirée par soirée avec le ou
 // les joueurs pris par l'équipe. Lecture seule : les picks eux-mêmes se changent comme d'habitude.
@@ -11,11 +13,13 @@ export function PlanEquipe({
   aujourdhui,
   maintenantMs,
   historiques,
+  x2,
 }: {
   plans: TtflPlan30[];
   aujourdhui: string;
   maintenantMs: number;
   historiques?: Record<string, HistoriqueJoueur>; // forme du moment par joueur (nom normalisé), fournie par la page
+  x2?: CarteX2; // bonus ×2 par compte et soirée
 }) {
   const jours = planEquipeParJour(plans, aujourdhui);
 
@@ -55,11 +59,18 @@ export function PlanEquipe({
               <ul className="mt-1 space-y-0.5">
                 {j.groupes.map((g) => {
                   const forme = historiques?.[normaliserNom(g.joueur)] ?? null;
+                  const avecX2 = g.comptes.filter((c) => x2Pour(x2, c, j.date, g.joueur));
                   const ligne = (
                     <>
                       <span className="min-w-0">
                         <span className="text-fg">{g.joueur}</span>
                         <span className="text-fg-muted"> · {g.comptes.join(", ")}</span>
+                        {avecX2.length > 0 && (
+                          <span className="ml-1.5 inline-flex items-center gap-1 align-middle text-fg-muted">
+                            <BadgeX2 etat={x2Pour(x2, avecX2[0], j.date, g.joueur)} />
+                            {g.comptes.length > 1 && <span>cpt {avecX2.join(", ")}</span>}
+                          </span>
+                        )}
                       </span>
                       {g.projection !== null && (
                         <span className="shrink-0 tabular-nums text-fg-faint">{g.projection.toFixed(1)}</span>

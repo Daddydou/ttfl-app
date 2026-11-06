@@ -108,4 +108,5 @@ poussé dans Supabase.
 ## x2 (06/11/2026)
 - Admin → x2 (`app/(app)/admin/x2/page.tsx`, `lib/x2.ts`, `x2-actions.ts`, composants `ReglageX2`, `PoserX2`, `GrilleX2`) : interrupteur (off | à blanc | réel + comptes cochés), pose à la main sur un pick existant, retrait, vue des 6 mois par compte. Tables `ttfl_x2`, `ttfl_x2_reglage` (RLS propriétaire). La pose/retrait réels sont faits par le robot (ttfl-auto), pas par l'app.
 - Pick secret : le x2 d'une soirée secrète du compte 02 est affiché « 🔒 secret » et les actions sont refusées (`refusSecret`).
+- Badge « ×2 » partout où un pick est affiché : `components/BadgeX2.tsx` + `lib/x2-affichage.ts` (`lireLignesX2` dans le `Promise.all` de la page, `construireCarteX2` avec le secret, `x2Pour(carte, compte, date, joueur)`). Le badge suit le JOUEUR (nom normalisé) ; pleine = `pose`, pointillés = `voulu` ; rien pour `a_retirer` / `annule_site` / `echec` ni pour le 02 d'une soirée secrète. Tout nouvel écran qui montre un pick doit l'ajouter. Tests : `tests/x2-affichage.test.tsx`.
 - Fiche « Mode op. » : `x2` (lib/modes-operatoires.ts). Tests : `tests/x2-lib.test.ts`.

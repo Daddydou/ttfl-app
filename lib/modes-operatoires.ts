@@ -118,6 +118,7 @@ export const MODES: ModeOperatoire[] = [
       "Compte 01 : le robot ne décide jamais. Pose ou retire le x2 depuis Plus > Admin > x2 (« Poser un x2 à la main » : choisis le compte puis un de ses picks à venir), ou directement sur le site : le robot le reprend.",
       "Réglage : Plus > Admin > x2. « À blanc » = le moteur calcule sans rien poser ; « Réel » = le robot pose et retire de vrais x2, uniquement sur les comptes cochés. Commence par un seul compte et vérifie le résultat sur le site.",
       "Le tableau « Les x2 de la saison » montre, par compte et par mois, la soirée, le joueur et l'état (prévu, posé, à retirer…). « Retirer » demande au robot d'enlever le x2 du site (sous 10 minutes) ; pour un compte automatique, le moteur en proposera un autre ce mois-ci.",
+      "Le x2 se voit partout où un pick est affiché (Accueil, Mes picks, Conseillés, Semaine équipe, Stats) : une pastille « ×2 » pleine = posé sur le site, en pointillés = prévu mais pas encore posé. Pour le compte 02, elle n'apparaît qu'une fois la soirée close.",
     ],
     attention: [
       "Si tu retires un x2 à la main directement sur le site, le robot ne le repose pas ce mois-ci (il le note « retiré à la main »).",

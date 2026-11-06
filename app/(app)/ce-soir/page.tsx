@@ -15,6 +15,7 @@ import { PickDuSoirResume } from "@/components/PickDuSoirResume";
 import { PickZoneButton } from "@/components/PickZoneButton";
 import { BandeauSecret } from "@/components/BandeauSecret";
 import { RevelerBouton } from "@/components/RevelerBouton";
+import { construireCarteX2, lireLignesX2, x2Pour } from "@/lib/x2-affichage";
 import { chargerSecret, heureCloture, masquerLignes, soireeSecrete, soireesSecretes } from "@/lib/secret";
 import { maintenantMs, type TtflPlan30 } from "@/lib/plan30";
 import {
@@ -99,7 +100,7 @@ export default async function PicksConseillesPage({
 
   const avecPlanEquipe = zone.id === "equipe"; // Plan 30 des comptes 03 à 12 (un plan par compte, écrit par le moteur)
 
-  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes, secret, capturesBrutes, planEquipeRes] = await Promise.all([
+  const [soiree, picksRes, absentsRes, planRes, verrousRes, suiviRes, secret, capturesBrutes, planEquipeRes, lignesX2] = await Promise.all([
     chargerSoiree(supabase, mode, date),
     supabase
       .from("ttfl_picks")
@@ -134,11 +135,13 @@ export default async function PicksConseillesPage({
     avecPlanEquipe
       ? supabase.from("ttfl_plan30").select("*").in("compte", zone.comptes).returns<TtflPlan30[]>()
       : Promise.resolve({ data: [] as TtflPlan30[], error: null }),
+    lireLignesX2(supabase, aujourdhui),
   ]);
   const nowMs = maintenantMs();
   // Pick secret du compte 02 : tout ce qui trahirait son joueur (picks, cycle, plan, verrous, suivi, captures) est
   // retiré tant que la soirée n'est ni close, ni révélée (lib/secret.ts).
   const estSecret = (compte: string, d: string) => soireeSecrete(secret, compte, d, aujourdhui, nowMs);
+  const x2 = construireCarteX2(lignesX2, { etat: secret, aujourdhui, maintenantMs: nowMs });
   const captures = avecPlan ? masquerLignes(capturesBrutes, secret, aujourdhui, nowMs) : [];
   const verrous = Object.fromEntries(
     (verrousRes.data ?? [])
@@ -271,6 +274,7 @@ export default async function PicksConseillesPage({
           pick={pickResume}
           projectionPick={pickResume ? (ligneDe(pickResume)?.projection ?? null) : null}
           pose={!!captureDuPick(captures, compteResume, date, pickResume)}
+          x2={x2Pour(x2, compteResume, date, pickResume)}
           n1={conseilles[0] ? { player: conseilles[0].player, projection: conseilles[0].projection } : null}
           action={
             // Une seule grande action, en tête : poser le n° 1 (s'il diffère du pick et reste libre pour ce compte).
@@ -325,6 +329,7 @@ export default async function PicksConseillesPage({
                 maintenantMs={maintenantMs()}
                 verrous={verrous}
                 captures={captures}
+                x2={x2}
                 historiques={historiques}
               />
             )}
@@ -339,6 +344,7 @@ export default async function PicksConseillesPage({
           aujourdhui={aujourdhui}
           maintenantMs={maintenantMs()}
           historiques={historiquesEquipe}
+          x2={x2}
         />
       )}
 

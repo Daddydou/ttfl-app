@@ -10,6 +10,7 @@ import {
   type PickAuto,
   type PickLigne,
 } from "@/lib/planning";
+import { construireCarteX2, lireLignesX2 } from "@/lib/x2-affichage";
 import { construireSemaine, datesDeLaSemaine } from "@/lib/semaine";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +26,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
   const fin = dates[dates.length - 1];
 
   const supabase = await createClient();
-  const [picksRes, envoisRes, autosRes] = await Promise.all([
+  const [picksRes, envoisRes, autosRes, lignesX2] = await Promise.all([
     supabase
       .from("ttfl_picks")
       .select("pick_date,player,compte")
@@ -51,6 +52,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
       .gte("pick_date", debut)
       .lte("pick_date", fin)
       .returns<PickAuto[]>(),
+    lireLignesX2(supabase, debut),
   ]);
 
   const semaine = construireSemaine({
@@ -71,7 +73,7 @@ export default async function EquipePage({ searchParams }: { searchParams: Promi
       />
       <NavSemaine precedent={ajouterJours(debut, -7)} suivant={ajouterJours(debut, 7)} />
       {erreur && <p className="rounded-[14px] bg-out/10 px-3 py-2 text-[13px] text-out">{erreur}</p>}
-      <GrilleSemaine semaine={semaine} />
+      <GrilleSemaine semaine={semaine} x2={construireCarteX2(lignesX2)} />
     </div>
   );
 }

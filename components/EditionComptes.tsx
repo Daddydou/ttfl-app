@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { NuitPicker } from "@/components/NuitPicker";
 import { frDate } from "@/lib/format";
 import type { Mode } from "@/lib/types";
+import { BadgeX2 } from "@/components/BadgeX2";
+import type { EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Changements MANUELS sur x comptes de l'équipe, pour une soirée : on voit le pick de chaque compte, on coche ceux à
 // modifier, puis on choisit le joueur (ou on retire le pick) pour la sélection seulement. Les autres comptes ne bougent pas.
@@ -14,6 +16,7 @@ export function EditionComptes({
   parCompte,
   bloques,
   dejaPose,
+  x2,
 }: {
   mode: Mode;
   date: string;
@@ -21,6 +24,7 @@ export function EditionComptes({
   parCompte: Record<string, string>; // compte → joueur pické pour cette soirée
   bloques: Record<string, string[]>; // nom normalisé → comptes où il est bloqué (≤ 30 jours)
   dejaPose: boolean;
+  x2?: Record<string, EtatBadgeX2>; // compte → bonus ×2 sur le pick de la soirée
 }) {
   const [ouvert, setOuvert] = useState(false);
   const [selection, setSelection] = useState<string[]>([]);
@@ -101,8 +105,9 @@ export function EditionComptes({
                         className="h-6 w-6 shrink-0 accent-court-500"
                       />
                       <span className="w-24 shrink-0 whitespace-nowrap text-[16px] font-semibold text-fg">Compte {c}</span>
-                      <span className={`min-w-0 flex-1 truncate text-right text-sm ${joueur ? "text-fg" : "text-fg-muted"}`}>
-                        {joueur ?? "aucun pick"}
+                      <span className={`flex min-w-0 flex-1 items-center justify-end gap-1.5 text-sm ${joueur ? "text-fg" : "text-fg-muted"}`}>
+                        <span className="truncate">{joueur ?? "aucun pick"}</span>
+                        {joueur && <BadgeX2 etat={x2?.[c]} />}
                       </span>
                     </label>
                   </li>

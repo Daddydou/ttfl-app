@@ -12,6 +12,8 @@ import { MoisTabs, VueTabs, ZoneTabs, type ParamsPicks } from "@/components/Plan
 import { frDate, majuscule } from "@/lib/format";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { RevelerBouton } from "@/components/RevelerBouton";
+import { construireCarteX2, lireLignesX2, x2Pour, type CarteX2, type EtatBadgeX2 } from "@/lib/x2-affichage";
+import { BadgeX2 } from "@/components/BadgeX2";
 import { chargerSecret, heureCloture, masquerLignes, soireeSecrete } from "@/lib/secret";
 import { maintenantMs as heureServeur } from "@/lib/plan30";
 import {
@@ -64,6 +66,7 @@ interface NuitVue {
   dejaPose: boolean; // au moins un compte a ce pick posé sur le site TTFL
   bloques: Record<string, string[]>;
   parCompte: Record<string, string>; // compte → joueur pické pour cette soirée
+  x2: Record<string, EtatBadgeX2>; // compte → bonus ×2 sur ce pick (posé ou prévu)
   autos: string[]; // comptes dont le pick a été posé par le robot (auto-remplissage), pas validé par l'utilisateur
   passee: boolean;
   secret: boolean; // pick du compte secret (02) caché jusqu'à la clôture de la soirée
@@ -87,7 +90,7 @@ async function chargerPlanning(
   const zone = zoneDe(zoneParam);
   const aujourdhui = aujourdhuiNY();
 
-  const [nuitsRes, picksRes, envoisRes, autosRes, secret] = await Promise.all([
+  const [nuitsRes, picksRes, envoisRes, autosRes, secret, lignesX2] = await Promise.all([
     supabase.from("ttfl_nuits").select("*").eq("mode", mode).returns<Nuit[]>(),
     supabase
       .from("ttfl_picks")
@@ -109,8 +112,10 @@ async function chargerPlanning(
       .in("compte", zone.comptes)
       .returns<PickAuto[]>(),
     chargerSecret(supabase, aujourdhui),
+    lireLignesX2(supabase, aujourdhui),
   ]);
   const maintenantMs = heureServeur();
+  const carteX2 = construireCarteX2(lignesX2, { etat: secret, aujourdhui, maintenantMs });
   // Pick secret du compte 02 : ses lignes des soirées pas encore closes sont retirées AVANT tout calcul (cycle, envois,
   // marques « auto »), pour que rien n'en trahisse le joueur.
   const masquer = <T extends { compte: string }>(l: T[], champ: keyof T = "pick_date" as keyof T) =>
@@ -149,6 +154,12 @@ async function chargerPlanning(
         dejaPose: envoisDuSoir.some((e) => e.statut === "confirme"),
         bloques: bloquesPourSoiree(picks, zone.comptes, date),
         parCompte: Object.fromEntries(picks.filter((p) => p.pick_date === date).map((p) => [p.compte, p.player])),
+        x2: Object.fromEntries(
+          picks
+            .filter((p) => p.pick_date === date)
+            .map((p) => [p.compte, x2Pour(carteX2, p.compte, date, p.player)] as const)
+            .filter((e): e is readonly [string, EtatBadgeX2] => !!e[1]),
+        ),
         autos: comptesAuto(autosMarques, picks, date),
         passee: date < aujourdhui,
         secret: zone.comptes.includes(secret.compte) && soireeSecrete(secret, secret.compte, date, aujourdhui, maintenantMs),
@@ -213,7 +224,12 @@ export default async function PicksPage({
     );
   }
 
-  const tous = await chargerHistorique(supabase, mode);
+  const [tous, lignesX2Histo, secretHisto] = await Promise.all([
+    chargerHistorique(supabase, mode),
+    lireLignesX2(supabase),
+    chargerSecret(supabase, aujourdhuiNY()),
+  ]);
+  const carteX2Histo = construireCarteX2(lignesX2Histo, { etat: secretHisto, aujourdhui: aujourdhuiNY(), maintenantMs: heureServeur() });
   const compte = compteValide(compteParam);
   const rows = tous.filter((p) => p.compte === compte);
   const params: ParamsPicks = { mode, vue, zone: zoneDe(zoneParam).id };
@@ -222,7 +238,7 @@ export default async function PicksPage({
       <PageHeader titre="Mes picks" sousTitre="Historique et points de tes 13 comptes" />
       <VueTabs courant={params} />
       <ChoixCompte resume={resumerComptes(tous)} courant={compte} mode={mode} />
-      <HistoriqueVue rows={rows} mode={mode} compte={compte} />
+      <HistoriqueVue rows={rows} mode={mode} compte={compte} x2={carteX2Histo} />
     </div>
   );
 }
@@ -319,6 +335,19 @@ function PlanningVue({
                   className={`mt-2 text-sm ${n.resume.etat === "aucun" ? "text-fg-muted" : "font-semibold text-fg"}`}
                 >
                   {libellePick(n.resume)}
+                  {Object.keys(n.x2).length > 0 && zone.comptes.length === 1 && (
+                    <BadgeX2 etat={Object.values(n.x2)[0]} className="ml-2" />
+                  )}
+                </p>
+              )}
+              {!n.secret && Object.keys(n.x2).length > 0 && zone.comptes.length > 1 && (
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-fg-muted">
+                  Bonus ×2 :
+                  {Object.entries(n.x2).map(([c, etat]) => (
+                    <span key={c} className="inline-flex items-center gap-1 whitespace-nowrap">
+                      cpt {c} <BadgeX2 etat={etat} />
+                    </span>
+                  ))}
                 </p>
               )}
               {n.envoi.detail && <p className="mt-1 text-[13px] text-out">{n.envoi.detail}</p>}
@@ -357,6 +386,7 @@ function PlanningVue({
                   date={n.date}
                   comptes={zone.comptes}
                   parCompte={n.parCompte}
+                  x2={n.x2}
                   bloques={n.bloques}
                   dejaPose={n.dejaPose}
                 />
@@ -401,7 +431,7 @@ function ChoixCompte({ resume, courant, mode }: { resume: ResumeCompte[]; couran
   );
 }
 
-function HistoriqueVue({ rows, mode, compte }: { rows: TtflPick[]; mode: Mode; compte: string }) {
+function HistoriqueVue({ rows, mode, compte, x2 }: { rows: TtflPick[]; mode: Mode; compte: string; x2: CarteX2 }) {
   const scored = rows.filter((p) => p.score !== null);
   const total = scored.reduce((s, p) => s + (p.score ?? 0), 0);
   const avg = scored.length ? total / scored.length : null;
@@ -442,7 +472,10 @@ function HistoriqueVue({ rows, mode, compte }: { rows: TtflPick[]; mode: Mode; c
               className="list-row"
             >
               <div className="min-w-0 flex-1">
-                <div className="truncate font-semibold text-fg">{p.player}</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate font-semibold text-fg">{p.player}</span>
+                  <BadgeX2 etat={x2Pour(x2, p.compte, p.pick_date, p.player)} />
+                </div>
                 <div className="text-[13px] text-fg-muted">{frDate(p.pick_date)}</div>
               </div>
               <ScoreInput pickId={p.id} score={p.score} />

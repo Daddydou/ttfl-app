@@ -25,6 +25,8 @@ import {
 } from "@/lib/plan30";
 import { HistoriqueJoueur as FormeJoueur } from "@/components/HistoriqueJoueur";
 import type { HistoriqueJoueur, Mode } from "@/lib/types";
+import { BadgeX2 } from "@/components/BadgeX2";
+import { x2Pour, type CarteX2, type EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Plan glissant de 30 jours pour un compte (01 ou 02) : un joueur par soirée, choisi pour maximiser le total de points
 // TTFL attendu sur la fenêtre. Le plan est calculé sur le PC (moteur/plan30.py) ; ici on le lit, on change de formule et
@@ -39,6 +41,7 @@ export function PlanTrenteJours({
   verrous,
   captures,
   historiques,
+  x2,
 }: {
   historiques?: Record<string, HistoriqueJoueur>; // forme du moment par joueur (nom normalisé), fournie par la page
   plans: TtflPlan30[];
@@ -49,6 +52,7 @@ export function PlanTrenteJours({
   maintenantMs: number;
   verrous?: Record<string, string>; // « picks manuels validés » du compte 02 : { date: joueur }
   captures?: Capture[]; // captures d'écran de la case TTFL (posées par le robot), une par pick confirmé
+  x2?: CarteX2; // bonus ×2 par compte et soirée
 }) {
   const router = useRouter();
   const formules = formulesTriees(plans);
@@ -161,6 +165,7 @@ export function PlanTrenteJours({
               mode={mode}
               zoneLabel={zoneLabel}
               capture={captureDuPick(captures, compte, jour.date, jour.joueur)}
+              x2={x2Pour(x2, compte, jour.date, jour.joueur)}
               historique={jour.joueur ? (historiques?.[normaliserNom(jour.joueur)] ?? null) : null}
               verrouille={
                 jour.statut === "valide" &&
@@ -181,7 +186,10 @@ export function PlanTrenteJours({
                     <button className="text-left text-fg-muted" onClick={() => setDateId(j.date)}>
                       {frDate(j.date)}
                     </button>
-                    <span className="min-w-0 flex-1 truncate text-right font-medium text-fg">{j.joueur ?? "—"}</span>
+                    <span className="flex min-w-0 flex-1 items-center justify-end gap-1.5 font-medium text-fg">
+                      <span className="truncate">{j.joueur ?? "—"}</span>
+                      <BadgeX2 etat={x2Pour(x2, compte, j.date, j.joueur)} />
+                    </span>
                     <span className="num w-12 shrink-0 text-right text-fg-muted">
                       {j.projection !== null ? fmtNum(j.projection, 1) : ""}
                     </span>
@@ -272,6 +280,7 @@ function DetailJour({
   verrouille,
   capture,
   historique,
+  x2,
 }: {
   jour: JourPlan30;
   compte: string;
@@ -280,6 +289,7 @@ function DetailJour({
   verrouille: boolean;
   capture: Capture | null;
   historique: HistoriqueJoueur | null;
+  x2?: EtatBadgeX2 | null;
 }) {
   if (jour.statut === "aucun" || !jour.joueur) {
     return (
@@ -296,7 +306,10 @@ function DetailJour({
     <div className="space-y-3 rounded-[14px] bg-surface-2 px-3 py-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-[17px] font-semibold text-fg">{jour.joueur}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-[17px] font-semibold text-fg">{jour.joueur}</p>
+            <BadgeX2 etat={x2} />
+          </div>
           <p className="text-[13px] text-fg-muted">
             {infos}
             {jour.nb_matchs > 1 ? ` · ${jour.nb_matchs} matchs` : ""}

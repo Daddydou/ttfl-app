@@ -5,6 +5,8 @@ import { COMPTES_EQUIPE } from "@/lib/planning";
 import { Icon } from "@/components/ui/Icon";
 import { CaptureVignette } from "@/components/CaptureVignette";
 import { captureDuPick, type Capture } from "@/lib/captures";
+import { BadgeX2 } from "@/components/BadgeX2";
+import { x2Pour, type CarteX2, type EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Petite tuile calendrier : jour de la semaine + numéro, comme l'app Calendrier d'iOS.
 function Tuile({ iso }: { iso: string }) {
@@ -30,13 +32,13 @@ export interface PickCompte {
   compte: string;
 }
 
-function LigneCompte({ label, joueur, capture, secret }: { label: string; joueur?: string; capture?: Capture | null; secret?: boolean }) {
+function LigneCompte({ label, joueur, capture, secret, x2 }: { label: string; joueur?: string; capture?: Capture | null; secret?: boolean; x2?: EtatBadgeX2 | null }) {
   return (
     <div>
       <div className="flex items-baseline gap-2 text-[14px]">
         <span className="w-14 shrink-0 whitespace-nowrap text-[12px] font-semibold uppercase tracking-wide text-fg-muted">{label}</span>
-        <span className={`min-w-0 truncate ${joueur ? "font-semibold text-fg" : "text-fg-muted"}`}>
-          {joueur ??
+        <span className={`flex min-w-0 items-baseline gap-1.5 ${joueur ? "font-semibold text-fg" : "text-fg-muted"}`}>
+          <span className="truncate">{joueur ??
             (secret ? (
               <>
                 <Icon name="cadenas" size={13} strokeWidth={2} className="mr-1 inline-block -translate-y-px" />
@@ -44,7 +46,8 @@ function LigneCompte({ label, joueur, capture, secret }: { label: string; joueur
               </>
             ) : (
               "pas de pick"
-            ))}
+            ))}</span>
+          {joueur && <BadgeX2 etat={x2} />}
         </span>
       </div>
       {capture && (
@@ -64,6 +67,7 @@ export function PicksValidesCard({
   aujourdhui,
   captures,
   datesSecretes = [],
+  x2,
   titre = "Mes picks validés",
 }: {
   titre?: string;
@@ -71,6 +75,7 @@ export function PicksValidesCard({
   picks: { pick_date: string; player: string }[];
   autres?: PickCompte[];
   aujourdhui: string;
+  x2?: CarteX2; // bonus ×2 par compte et soirée (lib/x2-affichage.ts)
   captures?: Capture[]; // captures d'écran de la case TTFL (comptes 01 à 13), une par pick confirmé
 }) {
   const toutes = autres
@@ -117,14 +122,17 @@ export function PicksValidesCard({
                 <div className="min-w-0 flex-1">
                   {!autres ? (
                     <>
-                      <div className="truncate text-[17px] font-semibold tracking-[-0.01em] text-fg">{c1}</div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate text-[17px] font-semibold tracking-[-0.01em] text-fg">{c1}</span>
+                        <BadgeX2 etat={x2Pour(x2, "01", date, c1)} />
+                      </div>
                       {captureDuPick(captures, "01", date, c1) && <CaptureVignette capture={captureDuPick(captures, "01", date, c1)!} />}
                     </>
                   ) : (
                     <div className="space-y-0.5">
-                      <LigneCompte label="Cpt 01" joueur={c1} capture={captureDuPick(captures, "01", date, c1)} />
-                      <LigneCompte label="Cpt 02" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} secret={datesSecretes.includes(date)} />
-                      <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} />
+                      <LigneCompte label="Cpt 01" joueur={c1} capture={captureDuPick(captures, "01", date, c1)} x2={x2Pour(x2, "01", date, c1)} />
+                      <LigneCompte label="Cpt 02" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} secret={datesSecretes.includes(date)} x2={x2Pour(x2, "02", date, parDateCompte.get(`${date}|02`))} />
+                      <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} x2={x2Pour(x2, "13", date, parDateCompte.get(`${date}|13`))} />
                     </div>
                   )}
                   {/* La tuile donne déjà le jour : on n'ajoute que « demain » / « aujourd'hui ». */}
@@ -137,7 +145,7 @@ export function PicksValidesCard({
                       </summary>
                       <div className="mt-1.5 space-y-0.5">
                         {equipe.map((e) => (
-                          <LigneCompte key={e.compte} label={`Cpt ${e.compte}`} joueur={e.joueur} capture={captureDuPick(captures, e.compte, date, e.joueur)} />
+                          <LigneCompte key={e.compte} label={`Cpt ${e.compte}`} joueur={e.joueur} capture={captureDuPick(captures, e.compte, date, e.joueur)} x2={x2Pour(x2, e.compte, date, e.joueur)} />
                         ))}
                       </div>
                     </details>

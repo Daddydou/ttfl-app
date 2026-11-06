@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { fmtNum } from "@/lib/format";
+import { BadgeX2 } from "@/components/BadgeX2";
+import type { EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Résumé en tête de Conseillés : le pick posé pour la soirée affichée (le plan commande l'écran), puis, en second,
 // l'avis du classement s'il préfère un autre joueur. LECTURE SEULE : projections du moteur, rien n'est recalculé.
@@ -11,12 +13,14 @@ export function PickDuSoirResume({
   pose,
   n1,
   action,
+  x2,
 }: {
   titre: string; // « Ce soir · Compte 1 »
   pick: string | null; // joueur posé (null = pas encore de pick)
   projectionPick: number | null;
   pose: boolean; // case TTFL confirmée (capture reçue)
   n1: { player: string; projection: number | null } | null; // n° 1 du classement pour cette zone
+  x2?: EtatBadgeX2 | null; // bonus ×2 sur le pick posé
   action?: ReactNode; // bouton « Picker X » (absent si le n° 1 est déjà posé ou indisponible pour ce compte)
 }) {
   const memeJoueur = !!pick && !!n1 && n1.player === pick;
@@ -27,7 +31,10 @@ export function PickDuSoirResume({
       <h2 className="headline">{titre}</h2>
       {pick ? (
         <div className="mt-1 flex items-baseline justify-between gap-3">
-          <p className="min-w-0 truncate text-[22px] font-bold tracking-[-0.014em] text-fg">{pick}</p>
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="truncate text-[22px] font-bold tracking-[-0.014em] text-fg">{pick}</p>
+            <BadgeX2 etat={x2} />
+          </div>
           <span className="shrink-0 text-right">
             {projectionPick != null && (
               <span className="num text-[17px] font-semibold text-fg">{fmtNum(projectionPick)}</span>

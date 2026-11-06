@@ -18,6 +18,7 @@ import { chargerSoiree } from "@/lib/conseilles-data";
 import { fusionnerSoiree } from "@/lib/conseilles";
 import { COMPTES_EQUIPE, JOURS_CYCLE, ZONES, ajouterJours, normaliserNom, type PickLigne } from "@/lib/planning";
 import { BandeauSecret } from "@/components/BandeauSecret";
+import { construireCarteX2, lireLignesX2, x2Pour } from "@/lib/x2-affichage";
 import { chargerSecret, masquerLignes, soireeSecrete, soireesSecretes } from "@/lib/secret";
 import { maintenantMs as heureServeur } from "@/lib/plan30";
 import type { TtflManualAbsent } from "@/lib/types";
@@ -80,7 +81,7 @@ export default async function DashboardPage() {
         ])
       : null;
 
-  const [pickRes, aVenirRes, secret, capturesBrutes] = await Promise.all([
+  const [pickRes, aVenirRes, secret, capturesBrutes, lignesX2] = await Promise.all([
     run
       ? supabase
           .from("ttfl_picks")
@@ -100,6 +101,7 @@ export default async function DashboardPage() {
       .returns<PickCompte[]>(),
     chargerSecret(supabase, aujourdhui),
     chargerCaptures(supabase),
+    lireLignesX2(supabase, aujourdhui),
   ]);
   const maintenantMs = heureServeur();
   // Pick secret du compte 02 : ses picks, captures et alertes des soirées pas encore closes sont retirés (lib/secret.ts).
@@ -111,6 +113,7 @@ export default async function DashboardPage() {
   );
   const pickedPlayer = pickRes.data?.player ?? null;
   const captures = masquerLignes(capturesBrutes, secret, aujourdhui, maintenantMs);
+  const x2 = construireCarteX2(lignesX2, { etat: secret, aujourdhui, maintenantMs }); // bonus ×2 (badge à côté du joueur)
   const tousPicks = picksAVenir(masquerLignes(aVenirRes.data ?? [], secret, aujourdhui, maintenantMs), aujourdhui);
   const picksValides = tousPicks.filter((p) => p.compte === COMPTE_REF); // compte 1 : alertes et photo hors-ligne
   const picksAutres = tousPicks.filter((p) => p.compte !== COMPTE_REF);
@@ -200,6 +203,7 @@ export default async function DashboardPage() {
       joueur,
       secret: secretCeSoir,
       pose: !!captureDuPick(captures, compte, aujourdhui, joueur),
+      x2: x2Pour(x2, compte, aujourdhui, joueur),
     };
   };
   const equipePosees = COMPTES_EQUIPE.filter((c) => joueurDuSoir(c)).length;
@@ -244,6 +248,7 @@ export default async function DashboardPage() {
         autres={picksAutres.filter((p) => p.pick_date > aujourdhui)}
         aujourdhui={aujourdhui}
         captures={captures}
+        x2={x2}
         datesSecretes={datesSecretes}
       />
 

@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Semaine } from "@/lib/semaine";
 import { frDate } from "@/lib/format";
 import { libelleStatutEnvoi } from "@/lib/planning";
+import { BadgeX2 } from "@/components/BadgeX2";
+import { x2Pour, type CarteX2 } from "@/lib/x2-affichage";
 
 // « Jayson Tatum » → « J. Tatum » ; les suffixes (Jr., III…) restent avec le nom.
 export function nomCourt(nom: string): string {
@@ -19,7 +21,7 @@ const COULEUR_STATUT: Record<string, string> = {
 };
 
 // Grille 10 comptes × 7 soirées. Défilement horizontal sur mobile ; la colonne des comptes reste visible.
-export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
+export function GrilleSemaine({ semaine, x2 }: { semaine: Semaine; x2?: CarteX2 }) {
   return (
     <div className="space-y-4">
       <div className="card rail overflow-x-auto" role="region" aria-label="Grille des picks de l'équipe" tabIndex={0}>
@@ -57,6 +59,7 @@ export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
                             />
                           )}
                           {nomCourt(c.joueur)}
+                          <BadgeX2 etat={x2Pour(x2, l.compte, c.date, c.joueur)} />
                         </span>
                         {c.auto && (
                           <span
@@ -82,7 +85,8 @@ export function GrilleSemaine({ semaine }: { semaine: Semaine }) {
       <p className="px-1 text-[12px] text-fg-muted">
         <span className="rounded-full bg-fill px-1.5 text-[11px] font-semibold text-fg-muted">auto</span> = choisi par le
         robot (case vide remplie à 23 h 30, joueur indisponible remplacé, ou pick automatique), pas par toi. Point vert :
-        posé sur TTFL ; jaune : en cours d&apos;envoi ; rouge : conflit ou échec.
+        posé sur TTFL ; jaune : en cours d&apos;envoi ; rouge : conflit ou échec. <BadgeX2 etat="pose" /> = bonus ×2 posé,{" "}
+        <BadgeX2 etat="voulu" /> = prévu.
         Tu peux le changer jusqu&apos;à la clôture de la soirée (début du premier match, au plus tard minuit).
       </p>
 
