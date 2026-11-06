@@ -75,6 +75,7 @@ export default async function AdminPage() {
       detail: secret.actif ? `Activé · compte ${secret.compte}` : "Désactivé",
       icone: "cadenas",
     },
+    { href: "/admin/x2", titre: "x2 (bonus ×2)", detail: "Réglage, x2 de la saison, pose et retrait", icone: "eclair" },
     { href: "/admin/cloud", titre: "Moteur dans le cloud", detail: "Essai à blanc, cloud en charge ou PC", icone: "reglages" },
     { href: "/admin/masse", titre: "Picks en masse", detail: "Importer, copier ou supprimer des picks", icone: "plus" },
     { href: "/admin/notifications", titre: "Notifications", detail: "Alertes sur ce téléphone", icone: "cloche" },
