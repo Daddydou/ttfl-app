@@ -103,3 +103,9 @@ poussé dans Supabase.
 - Les sous-pages ont un retour en haut à gauche : `PageHeader retour={{ href, libelle }}`.
 - Le dernier compte choisi (Conseillés `?pour=`, Mes picks `?zone=`) est retenu dans le cookie `ttfl_zone` (proxy, `lib/planning.ts` + `lib/zone-memo.ts`).
 - Orange = action ou sélection uniquement (DESIGN.md) : jamais pour un chiffre, un graphique ou un statut.
+
+
+## x2 (06/11/2026)
+- Admin → x2 (`app/(app)/admin/x2/page.tsx`, `lib/x2.ts`, `x2-actions.ts`, composants `ReglageX2`, `PoserX2`, `GrilleX2`) : interrupteur (off | à blanc | réel + comptes cochés), pose à la main sur un pick existant, retrait, vue des 6 mois par compte. Tables `ttfl_x2`, `ttfl_x2_reglage` (RLS propriétaire). La pose/retrait réels sont faits par le robot (ttfl-auto), pas par l'app.
+- Pick secret : le x2 d'une soirée secrète du compte 02 est affiché « 🔒 secret » et les actions sont refusées (`refusSecret`).
+- Fiche « Mode op. » : `x2` (lib/modes-operatoires.ts). Tests : `tests/x2-lib.test.ts`.
