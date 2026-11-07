@@ -88,6 +88,26 @@ export const MODES: ModeOperatoire[] = [
 
   // ── Chaque jour, chaque soir ───────────────────────────────────────────────────────────────────────────────
   {
+    id: "stats",
+    section: "comprendre",
+    titre: "La page Stats et ses sous-pages",
+    pourQuoi: "Savoir où trouver chaque statistique et comment la lire.",
+    quand: "Quand tu veux comprendre comment va l'équipe, ton compte, les formules ou le moteur.",
+    etapes: [
+      "Ouvre Plus > Stats : l'Aperçu donne les chiffres clés, et la barre de pastilles en haut ouvre chaque sous-page.",
+      "Équipe : classement des comptes, soirées, joueurs les plus joués et les plus rentables. Mes picks : ton compte (forme, séries, jours de la semaine, repères du moteur).",
+      "Stratégie : comparaison des formules du Plan 30 et bilan des bonus ×2. Adversaires : les joueurs suivis. Joueurs NBA : projections, forme et défenses du soir.",
+      "Vainqueurs : tes pronos face aux résultats et la fiabilité des favoris. Système : santé du moteur dans le cloud (passages, échecs, durées).",
+      "Le choix Saison régulière / Playoffs en haut des pages concernées change les chiffres affichés.",
+    ],
+    attention: [
+      "Ce sont des statistiques en lecture seule : rien n'est modifié par cette page.",
+      "Tant qu'une soirée n'est pas close, le pick du compte 02 n'entre dans aucune statistique (pick secret).",
+    ],
+    lien: { href: "/stats", libelle: "Ouvrir les stats" },
+    misAJour: "2026-11-07",
+  },
+  {
     id: "choisir-pick",
     section: "soir",
     titre: "Choisir ou changer un pick à la main",

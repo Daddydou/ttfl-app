@@ -9,7 +9,7 @@ const GROUPES: { titre: string; lignes: { href: string; titre: string; detail: s
   {
     titre: "Analyse",
     lignes: [
-      { href: "/stats", titre: "Stats", detail: "Scores, moyenne, toi vs les repères", icone: "stats" },
+      { href: "/stats", titre: "Stats", detail: "Équipe, mes picks, stratégie, joueurs NBA, système", icone: "stats" },
       { href: "/stars", titre: "Stars", detail: "Joueurs bloqués par le cycle de 30 jours", icone: "trophee" },
       { href: "/adversaires", titre: "Adversaires", detail: "Classement et picks des joueurs suivis", icone: "picks" },
       { href: "/absents", titre: "Absents", detail: "Joueurs exclus du calcul", icone: "absents" },
