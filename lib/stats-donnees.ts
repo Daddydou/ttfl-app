@@ -14,6 +14,7 @@ import type { LigneX2 } from "@/lib/x2";
 import type { JourSuivi } from "@/lib/stats-adversaires";
 import type { Passage } from "@/lib/stats-systeme";
 import type { ChoixVainqueur, MatchVainqueur } from "@/lib/vainqueurs";
+import type { LigneAbsence, ProjectionNuit } from "@/lib/stats-moteur";
 
 const TAILLE_PAGE = 1000;
 const PAGES_MAX = 30; // garde-fou : 30 000 lignes au plus
@@ -165,5 +166,53 @@ export async function chargerPassages(supabase: SupabaseClient, jours = 14): Pro
       .order("debut_le", { ascending: false })
       .range(debut, fin)
       .returns<Passage[]>(),
+  );
+}
+
+// Projection du DERNIER calcul du moteur pour chacune des soirées demandées (pour comparer aux scores réels).
+export async function chargerProjectionsDesSoirees(supabase: SupabaseClient, mode: Mode, dates: string[]): Promise<ProjectionNuit[]> {
+  const uniques = [...new Set(dates.map((d) => String(d).slice(0, 10)))].sort();
+  if (uniques.length === 0) return [];
+  const runs = await lirePages<{ id: number; game_date: string; computed_at: string }>((debut, fin) =>
+    supabase
+      .from("ttfl_runs")
+      .select("id,game_date,computed_at")
+      .eq("mode", mode)
+      .in("game_date", uniques)
+      .order("computed_at", { ascending: true })
+      .range(debut, fin)
+      .returns<{ id: number; game_date: string; computed_at: string }[]>(),
+  );
+  const dernierParSoiree = new Map<string, number>();
+  for (const r of runs) dernierParSoiree.set(String(r.game_date).slice(0, 10), r.id); // tri croissant : le dernier gagne
+  const ids = [...dernierParSoiree.values()];
+  if (ids.length === 0) return [];
+  const dateDuRun = new Map([...dernierParSoiree.entries()].map(([date, id]) => [id, date]));
+  const lignes = await lirePages<{ run_id: number; player: string; projection: number | null }>((debut, fin) =>
+    supabase
+      .from("ttfl_projections")
+      .select("run_id,player,projection")
+      .in("run_id", ids)
+      .order("run_id", { ascending: true })
+      .order("rank", { ascending: true })
+      .range(debut, fin)
+      .returns<{ run_id: number; player: string; projection: number | null }[]>(),
+  );
+  return lignes.flatMap((l) => {
+    const date = dateDuRun.get(l.run_id);
+    return date ? [{ date, player: l.player, projection: l.projection }] : [];
+  });
+}
+
+// Historique des statuts de blessure relevés (une ligne à chaque changement).
+export async function chargerAbsences(supabase: SupabaseClient): Promise<LigneAbsence[]> {
+  return lirePages<LigneAbsence>((debut, fin) =>
+    supabase
+      .from("ttfl_blesses_historique")
+      .select("game_date,joueur_norm,statut,vu_le")
+      .order("game_date", { ascending: true })
+      .order("id", { ascending: true })
+      .range(debut, fin)
+      .returns<LigneAbsence[]>(),
   );
 }

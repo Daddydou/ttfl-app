@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { ModeTabs } from "@/components/ModeTabs";
 import { BarresH, Carte, GrilleTuiles, Tableau, Tuile, Vide } from "@/components/stats/blocs";
-import { chargerProjectionsNba, resoudreMode } from "@/lib/stats-donnees";
+import { chargerAbsences, chargerProjectionsNba, resoudreMode } from "@/lib/stats-donnees";
+import { absencesParSoiree } from "@/lib/stats-moteur";
 import { parDefense, parPoste, plusEnForme, plusReguliers, repartitionStatuts, resumeSoirNba, topProjections } from "@/lib/stats-nba";
 import { dateCourte, fmt, fmtSigne } from "@/lib/stats-outils";
 
@@ -25,6 +26,7 @@ export default async function StatsJoueursNbaPage({ searchParams }: { searchPara
     );
   }
 
+  const absences = absencesParSoiree(await chargerAbsences(supabase)).slice(-10);
   const resume = resumeSoirNba(projections);
   const top = topProjections(projections, 12);
   const defenses = parDefense(projections);
@@ -78,6 +80,11 @@ export default async function StatsJoueursNbaPage({ searchParams }: { searchPara
         </Carte>
       )}
 
+      {absences.length > 0 && (
+        <Carte titre="Absences relevées" aide="Dernier statut relevé de chaque joueur, soirée par soirée (l'historique commence avec les premiers relevés conservés).">
+          <Tableau colonnes={["Soirée", "Out", "Doubtful", "Autres"]} lignes={absences.map((a) => [dateCourte(a.date), a.out, a.doubtful, a.autres])} />
+        </Carte>
+      )}
       {statuts.length > 0 && (
         <Carte titre="Statuts des joueurs analysés" aide="Disponibles, incertains, absents.">
           <BarresH items={statuts.map((s) => ({ label: s.statut, valeur: s.n }))} />

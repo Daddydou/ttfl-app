@@ -4,9 +4,10 @@ import { BarresH, Carte, GrilleTuiles, Lignes, Tableau, Tuile } from "@/componen
 import { aujourdhuiNY } from "@/lib/planning";
 import { maintenantMs } from "@/lib/plan30";
 import { chargerSecret } from "@/lib/secret";
-import { chargerPicksNotes, chargerSuiviFormules, chargerX2, resoudreMode } from "@/lib/stats-donnees";
+import { chargerPicksNotes, chargerProjectionsDesSoirees, chargerSuiviFormules, chargerX2, resoudreMode } from "@/lib/stats-donnees";
+import { bilanMoteur } from "@/lib/stats-moteur";
 import { bilanX2, detailFormules, nomFormule } from "@/lib/stats-strategie";
-import { dateCourte, fmt, fmtEntier, fmtSigne } from "@/lib/stats-outils";
+import { dateCourte, fmt, fmtEntier, fmtPourcent, fmtSigne } from "@/lib/stats-outils";
 import { LIBELLES_STATUT, libelleMois, type StatutX2 } from "@/lib/x2";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,7 @@ export default async function StatsStrategiePage({ searchParams }: { searchParam
 
   const f = detailFormules(lignesSuivi);
   const x2 = bilanX2(lignesX2, picks);
+  const moteur = bilanMoteur(picks, await chargerProjectionsDesSoirees(supabase, mode, picks.map((p) => p.pick_date)));
 
   return (
     <div className="space-y-5">
@@ -62,6 +64,28 @@ export default async function StatsStrategiePage({ searchParams }: { searchParam
         )}
       </Carte>
 
+      <Carte titre="Le moteur face à la réalité" aide="Projection du moteur (dernier calcul de la soirée) comparée au score réel des picks notés de l'équipe. Seuls les picks présents dans les 30 meilleurs du calcul sont comparés.">
+        {moteur.nCompares === 0 ? (
+          <p className="text-sm text-fg-muted">Pas encore de pick retrouvé dans un calcul du moteur.</p>
+        ) : (
+          <div className="space-y-4">
+            <GrilleTuiles>
+              <Tuile label="Picks comparés" valeur={String(moteur.nCompares)} detail={`${fmtPourcent(moteur.couverture)} des ${moteur.nPicks} picks notés`} />
+              <Tuile label="Projeté / réel" valeur={`${fmt(moteur.projectionMoyenne)} / ${fmt(moteur.reelMoyen)}`} detail={`biais ${fmtSigne(moteur.biais)} point(s) par pick`} />
+              <Tuile label="Erreur moyenne" valeur={fmt(moteur.erreurMoyenne)} detail="points d'écart par pick" />
+              <Tuile label="Corrélation" valeur={moteur.correlation === null ? "—" : moteur.correlation.toFixed(2)} detail="1 = le moteur classe parfaitement" />
+            </GrilleTuiles>
+            <Tableau
+              colonnes={["Projection", "Picks", "Projeté", "Réel"]}
+              lignes={moteur.tranches.filter((t) => t.n > 0).map((t) => [t.label, t.n, fmt(t.projection), fmt(t.reel)])}
+            />
+            <Tableau
+              colonnes={["Plus gros écarts", "Jour", "Proj.", "Réel"]}
+              lignes={moteur.plusGrosEcarts.map((e) => [e.joueur, dateCourte(e.date), fmt(e.projection), fmt(e.reel)])}
+            />
+          </div>
+        )}
+      </Carte>
       <Carte titre="Les bonus ×2" aide="Le ×2 double le score d'un pick : le gain est donc le score lui-même. Le ×2 est posé à la main ou par l'automate selon le compte.">
         {x2.total === 0 ? (
           <p className="text-sm text-fg-muted">Aucun ×2 enregistré pour l&apos;instant.</p>
