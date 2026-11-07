@@ -32,7 +32,7 @@ export function PickDuSoirResume({
       {pick ? (
         <div className="mt-1 flex items-baseline justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
-            <p className="truncate text-[22px] font-bold tracking-[-0.014em] text-fg">{pick}</p>
+            <p className="display truncate text-[28px] leading-[1.1] text-fg">{pick}</p>
             <BadgeX2 etat={x2} />
           </div>
           <span className="shrink-0 text-right">

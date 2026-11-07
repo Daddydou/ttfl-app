@@ -20,7 +20,8 @@ const config: Config = {
         line: { DEFAULT: v("line"), strong: v("line-strong") },
         fg: { DEFAULT: v("fg"), muted: v("fg-muted"), faint: v("fg-faint") },
         "on-accent": v("on-accent"),
-        // Accent = orange ballon de basket. 400 = texte, 500 = fond plein.
+        "on-out": v("on-out"),
+        // Accent = or champagne. 400 = texte, 500 = fond plein.
         court: { 400: v("accent"), 500: v("accent-fill"), 600: v("accent-press") },
         avail: v("avail"),
         quest: v("quest"),
@@ -29,14 +30,15 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          "var(--font-inter)",
           "-apple-system",
           "BlinkMacSystemFont",
-          "var(--font-inter)",
           "Segoe UI",
           "Roboto",
           "system-ui",
           "sans-serif",
         ],
+        display: ["var(--font-fraunces)", "Georgia", "Times New Roman", "serif"],
       },
       keyframes: {
         "pulse-ring": {

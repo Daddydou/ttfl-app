@@ -10,58 +10,60 @@
 :root {
   color-scheme: light dark;
 
-  --c-canvas: 242 242 247; /* fond de page (systemGroupedBackground) */
-  --c-surface: 255 255 255; /* cartes */
-  --c-surface-2: 242 242 247; /* tuile en creux dans une carte */
-  --c-fill: 229 229 234; /* pastilles, états pressés */
+  --c-canvas: 245 242 235; /* fond de page : ivoire */
+  --c-surface: 255 253 249; /* cartes */
+  --c-surface-2: 240 236 227; /* tuile en creux dans une carte */
+  --c-fill: 232 227 216; /* pastilles, états pressés */
   --c-thumb: 255 255 255; /* curseur du contrôle segmenté */
-  --c-line: 224 224 229; /* filets */
-  --c-line-strong: 199 199 204;
-  --c-fg: 17 17 19;
-  --c-fg-muted: 100 100 105; /* ≥ 4,5:1 même sur fill (pastilles) */
-  --c-fg-faint: 142 142 147; /* placeholders, éléments désactivés */
-  --c-accent: 194 65 12; /* texte / liens : orange foncé lisible */
-  --c-accent-fill: 207 69 16; /* boutons pleins (texte blanc ≥ 4,5:1) */
-  --c-accent-press: 178 56 10;
-  --c-on-accent: 255 255 255;
-  --c-avail: 36 138 61;
-  --c-quest: 156 90 0;
-  --c-doubt: 190 80 0;
-  --c-out: 215 0 21;
+  --c-line: 224 218 206; /* filets */
+  --c-line-strong: 199 192 178;
+  --c-fg: 20 19 17;
+  --c-fg-muted: 98 94 86; /* ≥ 4,5:1 même sur fill (pastilles) */
+  --c-fg-faint: 140 135 126; /* placeholders, éléments désactivés */
+  --c-accent: 134 94 20; /* texte / liens : or foncé lisible sur ivoire */
+  --c-accent-fill: 184 140 56; /* boutons pleins (texte brun foncé ≥ 4,5:1) */
+  --c-accent-press: 160 118 38;
+  --c-on-accent: 23 19 10;
+  --c-on-out: 255 255 255; /* texte sur fond rouge */
+  --c-avail: 31 122 69;
+  --c-quest: 138 90 0;
+  --c-doubt: 176 74 0;
+  --c-out: 200 0 21;
 
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 20px rgb(0 0 0 / 0.05);
-  --shadow-float: 0 8px 32px rgb(0 0 0 / 0.16), 0 1px 0 rgb(255 255 255 / 0.6) inset;
-  --glass: rgb(255 255 255 / 0.82);
-  --glass-border: rgb(0 0 0 / 0.06);
-  --scrim: rgb(0 0 0 / 0.38);
+  --shadow-card: 0 0 0 1px rgb(224 218 206 / 0.7), 0 8px 24px rgb(60 45 10 / 0.05);
+  --shadow-float: 0 10px 32px rgb(40 30 10 / 0.16), 0 0 0 1px rgb(224 218 206 / 0.8);
+  --glass: rgb(255 253 249 / 0.9);
+  --glass-border: rgb(60 45 10 / 0.08);
+  --scrim: rgb(20 15 5 / 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --c-canvas: 0 0 0;
-    --c-surface: 28 28 30;
-    --c-surface-2: 44 44 46;
-    --c-fill: 58 58 60;
-    --c-thumb: 99 99 102;
-    --c-line: 56 56 58;
-    --c-line-strong: 72 72 74;
-    --c-fg: 245 245 247;
-    --c-fg-muted: 166 166 172; /* ≥ 4,5:1 même sur fill */
-    --c-fg-faint: 99 99 102;
-    --c-accent: 255 159 67;
-    --c-accent-fill: 255 140 26;
-    --c-accent-press: 232 120 10;
-    --c-on-accent: 28 14 0;
-    --c-avail: 48 209 88;
-    --c-quest: 255 214 10;
-    --c-doubt: 255 159 10;
-    --c-out: 255 105 97; /* ≥ 4,5:1 sur surface-2 */
+    --c-canvas: 11 11 13; /* noir chaud */
+    --c-surface: 20 20 23;
+    --c-surface-2: 26 26 30;
+    --c-fill: 36 36 41;
+    --c-thumb: 58 58 64;
+    --c-line: 38 38 43;
+    --c-line-strong: 62 62 69;
+    --c-fg: 242 238 230; /* ivoire */
+    --c-fg-muted: 154 150 142; /* ≥ 4,5:1 même sur fill */
+    --c-fg-faint: 104 100 94;
+    --c-accent: 201 164 92; /* or champagne */
+    --c-accent-fill: 201 164 92;
+    --c-accent-press: 176 142 74;
+    --c-on-accent: 23 19 10;
+    --c-on-out: 23 19 10;
+    --c-avail: 127 199 154;
+    --c-quest: 238 204 80;
+    --c-doubt: 232 134 64;
+    --c-out: 244 114 106; /* ≥ 4,5:1 sur surface-2 */
 
-    --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
-    --shadow-float: 0 8px 32px rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.08) inset;
-    --glass: rgb(34 34 36 / 0.8);
-    --glass-border: rgb(255 255 255 / 0.08);
-    --scrim: rgb(0 0 0 / 0.6);
+    --shadow-card: 0 0 0 1px rgb(38 38 43);
+    --shadow-float: 0 14px 36px rgb(0 0 0 / 0.65), 0 0 0 1px rgb(42 42 48);
+    --glass: rgb(28 28 32 / 0.94);
+    --glass-border: rgb(42 42 48);
+    --scrim: rgb(0 0 0 / 0.65);
   }
 }
 
@@ -112,10 +114,10 @@ input[type="number"]::-webkit-outer-spin-button {
 @layer components {
   /* Typographie (échelle iOS) */
   .title-large {
-    @apply text-[34px] font-bold leading-[1.08] tracking-[-0.022em] text-fg;
+    @apply font-display text-[38px] font-normal leading-[1.05] tracking-[-0.02em] text-fg;
   }
   .title-2 {
-    @apply text-[22px] font-bold leading-tight tracking-[-0.014em] text-fg;
+    @apply font-display text-[24px] font-normal leading-tight tracking-[-0.015em] text-fg;
   }
   .headline {
     @apply text-[17px] font-semibold leading-snug tracking-[-0.01em] text-fg;
@@ -127,7 +129,7 @@ input[type="number"]::-webkit-outer-spin-button {
     @apply text-[13px] leading-snug text-fg-muted;
   }
   .section-label {
-    @apply px-4 text-[13px] font-medium uppercase tracking-[0.04em] text-fg-muted;
+    @apply px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-fg-muted;
   }
   /* Dans une carte, l'étiquette s'aligne sur le contenu (la carte a déjà sa marge). */
   .card .section-label {
@@ -135,6 +137,10 @@ input[type="number"]::-webkit-outer-spin-button {
   }
   .num {
     font-variant-numeric: tabular-nums;
+  }
+  /* Grand serif (Fraunces) : noms de joueurs, gros chiffres. */
+  .display {
+    @apply font-display font-normal tracking-[-0.02em];
   }
   /* Rail défilant horizontal (jours, onglets) : on glisse au doigt, pas de barre. */
   .rail {
@@ -146,7 +152,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
   /* Surfaces */
   .card {
-    @apply rounded-[20px] bg-surface;
+    @apply rounded-[22px] bg-surface;
     box-shadow: var(--shadow-card);
   }
   .glass {
@@ -179,7 +185,7 @@ input[type="number"]::-webkit-outer-spin-button {
     @apply bg-court-500/20;
   }
   .btn-danger {
-    @apply bg-out text-on-accent;
+    @apply bg-out text-on-out;
   }
   .btn-plain {
     @apply bg-fill text-fg;

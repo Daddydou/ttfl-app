@@ -418,10 +418,10 @@ function ChoixCompte({ resume, courant, mode }: { resume: ResumeCompte[]; couran
             key={r.compte}
             href={`/picks?mode=${mode}&vue=historique&compte=${r.compte}`}
             aria-current={actif ? "page" : undefined}
-            className={`rounded-[12px] px-1 py-1.5 text-center ${actif ? "bg-court-500 text-white" : "bg-surface-2 text-fg"}`}
+            className={`rounded-[12px] px-1 py-1.5 text-center ${actif ? "bg-court-500 text-on-accent" : "bg-surface-2 text-fg"}`}
           >
             <div className="text-[13px] font-bold tabular-nums">{r.compte}</div>
-            <div className={`text-[11px] tabular-nums ${actif ? "text-white/90" : "text-fg-muted"}`}>
+            <div className={`text-[11px] tabular-nums ${actif ? "text-on-accent/80" : "text-fg-muted"}`}>
               {r.notes ? `${r.total} pts` : "—"}
             </div>
           </Link>

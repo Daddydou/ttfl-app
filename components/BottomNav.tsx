@@ -29,7 +29,7 @@ export function BottomNav() {
       className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
     >
       <div
-        className="glass pointer-events-auto mx-auto flex max-w-md items-stretch rounded-[28px] p-1.5"
+        className="glass pointer-events-auto mx-auto flex max-w-md items-stretch rounded-[24px] p-1.5"
         style={{ boxShadow: "var(--shadow-float)" }}
       >
         {TABS.map((tab) => {
@@ -44,8 +44,8 @@ export function BottomNav() {
               key={tab.href}
               href={tab.href}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-[52px] flex-1 flex-col max-[359px]:min-w-0 items-center justify-center gap-0.5 rounded-[22px] px-0.5 text-[11px] font-semibold tracking-tight transition duration-200 ${
-                active ? "bg-court-500/15 text-court-400" : "text-fg-muted active:bg-fill/60"
+              className={`flex min-h-[52px] flex-1 flex-col max-[359px]:min-w-0 items-center justify-center gap-0.5 rounded-[18px] px-0.5 text-[11px] font-semibold tracking-tight transition duration-200 ${
+                active ? "text-court-400" : "text-fg-muted active:bg-fill/60"
               }`}
             >
               <Icon name={tab.icon} size={24} strokeWidth={active ? 2.1 : 1.8} />
