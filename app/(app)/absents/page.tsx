@@ -4,6 +4,10 @@ import { DeleteAbsentButton } from "@/components/DeleteAbsentButton";
 import { frDate, todayISO } from "@/lib/format";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { TtflManualAbsent } from "@/lib/types";
+import { StarsAbsentes } from "@/components/StarsAbsentes";
+import { aujourdhuiNY } from "@/lib/planning";
+import type { Blesse } from "@/lib/blesses";
+import { starsAbsentes, TAILLE_TOP, type LigneClassement } from "@/lib/stars-absentes";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Absents — TTFL" };
@@ -12,11 +16,25 @@ export default async function AbsentsPage() {
   const supabase = await createClient();
   const today = todayISO();
 
-  const { data: absents } = await supabase
-    .from("ttfl_manual_absents")
-    .select("*")
-    .order("date_debut", { ascending: false })
-    .returns<TtflManualAbsent[]>();
+  // Requêtes indépendantes : toutes en parallèle. Blessés (Out / Doubtful) d'aujourd'hui et des soirées à venir +
+  // top 30 des moyennes TTFL ; une table vide ou absente n'affiche simplement rien (jamais d'erreur sur la page).
+  const depuis = aujourdhuiNY();
+  const [{ data: absents }, { data: blesses }, { data: classement }] = await Promise.all([
+    supabase.from("ttfl_manual_absents").select("*").order("date_debut", { ascending: false }).returns<TtflManualAbsent[]>(),
+    supabase
+      .from("ttfl_blesses")
+      .select("game_date,joueur,joueur_norm,equipe_abbr,equipe,statut,statut_brut,motif,retour_prevu,source,maj_le")
+      .gte("game_date", depuis)
+      .returns<Blesse[]>(),
+    supabase
+      .from("ttfl_classement_moyennes")
+      .select("cle,player,rang,moyenne,maj_le")
+      .lte("rang", TAILLE_TOP)
+      .order("rang")
+      .returns<(LigneClassement & { maj_le: string | null })[]>(),
+  ]);
+  const stars = starsAbsentes(blesses ?? [], classement ?? [], depuis);
+  const classementMaj = (classement ?? []).map((c) => c.maj_le ?? "").sort().pop() || null;
 
   const rows = absents ?? [];
   // Un absent est "actif" si la date du jour est dans [début, fin].
@@ -28,6 +46,8 @@ export default async function AbsentsPage() {
   return (
     <div className="space-y-4">
       <PageHeader titre="Absents" sousTitre="Joueurs à exclure du classement" retour={{ href: "/plus", libelle: "Plus" }} />
+      <StarsAbsentes soirees={stars} classementMaj={classementMaj} />
+
       <div className="card px-4 py-3">
         <p className="text-[13px] leading-relaxed text-fg-muted">
           Ces absents sont pris en compte au{" "}
