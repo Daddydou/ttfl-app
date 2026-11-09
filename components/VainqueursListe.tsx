@@ -101,6 +101,9 @@ export function VainqueursListe({
                         {m.prob_dom == null && !m.resultat && (
                           <span className="rounded-full bg-surface px-2 py-0.5 font-medium text-fg-muted">cotes pas encore publiées</span>
                         )}
+                        {m.prob_dom != null && m.cote_dom == null && !m.resultat && (
+                          <span className="rounded-full bg-surface px-2 py-0.5 font-medium text-fg-muted">estimation du modèle</span>
+                        )}
                         {m.serre && <span className="rounded-full bg-quest/15 px-2 py-0.5 font-semibold text-quest">serré</span>}
                         {c?.source === "manuel" && <span className="rounded-full bg-court-500/15 px-2 py-0.5 font-semibold text-court-400">manuel</span>}
                         {m.resultat && effectif && (
