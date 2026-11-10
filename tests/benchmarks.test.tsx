@@ -45,7 +45,7 @@ describe("carte Toi vs les repères", () => {
   };
   it("affiche l'écart à soirées égales, pas sur toutes les soirées", () => {
     render(<BenchmarksCard rows={[row]} userPicks={picks} />);
-    expect(screen.getByText("Glouton réaliste")).toBeInTheDocument();
+    expect(screen.getByText("Glouton idéal (absences connues)")).toBeInTheDocument();
     expect(screen.getByText("-51")).toBeInTheDocument();
     expect(screen.getByText(/2 soirées/)).toBeInTheDocument();
     expect(screen.getByText(/toi : 20/)).toBeInTheDocument();

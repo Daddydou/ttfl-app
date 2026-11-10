@@ -15,11 +15,12 @@ const META: Record<
   { label: string; tooltip: string }
 > = {
   greedy: {
-    label: "Glouton réaliste",
+    label: "Glouton idéal (absences connues)",
     tooltip:
-      "Chaque soir, le pick #1 du modèle avec l'info disponible ce soir-là, " +
-      "sans anticiper le futur. Aucune intelligence de calendrier — le repère " +
-      "de base.",
+      "Chaque soir, le pick #1 du modèle, sans anticiper le futur. Attention : " +
+      "ce repère est calculé après coup sur des joueurs qui ont tous joué, donc il ne subit jamais " +
+      "une absence de dernière minute. Il est plus haut que ce qu'un vrai glouton peut " +
+      "faire en direct : compare-toi plutôt au « Glouton (base) » du suivi des formules.",
   },
   plan_by_round: {
     label: "Planification par tour",

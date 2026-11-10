@@ -151,7 +151,7 @@ export default async function StatsPage({
         <VersusEngineCard
           rows={versus}
           engineLabel={
-            engine.strategy === "doctrine" ? "Doctrine" : "Glouton réaliste"
+            engine.strategy === "doctrine" ? "Doctrine" : "Glouton idéal"
           }
         />
       )}
