@@ -10,12 +10,17 @@ export interface ScorePick {
   compte: string;
   pick_date: string;
   player: string;
-  score: number | null;
+  score: number | null; // score TTFL BRUT du joueur
+  points_site?: number | null; // points que le SITE compte (x2 inclus) ; absent = score brut
 }
 
 export interface PickJoue extends ScorePick {
   score: number;
 }
+
+// Points comptés par le site pour ce pick : x2 inclus. A utiliser pour les TOTAUX ; les moyennes, records et comparaisons
+// restent sur le score brut.
+export const pointsSite = (p: { score: number | null; points_site?: number | null }): number => p.points_site ?? p.score ?? 0;
 
 export const SEUIL_BON_SOIR = 40; // un pick à 40 points ou plus est un « bon soir »
 
@@ -49,7 +54,7 @@ export function parCompte(picks: ScorePick[]): ResumeCompte[] {
       return {
         compte,
         n: ps.length,
-        total: somme(scores),
+        total: somme(ps.map(pointsSite)),
         moyenne: moyenne(scores),
         meilleur: meilleurDe(ps),
         pire: pireDe(ps),
@@ -75,7 +80,7 @@ export function parSoiree(picks: ScorePick[]): ResumeSoiree[] {
   const groupes = grouper(picksJoues(picks), (p) => p.pick_date);
   return [...groupes.entries()]
     .map(([date, ps]) => {
-      const total = somme(ps.map((p) => p.score));
+      const total = somme(ps.map(pointsSite));
       return { date, n: ps.length, total, moyenne: total / ps.length, meilleur: meilleurDe(ps)!, pire: pireDe(ps)! };
     })
     .sort((a, b) => a.date.localeCompare(b.date));
@@ -99,7 +104,7 @@ export function syntheseEquipe(picks: ScorePick[]): SyntheseEquipe {
   const meilleure = soirees.reduce<ResumeSoiree | null>((b, s) => (!b || s.moyenne > b.moyenne ? s : b), null);
   const pire = soirees.reduce<ResumeSoiree | null>((b, s) => (!b || s.moyenne < b.moyenne ? s : b), null);
   return {
-    total: somme(scores),
+    total: somme(joues.map(pointsSite)),
     nPicks: joues.length,
     nSoirees: soirees.length,
     nComptes: new Set(joues.map((p) => p.compte)).size,

@@ -86,7 +86,8 @@ export interface TtflPick {
   mode: Mode;
   pick_date: string;
   player: string;
-  score: number | null;
+  score: number | null; // score TTFL brut du joueur
+  points_site?: number | null; // points comptés par le site (x2 inclus) ; null/absent = score brut
   created_at: string;
   compte: string; // '01' … '12' (01/02 = comptes principaux, 03 à 12 = équipe)
   source: "app" | "site"; // posé depuis l'application ou repéré sur le site TTFL

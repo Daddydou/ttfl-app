@@ -19,7 +19,7 @@ import { chargerSecret } from "@/lib/secret";
 import { aujourdhuiNY } from "@/lib/planning";
 import { maintenantMs } from "@/lib/plan30";
 import { chargerPicksNotes, resoudreMode } from "@/lib/stats-donnees";
-import { ecartAuCompte, type ScorePick } from "@/lib/stats-equipe";
+import { ecartAuCompte, pointsSite, type ScorePick } from "@/lib/stats-equipe";
 import { formeRecente, parJourSemaine, series, SEUIL_SERIE } from "@/lib/stats-mes-picks";
 import { Carte, Colonnes, Lignes, Tuile, GrilleTuiles } from "@/components/stats/blocs";
 import { fmt, fmtSigne, dateCourte } from "@/lib/stats-outils";
@@ -65,8 +65,8 @@ export default async function StatsPage({
   const all = picks ?? [];
   const scored = all.filter((p) => p.score !== null);
   const scores = scored.map((p) => p.score as number);
-  const total = scores.reduce((s, v) => s + v, 0);
-  const avg = scores.length ? total / scores.length : null;
+  const total = scored.reduce((s, p) => s + pointsSite(p), 0); // points du site : x2 compté
+  const avg = scores.length ? scores.reduce((s, v) => s + v, 0) / scores.length : null; // moyenne brute
   const best = scored.reduce<TtflPick | null>(
     (b, p) => (!b || (p.score ?? 0) > (b.score ?? 0) ? p : b),
     null,
@@ -88,7 +88,7 @@ export default async function StatsPage({
   const aujourdhui = aujourdhuiNY();
   const etatSecret = await chargerSecret(supabase, aujourdhui);
   const picksEquipe = await chargerPicksNotes(supabase, mode, { etat: etatSecret, aujourdhui, maintenantMs: maintenantMs() });
-  const miens: ScorePick[] = scored.map((p) => ({ compte: p.compte, pick_date: p.pick_date, player: p.player, score: p.score }));
+  const miens: ScorePick[] = scored.map((p) => ({ compte: p.compte, pick_date: p.pick_date, player: p.player, score: p.score, points_site: p.points_site }));
   const forme = formeRecente(miens, 7);
   const serie = series(miens);
   const semaine = parJourSemaine(miens);

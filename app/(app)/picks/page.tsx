@@ -37,6 +37,7 @@ import {
   type Zone,
 } from "@/lib/planning";
 import type { Mode, TtflPick } from "@/lib/types";
+import { pointsSite } from "@/lib/stats-equipe";
 import { Icon } from "@/components/ui/Icon";
 
 export const dynamic = "force-dynamic";
@@ -435,8 +436,8 @@ function ChoixCompte({ resume, courant, mode }: { resume: ResumeCompte[]; couran
 
 function HistoriqueVue({ rows, mode, compte, x2 }: { rows: TtflPick[]; mode: Mode; compte: string; x2: CarteX2 }) {
   const scored = rows.filter((p) => p.score !== null);
-  const total = scored.reduce((s, p) => s + (p.score ?? 0), 0);
-  const avg = scored.length ? total / scored.length : null;
+  const total = scored.reduce((s, p) => s + pointsSite(p), 0); // points du site : x2 compté
+  const avg = scored.length ? scored.reduce((s, p) => s + (p.score ?? 0), 0) / scored.length : null; // moyenne brute
 
   return (
     <>

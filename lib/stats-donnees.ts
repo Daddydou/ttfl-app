@@ -56,7 +56,7 @@ export async function chargerPicksNotes(supabase: SupabaseClient, mode: Mode, ct
   const lignes = await lirePages<ScorePick>((debut, fin) =>
     supabase
       .from("ttfl_picks")
-      .select("compte,pick_date,player,score")
+      .select("compte,pick_date,player,score,points_site")
       .eq("mode", mode)
       .not("score", "is", null)
       .order("pick_date", { ascending: true })
