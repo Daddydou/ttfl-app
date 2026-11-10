@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { listerJoueursDuSoir, pickRepartition, type JoueurDuSoir } from "@/app/actions";
 import { fmtNum, frDate } from "@/lib/format";
-import { joursEntre } from "@/lib/planning";
+import { joursEntre, normaliserNom } from "@/lib/planning";
 import { MARGE_BRUIT, PART_MAX, repartirEquipe } from "@/lib/repartition";
 import type { Mode } from "@/lib/types";
 
@@ -18,6 +18,8 @@ export function RepartitionEquipe({
   bloques,
   aUnPick,
   dejaPose,
+  parCompte = {},
+  x2 = {},
 }: {
   mode: Mode;
   date: string;
@@ -25,6 +27,8 @@ export function RepartitionEquipe({
   bloques: Record<string, string[]>; // nom normalisé → comptes où il est bloqué (≤ 30 jours)
   aUnPick: boolean;
   dejaPose: boolean; // au moins un compte a déjà un pick posé sur le site TTFL
+  parCompte?: Record<string, string>; // joueur actuel de chaque compte pour cette soirée
+  x2?: Record<string, string>; // comptes dont le joueur actuel porte un x2 (posé ou voulu)
 }) {
   const router = useRouter();
   const [ouvert, setOuvert] = useState(false);
@@ -84,6 +88,19 @@ export function RepartitionEquipe({
   }
 
   const nbComptes = proposition ? proposition.groupes.reduce((s, g) => s + g.comptes.length, 0) : 0;
+
+  // Changer le joueur d'un compte retire son x2 (le x2 est lié au joueur) : on prévient AVANT de valider.
+  const comptesX2Perdus = useMemo(() => {
+    if (!proposition) return [] as string[];
+    const perdus: string[] = [];
+    for (const g of proposition.groupes) {
+      for (const c of g.comptes) {
+        const actuel = parCompte[c];
+        if (x2[c] && actuel && normaliserNom(actuel) !== normaliserNom(g.player)) perdus.push(c);
+      }
+    }
+    return perdus.sort();
+  }, [proposition, parCompte, x2]);
 
   return (
     <>
@@ -156,6 +173,12 @@ export function RepartitionEquipe({
                 {proposition.coutProjection > 0
                   ? `Coût attendu : −${fmtNum(proposition.coutProjection)} points de projection pour l'équipe, contre chaque compte sur son meilleur joueur — en échange, bien moins de risque si un joueur manque.`
                   : "Aucun coût : un seul joueur est dans la marge, tous les comptes le prennent."}
+              </p>
+            )}
+            {comptesX2Perdus.length > 0 && (
+              <p className="mt-2 rounded-[10px] bg-quest/10 px-3 py-2 text-[13px] text-quest" role="status">
+                Attention : le x2 du compte {comptesX2Perdus.join(", ")} sera retiré (le joueur change). Le moteur en
+                replanifiera un pour les comptes 02 à 13 ; sinon, à remettre.
               </p>
             )}
             {proposition !== null && proposition.sansPick.length > 0 && (

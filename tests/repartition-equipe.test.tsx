@@ -66,6 +66,21 @@ describe("RepartitionEquipe", () => {
     expect(screen.getByText(/déjà posés sur le site TTFL/)).toBeInTheDocument();
   });
 
+  it("prévient quand la répartition va retirer un x2 (le joueur du compte change)", async () => {
+    // Le compte 07 a un x2 sur un joueur qui n'est dans aucun groupe proposé : son x2 sera perdu.
+    rendre({ parCompte: { "07": "Ancien Joueur", "08": "Luka Dončić" }, x2: { "07": "pose", "08": "pose" } });
+    await userEvent.click(screen.getByRole("button", { name: "Répartir l'équipe" }));
+    await screen.findByText("Luka Dončić");
+    expect(screen.getByRole("status")).toHaveTextContent(/le x2 du compte 07 sera retiré/);
+  });
+
+  it("ne prévient pas si aucun x2 n'est touché", async () => {
+    rendre({ parCompte: { "07": "Ancien Joueur" }, x2: {} });
+    await userEvent.click(screen.getByRole("button", { name: "Répartir l'équipe" }));
+    await screen.findByText("Luka Dončić");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("n'écrit rien et le dit s'il n'y a aucun joueur disponible", async () => {
     listerJoueursDuSoir.mockResolvedValue({ ok: true, joueurs: [], avanceSeule: true });
     rendre();

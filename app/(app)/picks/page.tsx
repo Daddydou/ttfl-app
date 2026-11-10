@@ -378,6 +378,8 @@ function PlanningVue({
                   bloques={n.bloques}
                   aUnPick={n.resume.nPicks > 0}
                   dejaPose={n.dejaPose}
+                  parCompte={n.parCompte}
+                  x2={n.x2}
                 />
               )}
               {!n.passee && !n.secret && zone.comptes.length > 1 && (
