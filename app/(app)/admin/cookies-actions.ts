@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { COMPTES_COOKIES, validerCookie } from "@/lib/cookies";
 import { poserSecretCookie, secretsConfigures } from "@/lib/github-secrets";
+import { refusNonProprietaire } from "@/lib/proprietaire";
 
 export type ResultatCookie = { ok: true; message: string } | { ok: false; error: string };
 
@@ -20,6 +21,8 @@ export async function renouvelerCookie(compte: string, cookieBrut: string): Prom
 
   const supabase = await createClient();
   const { data: utilisateur } = await supabase.auth.getUser();
+  const refus = refusNonProprietaire(utilisateur.user);
+  if (refus) return { ok: false, error: refus };
   if (!utilisateur.user) return { ok: false, error: "Session expirée : reconnecte-toi." };
 
   const pose = await poserSecretCookie(compte, v.cookie);
