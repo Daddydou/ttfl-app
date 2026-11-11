@@ -6,6 +6,7 @@ import { PourquoiPick } from "@/components/PourquoiPick";
 import { ComptesEquipeConseilles, JoursConseilles, ZonesConseilles } from "@/components/ConseillesNav";
 import { PlanTrenteJours } from "@/components/PlanTrenteJours";
 import { PlanEquipe } from "@/components/PlanEquipe";
+import { PicksEquipeSoir } from "@/components/PicksEquipeSoir";
 import { SuiviFormules } from "@/components/SuiviFormules";
 import type { LigneSuivi } from "@/lib/suivi-formules";
 import { chargerSoiree } from "@/lib/conseilles-data";
@@ -336,6 +337,17 @@ export default async function PicksConseillesPage({
             <SuiviFormules lignes={suiviVisible} />
           </div>
         </details>
+      )}
+
+      {avecPlanEquipe && !compteEquipe && (
+        <PicksEquipeSoir
+          comptes={zone.comptes}
+          date={date}
+          picks={picks}
+          conseilles={conseilles}
+          lignes={lignes}
+          x2={x2}
+        />
       )}
 
       {avecPlanEquipe && (

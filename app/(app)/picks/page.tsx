@@ -351,6 +351,17 @@ function PlanningVue({
                   ))}
                 </p>
               )}
+              {/* Équipe : quand les comptes n'ont pas tous le même joueur, on montre QUI a QUI (un compte par ligne). */}
+              {!n.secret && zone.comptes.length > 1 && (n.resume.etat === "mixte" || n.resume.etat === "partiel") && (
+                <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[13px]" aria-label="Pick de chaque compte">
+                  {zone.comptes.map((c) => (
+                    <li key={c} className="flex min-w-0 items-baseline gap-1.5">
+                      <span className="w-5 shrink-0 font-bold tabular-nums text-fg-muted">{c}</span>
+                      <span className={`truncate ${n.parCompte[c] ? "text-fg" : "text-fg-muted"}`}>{n.parCompte[c] ?? "pas de pick"}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
               {n.envoi.detail && <p className="mt-1 text-[13px] text-out">{n.envoi.detail}</p>}
               {/* Qui a choisi : une information neutre, pas un avertissement (l'état d'envoi est dans le badge). */}
               {n.autos.length > 0 && (

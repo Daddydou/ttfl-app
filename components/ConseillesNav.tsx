@@ -26,7 +26,8 @@ export function JoursConseilles({
   compte?: string | null;
 }) {
   return (
-    <div className="rail -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Soirées">
+    // Grille (et non plus un rail qui défile) : les 7 soirées sont toutes visibles d'un coup, sans rien à deviner.
+    <div className="grid grid-cols-4 gap-1.5" role="tablist" aria-label="Soirées">
       {jours.map((j) => {
         const e = etiquetteJour(j, aujourdhui);
         const actif = j === courant;
@@ -36,7 +37,7 @@ export function JoursConseilles({
             href={hrefConseilles(j, pour, compte)}
             role="tab"
             aria-selected={actif}
-            className={`chip !rounded-[20px] !px-3.5 !py-2 ${actif ? "chip-on" : ""}`}
+            className={`chip !rounded-[16px] !px-1 !py-2 ${actif ? "chip-on" : ""}`}
           >
             <span className="block">{majuscule(e.court)}</span>
             {e.relatif && <span className="block text-[11px] font-medium normal-case opacity-80">{e.relatif}</span>}
@@ -54,14 +55,15 @@ export function ComptesEquipeConseilles({ date, compte }: { date: string | null;
     ...COMPTES_EQUIPE.map((c) => ({ id: c, label: c })),
   ];
   return (
-    <div className="rail -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Compte de l'équipe">
+    // Les 10 comptes + « Tous » à la ligne (et non plus un rail caché qui défile) : on voit tous les comptes.
+    <div className="grid grid-cols-6 gap-1.5" role="tablist" aria-label="Compte de l'équipe">
       {items.map((it) => (
         <Link
           key={it.label}
           href={hrefConseilles(date, "equipe", it.id)}
           role="tab"
           aria-selected={compte === it.id}
-          className={`chip ${compte === it.id ? "chip-on" : ""}`}
+          className={`chip !px-1 ${it.id === null ? "col-span-2" : ""} ${compte === it.id ? "chip-on" : ""}`}
         >
           {it.label}
         </Link>
