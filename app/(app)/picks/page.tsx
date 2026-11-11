@@ -331,7 +331,7 @@ function PlanningVue({
                   </p>
                   <RevelerBouton soiree={n.date} />
                 </div>
-              ) : (
+              ) : zone.comptes.length > 1 && n.resume.etat === "mixte" ? null : ( // équipe, picks différents : la liste par compte (plus bas) suffit
                 <p
                   className={`mt-2 text-sm ${n.resume.etat === "aucun" ? "text-fg-muted" : "font-semibold text-fg"}`}
                 >
