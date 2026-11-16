@@ -246,7 +246,7 @@ export function MenuTiroir({ pied, haut }: { pied?: ReactNode; haut?: ReactNode 
           ))}
           <Section titre="Apparence" ouvert={section === "apparence"} basculer={() => basculer("apparence")}>
             <p className="mb-3 text-[13px] leading-snug text-fg-muted">
-              Couleur d&apos;accent (essai du site test : retenue sur cet appareil).
+              Couleur d&apos;accent (retenue sur cet appareil).
             </p>
             <div className="grid grid-cols-3 gap-2">
               {ACCENTS.map((a) => (

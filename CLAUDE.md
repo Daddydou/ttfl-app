@@ -102,7 +102,14 @@ poussé dans Supabase.
 - Admin = aperçu (état du moteur + santé) + sous-pages `/admin/{actions,journal,envois,secret,cloud,masse,notifications,cookies}`. Une action serveur Admin invalide `revalidatePath("/admin", "layout")`.
 - Les sous-pages ont un retour en haut à gauche : `PageHeader retour={{ href, libelle }}`.
 - Le dernier compte choisi (Conseillés `?pour=`, Mes picks `?zone=`) est retenu dans le cookie `ttfl_zone` (proxy, `lib/planning.ts` + `lib/zone-memo.ts`).
-- Orange = action ou sélection uniquement (DESIGN.md) : jamais pour un chiffre, un graphique ou un statut.
+- Accent (jaune balle depuis la refonte Dark) = action ou sélection uniquement (DESIGN.md) : jamais pour un chiffre, un graphique ou un statut.
+
+## Refonte « Dark » (16/11/2026)
+- Même thème et mêmes effets que l'app Tennis (refonte « esprit Dark ») : voir DESIGN.md. Toujours sombre, jetons `--c-*` dans `app/globals.css`, polices Inter + Jost (titres en capitales espacées).
+- Composants dans `components/dark/` : FondVivant (fibres), IntroOuverture, MenuTiroir (☰), Entonnoir (transition depuis le point touché, branchée dans `app/(app)/template.tsx`), TerrainDessine, SceneAccueil. `lib/origine-entonnoir.ts` retient le point de départ.
+- Accent réglable dans ☰ > Apparence (balle par défaut, or, ballon) : `localStorage.ttfl-accent`, lu avant l'affichage dans `app/layout.tsx`.
+- Une nouvelle page s'ajoute au menu tiroir (`components/dark/MenuTiroir.tsx`) ET à « Plus ».
+- Le squelette `app/(app)/loading.tsx` doit garder `aria-busy="true"` (l'Entonnoir attend sa disparition).
 
 
 ## x2 (06/11/2026)
