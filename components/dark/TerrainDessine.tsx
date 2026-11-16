@@ -162,15 +162,15 @@ function Perspective({ delai, cadrage }: { delai: string | null; cadrage: "centr
       </g>
       {/* Poteau, panneau et arceau lointains. */}
       <g fill="none" strokeLinecap="round">
-        <line x1={bx} y1={by} x2={bx} y2={by - h(2.9)} stroke="#fff" strokeOpacity="0.22" strokeWidth="1.4" {...dessin(1200)} />
+        <line x1={bx} y1={by} x2={bx} y2={by - h(2.9)} stroke="#fff" strokeOpacity="0.12" strokeWidth="1.2" {...dessin(1200)} />
         <rect
           x={bx - h(0.9)}
           y={by - h(3.95)}
           width={h(1.8)}
           height={h(1.05)}
           stroke="#fff"
-          strokeOpacity="0.55"
-          strokeWidth="1.4"
+          strokeOpacity="0.38"
+          strokeWidth="1.2"
           {...dessin(1300)}
         />
         <ellipse

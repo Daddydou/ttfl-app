@@ -68,7 +68,7 @@ export function SceneAccueil({
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_45%,transparent_40%,rgba(0,0,0,.85)_100%)]" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-start gap-4 px-6 pt-[max(6.5rem,15vh)] text-center">
+      <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-start gap-4 px-6 pt-[max(6.5rem,15vh)] text-center [text-shadow:0_0_22px_rgba(0,0,0,.95),0_0_6px_rgba(0,0,0,.85)]">
         <p className="titre-espace animate-fondu text-[10px] text-fg/80" style={apres(150)}>
           Saison {saison} · {titreDate}
         </p>
@@ -78,7 +78,7 @@ export function SceneAccueil({
         >
           {matchCeSoir ? (joueur ?? "Ce soir") : "Relâche"}
         </h1>
-        <p className="titre-espace animate-fondu text-[10px] text-fg-muted" style={apres(900)}>
+        <p className="titre-espace animate-fondu text-[10px] text-fg/75" style={apres(900)}>
           {matchCeSoir
             ? joueur
               ? `Compte 01${projection !== null ? ` · projection ${fmtNum(projection)}` : ""}`
