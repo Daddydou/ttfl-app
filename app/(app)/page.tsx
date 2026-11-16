@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { SceneAccueil } from "@/components/dark/SceneAccueil";
 import { CeSoirCard, type LigneCeSoir } from "@/components/CeSoirCard";
 import { captureDuPick } from "@/lib/captures";
 import { COMPTE_REF } from "@/lib/compte";
@@ -30,6 +30,12 @@ import type { Mode, TtflBenchmark, TtflRun } from "@/lib/types";
 import type { PickScore } from "@/lib/benchmarks";
 
 export const dynamic = "force-dynamic";
+
+/** « 2026-27 » : une saison NBA commence en octobre (soirée datée à New York). */
+function saisonDe(iso: string): string {
+  const an = Number(iso.slice(5, 7)) >= 9 ? Number(iso.slice(0, 4)) : Number(iso.slice(0, 4)) - 1;
+  return `${an}-${String(an + 1).slice(2)}`;
+}
 export const metadata = { title: "Accueil — TTFL" };
 
 // LECTURE SEULE : cette page ne calcule ni score ni projection. En tête, la carte « Ce soir » (un compte par ligne,
@@ -216,9 +222,21 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-5">
+      {/* Scène d'ouverture « Dark » (comme l'accueil de l'app Tennis) : terrain dessiné, pick du soir du compte 01. */}
+      <SceneAccueil
+        aujourdhui={aujourdhui}
+        saison={saisonDe(aujourdhui)}
+        titreDate={titreDate}
+        matchCeSoir={run?.game_date === aujourdhui}
+        joueur={joueurDuSoir(COMPTE_REF)}
+        projection={mode === "regular" ? projectionC1 : null}
+        equipe={{ posees: equipePosees, total: COMPTES_EQUIPE.length }}
+        cloture={secret.lignes[aujourdhui]?.cloture ?? null}
+        soireesAvecPick={picksValides.map((p) => p.pick_date)}
+      />
       <RealtimeRuns />
       <SauvegardeHorsLigne soiree={run?.game_date ?? null} pickDuSoir={pickedPlayer} aVenir={picksValides} />
-      <PageHeader titre="Accueil" />
+      <div className="cascade space-y-5">
       <AlertsBanner alerts={alerts} />
       {run && <AlertesPicks alertes={alertesPicks} mode={run.mode} date={run.game_date} />}
 
@@ -258,6 +276,7 @@ export default async function DashboardPage() {
       <Suspense fallback={<BlockSkeleton />}>
         <BenchmarksBlock mode={mode} />
       </Suspense>
+      </div>
     </div>
   );
 }

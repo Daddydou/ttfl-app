@@ -37,7 +37,7 @@ export default function PlusPage() {
           <h2 id={`plus-${g.titre}`} className="section-label mb-2">
             {g.titre}
           </h2>
-          <ul className="card overflow-hidden">
+          <ul className="card cascade overflow-hidden">
             {g.lignes.map((l) => (
               <li key={l.href} className="list-row !p-0">
                 <Link href={l.href} className="flex w-full items-center gap-3 px-4 py-3 active:bg-fill/60">

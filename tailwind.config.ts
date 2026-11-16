@@ -38,7 +38,9 @@ const config: Config = {
           "system-ui",
           "sans-serif",
         ],
-        display: ["var(--font-fraunces)", "Georgia", "Times New Roman", "serif"],
+        // Thème Dark (comme Tennis) : Jost fine pour les titres en capitales espacées.
+        titre: ["var(--font-jost)", "var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-jost)", "var(--font-inter)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "pulse-ring": {

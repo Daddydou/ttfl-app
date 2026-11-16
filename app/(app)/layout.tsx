@@ -6,6 +6,8 @@ import { NewRunNotifier } from "@/components/NewRunNotifier";
 import { NotifyToggle } from "@/components/NotifyToggle";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { Icon } from "@/components/ui/Icon";
+import { MenuTiroir } from "@/components/dark/MenuTiroir";
+import { IntroOuverture } from "@/components/dark/IntroOuverture";
 import { modeLabel } from "@/lib/format";
 import { signOut } from "@/app/login/actions";
 import type { Mode } from "@/lib/types";
@@ -27,13 +29,19 @@ async function ModeBadge() {
 
   return (
     <span
-      className={`rounded-full px-2.5 py-1 text-[13px] font-semibold ${
-        mode === "playoffs" ? "bg-court-500/15 text-court-400" : "bg-fill text-fg-muted"
+      className={`titre-espace rounded-full px-3 py-1 text-[10px] ring-1 ${
+        mode === "playoffs" ? "text-court-400 ring-court-500/50" : "text-fg-muted ring-white/15"
       }`}
     >
       {modeLabel(mode)}
     </span>
   );
+}
+
+/** « 2026-27 » : une saison NBA commence en octobre. */
+function saisonEnCours(d = new Date()): string {
+  const an = d.getUTCMonth() >= 8 ? d.getUTCFullYear() : d.getUTCFullYear() - 1;
+  return `${an}-${String(an + 1).slice(2)}`;
 }
 
 export default function AppLayout({
@@ -43,34 +51,52 @@ export default function AppLayout({
 }) {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="pt-safe glass sticky top-0 z-30 border-x-0 border-t-0">
-        <div className="flex h-12 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2" aria-label="Accueil TTFL">
-            <span className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-court-500 text-on-accent">
-              <Icon name="ballon" size={18} strokeWidth={2} />
-            </span>
-            <span className="text-[17px] font-bold tracking-tight text-fg">TTFL</span>
+      <IntroOuverture saison={saisonEnCours()} />
+      {/* Barre du haut transparente (comme Tennis) : le menu à gauche, le nom au centre,
+          le ballon (accueil) à droite. Les bandeaux de l'accueil glissent dessous. */}
+      <header className="pt-safe relative z-30">
+        <div className="grid h-16 grid-cols-[auto_1fr_auto] items-center px-2">
+          <MenuTiroir
+            haut={
+              <Suspense fallback={<span className="inline-block h-[22px] w-[110px] rounded-full ring-1 ring-white/10" aria-hidden="true" />}>
+                <ModeBadge />
+              </Suspense>
+            }
+            pied={
+              <>
+                <Link href="/mode-operatoire" className="titre-espace inline-flex min-h-11 items-center text-[11px] text-fg/80 hover:text-white">
+                  Aide
+                </Link>
+                <NotifyToggle />
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    className="titre-espace inline-flex min-h-11 items-center text-[11px] text-fg/80 transition hover:text-white"
+                  >
+                    Déconnexion
+                  </button>
+                </form>
+              </>
+            }
+          />
+          <Link
+            href="/"
+            aria-label="Accueil TTFL"
+            className="titre-espace justify-self-center pl-[0.6em] text-[14px] tracking-[0.6em] text-fg transition hover:text-white"
+          >
+            TTFL
           </Link>
-          <div className="flex items-center gap-3">
-            <NotifyToggle />
-            <Suspense fallback={<span className="inline-block h-[26px] w-[88px] rounded-full bg-fill" aria-hidden="true" />}>
-              <ModeBadge />
-            </Suspense>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-fg-muted transition active:bg-fill active:text-fg"
-                aria-label="Se déconnecter"
-                title="Se déconnecter"
-              >
-                <Icon name="sortie" size={20} />
-              </button>
-            </form>
-          </div>
+          <Link
+            href="/"
+            aria-label="Accueil"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-fg/80 transition hover:bg-white/5"
+          >
+            <Icon name="ballon" size={26} strokeWidth={1} />
+          </Link>
         </div>
       </header>
 
-      <main className="flex-1 px-4 pb-32 pt-3">{children}</main>
+      <main className="flex-1 px-4 pb-32 pt-1">{children}</main>
 
       <NewRunNotifier />
       <PullToRefresh />

@@ -2,85 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ------------------------------------------------------------------
-   Jetons de design (clair / sombre automatique, comme iOS).
-   Les valeurs sont des triplets RGB pour que Tailwind puisse appliquer
-   l'opacité (bg-out/10, text-fg/40…). Aucune couleur en dur ailleurs.
-   ------------------------------------------------------------------ */
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  THÈME « DARK » — repris de l'application Tennis (refonte « esprit Dark »)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Inspiration : le guide interactif de la série Dark (Netflix). Trois idées :
+ *  1. un fond presque noir, jamais plat (grain + poussières + fibres qui
+ *     dérivent, voir `body` et components/dark/FondVivant.tsx) ;
+ *  2. des titres en capitales fines très espacées (Jost 300), le texte courant
+ *     en Inter ;
+ *  3. des séparations par filets d'un pixel, pas par des blocs colorés.
+ *
+ * Toute l'app passe par les jetons ci-dessous (triplets RGB, pour que
+ * Tailwind applique l'opacité : bg-out/10, text-fg/40…) : changer le thème
+ * se fait ICI, sans toucher aux composants. Le thème est toujours sombre
+ * (plus de version claire). Contrastes mesurés sur le fond (#07080a) et sur
+ * `surface` (#0f1216) : texte ≥ 4,5:1.
+ *
+ * Accent : jaune « balle de tennis » (#d7f25a) comme Tennis, réservé à
+ * l'action et à l'élément actif. Le texte posé dessus est presque noir
+ * (`on-accent`). Deux variantes à l'essai, choisies dans le menu (☰) :
+ * « or » (l'accent actuel de TTFL) et « ballon » (orange basket).
+ */
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 
-  --c-canvas: 245 242 235; /* fond de page : ivoire */
-  --c-surface: 255 253 249; /* cartes */
-  --c-surface-2: 240 236 227; /* tuile en creux dans une carte */
-  --c-fill: 232 227 216; /* pastilles, états pressés */
-  --c-thumb: 255 255 255; /* curseur du contrôle segmenté */
-  --c-line: 224 218 206; /* filets */
-  --c-line-strong: 199 192 178;
-  --c-fg: 20 19 17;
-  --c-fg-muted: 98 94 86; /* ≥ 4,5:1 même sur fill (pastilles) */
-  --c-fg-faint: 140 135 126; /* placeholders, éléments désactivés */
-  --c-accent: 134 94 20; /* texte / liens : or foncé lisible sur ivoire */
-  --c-accent-fill: 184 140 56; /* boutons pleins (texte brun foncé ≥ 4,5:1) */
-  --c-accent-press: 160 118 38;
-  --c-on-accent: 23 19 10;
-  --c-on-out: 255 255 255; /* texte sur fond rouge */
-  --c-avail: 31 122 69;
-  --c-quest: 138 90 0;
-  --c-doubt: 176 74 0;
-  --c-out: 200 0 21;
+  --c-canvas: 7 8 10; /* #07080a */
+  --c-surface: 15 18 22; /* #0f1216 cartes */
+  --c-surface-2: 23 27 33; /* #171b21 tuile en creux */
+  --c-fill: 31 36 43; /* #1f242b pastilles, états pressés */
+  --c-thumb: 44 50 59; /* #2c323b curseur du contrôle segmenté */
+  --c-line: 34 39 46; /* filets d'un pixel */
+  --c-line-strong: 62 69 80;
+  --c-fg: 230 233 238; /* #e6e9ee */
+  --c-fg-muted: 141 151 165; /* #8d97a5 — 6,9:1 sur le fond */
+  --c-fg-faint: 93 103 115; /* #5d6773 — placeholders, désactivés */
+  --c-accent: 215 242 90; /* #d7f25a jaune balle */
+  --c-accent-fill: 215 242 90;
+  --c-accent-press: 179 205 52;
+  --c-on-accent: 11 13 16;
+  --c-on-out: 11 13 16;
+  --c-avail: 134 239 172; /* vert : dispo / gagné */
+  --c-quest: 252 211 77; /* ambre : questionable */
+  --c-doubt: 242 166 90; /* orange : doubtful */
+  --c-out: 251 113 133; /* framboise : out */
 
-  --shadow-card: 0 0 0 1px rgb(224 218 206 / 0.7), 0 8px 24px rgb(60 45 10 / 0.05);
-  --shadow-float: 0 10px 32px rgb(40 30 10 / 0.16), 0 0 0 1px rgb(224 218 206 / 0.8);
-  --glass: rgb(255 253 249 / 0.9);
-  --glass-border: rgb(60 45 10 / 0.08);
-  --scrim: rgb(20 15 5 / 0.4);
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.08), 0 12px 32px rgb(0 0 0 / 0.45);
+  --shadow-float: 0 0 0 1px rgb(255 255 255 / 0.1), 0 18px 48px rgb(0 0 0 / 0.7);
+  --glass: rgb(9 11 14 / 0.78);
+  --glass-border: rgb(255 255 255 / 0.08);
+  --scrim: rgb(0 0 0 / 0.7);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --c-canvas: 11 11 13; /* noir chaud */
-    --c-surface: 20 20 23;
-    --c-surface-2: 26 26 30;
-    --c-fill: 36 36 41;
-    --c-thumb: 58 58 64;
-    --c-line: 38 38 43;
-    --c-line-strong: 62 62 69;
-    --c-fg: 242 238 230; /* ivoire */
-    --c-fg-muted: 154 150 142; /* ≥ 4,5:1 même sur fill */
-    --c-fg-faint: 104 100 94;
-    --c-accent: 201 164 92; /* or champagne */
-    --c-accent-fill: 201 164 92;
-    --c-accent-press: 176 142 74;
-    --c-on-accent: 23 19 10;
-    --c-on-out: 23 19 10;
-    --c-avail: 127 199 154;
-    --c-quest: 238 204 80;
-    --c-doubt: 232 134 64;
-    --c-out: 244 114 106; /* ≥ 4,5:1 sur surface-2 */
-
-    --shadow-card: 0 0 0 1px rgb(38 38 43);
-    --shadow-float: 0 14px 36px rgb(0 0 0 / 0.65), 0 0 0 1px rgb(42 42 48);
-    --glass: rgb(28 28 32 / 0.94);
-    --glass-border: rgb(42 42 48);
-    --scrim: rgb(0 0 0 / 0.65);
-  }
+/* Variantes d'accent (à l'essai sur le site test, réglage dans le menu). */
+html[data-accent="or"] {
+  --c-accent: 214 182 110;
+  --c-accent-fill: 214 182 110;
+  --c-accent-press: 188 156 88;
+}
+html[data-accent="ballon"] {
+  --c-accent: 255 145 77;
+  --c-accent-fill: 255 145 77;
+  --c-accent-press: 230 118 52;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
+  /* Pas de fond sur <html> : celui du <body> remonte au fond de l'écran, et le
+     canvas FondVivant (z-index négatif) peut se peindre par-dessus. */
 }
 
-html,
+/*
+ * FOND : presque noir, avec un grain très léger, quelques poussières de
+ * lumière fixes et un halo bleuté en haut — comme Tennis. Les fibres qui
+ * bougent sont dessinées par-dessus (FondVivant, canvas fixe).
+ */
 body {
   background-color: rgb(var(--c-canvas));
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.28), transparent 60%),
+    radial-gradient(1px 1px at 72% 12%, rgba(255, 255, 255, 0.2), transparent 60%),
+    radial-gradient(1.5px 1.5px at 84% 64%, rgba(255, 255, 255, 0.16), transparent 60%),
+    radial-gradient(1px 1px at 38% 78%, rgba(255, 255, 255, 0.22), transparent 60%),
+    radial-gradient(1px 1px at 92% 28%, rgba(255, 255, 255, 0.2), transparent 60%),
+    radial-gradient(1200px 700px at 70% 0%, rgba(90, 130, 180, 0.07), transparent 70%);
+  background-attachment: fixed;
   color: rgb(var(--c-fg));
   -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
-  background: rgb(var(--c-accent-fill) / 0.25);
+  background: rgb(var(--c-accent) / 0.35);
+  color: #fff;
 }
 
 /* Zones de sécurité iOS (encoche + barre home). */
@@ -105,19 +121,19 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
 }
 
-/* Focus clavier visible, sans anneau au toucher. */
+/* Focus clavier : anneau couleur accent. */
 :focus-visible {
-  outline: 2px solid rgb(var(--c-accent-fill));
+  outline: 2px solid rgb(var(--c-accent));
   outline-offset: 2px;
 }
 
 @layer components {
-  /* Typographie (échelle iOS) */
+  /* Typographie — titres « Dark » : capitales fines très espacées (Jost 300). */
   .title-large {
-    @apply font-display text-[38px] font-normal leading-[1.05] tracking-[-0.02em] text-fg;
+    @apply font-titre text-[26px] font-light uppercase leading-[1.15] tracking-[0.28em] text-fg;
   }
   .title-2 {
-    @apply font-display text-[24px] font-normal leading-tight tracking-[-0.015em] text-fg;
+    @apply font-titre text-[19px] font-light uppercase leading-tight tracking-[0.2em] text-fg;
   }
   .headline {
     @apply text-[17px] font-semibold leading-snug tracking-[-0.01em] text-fg;
@@ -128,8 +144,9 @@ input[type="number"]::-webkit-outer-spin-button {
   .footnote {
     @apply text-[13px] leading-snug text-fg-muted;
   }
+  /* Sur-titres de section : petites capitales fines très espacées. */
   .section-label {
-    @apply px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-fg-muted;
+    @apply px-4 font-titre text-[11px] font-normal uppercase tracking-[0.3em] text-fg-muted;
   }
   /* Dans une carte, l'étiquette s'aligne sur le contenu (la carte a déjà sa marge). */
   .card .section-label {
@@ -138,9 +155,13 @@ input[type="number"]::-webkit-outer-spin-button {
   .num {
     font-variant-numeric: tabular-nums;
   }
-  /* Grand serif (Fraunces) : noms de joueurs, gros chiffres. */
+  /* Grande police fine (Jost) : noms de joueurs, gros chiffres. */
   .display {
-    @apply font-display font-normal tracking-[-0.02em];
+    @apply font-titre font-light tracking-[0.04em];
+  }
+  /* Libellé « Dark » : navigation, étiquettes. */
+  .titre-espace {
+    @apply font-titre font-light uppercase tracking-[0.3em];
   }
   /* Rail défilant horizontal (jours, onglets) : on glisse au doigt, pas de barre. */
   .rail {
@@ -150,21 +171,26 @@ input[type="number"]::-webkit-outer-spin-button {
     display: none;
   }
 
-  /* Surfaces */
+  /* Surfaces : carte sombre translucide (le grain transparaît), filet d'un pixel. */
   .card {
-    @apply rounded-[22px] bg-surface;
+    @apply rounded-lg bg-surface/85;
     box-shadow: var(--shadow-card);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
   }
   .glass {
     background: var(--glass);
-    -webkit-backdrop-filter: saturate(180%) blur(28px);
-    backdrop-filter: saturate(180%) blur(28px);
-    border: 0.5px solid var(--glass-border);
+    -webkit-backdrop-filter: saturate(140%) blur(20px);
+    backdrop-filter: saturate(140%) blur(20px);
+    border: 1px solid var(--glass-border);
   }
 
-  /* Boutons : 48 px de haut, rayon généreux, retour de pression discret */
+  /*
+   * Boutons, grammaire Dark : l'action principale est un CADRE fin à libellé
+   * espacé, pas un aplat ; l'aplat accent n'apparaît qu'à la pression/survol.
+   */
   .btn {
-    @apply inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-[14px] px-5 text-[17px] font-semibold tracking-[-0.01em] transition duration-150 ease-out;
+    @apply inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-md px-5 text-[15px] font-medium transition duration-150 ease-out;
   }
   .btn:active:not(:disabled) {
     transform: scale(0.97);
@@ -173,84 +199,94 @@ input[type="number"]::-webkit-outer-spin-button {
     @apply cursor-not-allowed opacity-40;
   }
   .btn-primary {
-    @apply bg-court-500 text-on-accent;
+    @apply border border-court-500 bg-transparent font-titre font-normal uppercase tracking-[0.2em] text-court-400;
   }
   .btn-primary:active:not(:disabled) {
-    @apply bg-court-600;
+    @apply bg-court-600 text-on-accent;
+  }
+  @media (hover: hover) {
+    .btn-primary:hover:not(:disabled) {
+      @apply bg-court-500 text-on-accent;
+    }
+    .btn-secondary:hover:not(:disabled),
+    .btn-plain:hover:not(:disabled) {
+      border-color: rgb(255 255 255 / 0.4);
+      background-color: rgb(255 255 255 / 0.05);
+    }
   }
   .btn-secondary {
-    @apply bg-court-500/10 text-court-400;
+    @apply border border-white/15 bg-transparent text-court-400;
   }
   .btn-secondary:active:not(:disabled) {
-    @apply bg-court-500/20;
+    @apply bg-white/5;
   }
   .btn-danger {
-    @apply bg-out text-on-out;
+    @apply border border-out/60 bg-out/10 text-out;
   }
   .btn-plain {
-    @apply bg-fill text-fg;
+    @apply border border-white/15 bg-transparent text-fg;
   }
   .btn-sm {
-    @apply min-h-[36px] shrink-0 whitespace-nowrap rounded-full px-3.5 text-[14px];
+    @apply min-h-[36px] shrink-0 whitespace-nowrap rounded-full px-3.5 text-[14px] tracking-[0.08em];
   }
 
-  /* Champs */
+  /* Champs : fond sombre, filet clair, anneau accent au focus. */
   .field {
-    @apply w-full rounded-[12px] bg-surface-2 px-4 py-3 text-[17px] text-fg outline-none transition;
-    border: 1.5px solid transparent;
+    @apply w-full rounded-md bg-surface-2 px-4 py-3 text-[17px] text-fg outline-none transition;
+    border: 1px solid rgb(255 255 255 / 0.1);
   }
   .field::placeholder {
     color: rgb(var(--c-fg-faint));
   }
   .field:focus {
-    border-color: rgb(var(--c-accent-fill));
-    background: rgb(var(--c-surface));
+    border-color: rgb(var(--c-accent));
+    background: rgb(var(--c-canvas));
+    box-shadow: 0 0 0 1px rgb(var(--c-accent));
   }
 
-  /* Contrôle segmenté */
+  /* Contrôle segmenté : piste sombre, sélection en cadre clair. */
   .seg {
-    @apply flex gap-0.5 rounded-[11px] bg-fill/70 p-0.5;
+    @apply flex gap-0.5 rounded-md bg-fill/60 p-0.5 ring-1 ring-white/5;
   }
   .seg-item {
-    @apply flex-1 rounded-[9px] px-2 py-[7px] text-center text-[14px] font-semibold text-fg-muted transition duration-150;
+    @apply flex-1 rounded-[5px] px-2 py-[7px] text-center text-[14px] font-medium text-fg-muted transition duration-150;
   }
   .seg-item-on {
     @apply bg-thumb text-fg;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.16), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.14);
   }
 
-  /* Pastilles de sélection (jours, mois) */
+  /* Pastilles de sélection (jours, mois) : sélection pleine en accent. */
   .chip {
-    @apply shrink-0 rounded-full bg-fill/80 px-3.5 py-1.5 text-center text-[13px] font-semibold text-fg transition duration-150;
+    @apply shrink-0 rounded-full bg-fill/80 px-3.5 py-1.5 text-center text-[13px] font-medium text-fg-muted ring-1 ring-white/5 transition duration-150;
   }
   .chip-on {
-    @apply bg-court-500 text-on-accent;
+    @apply bg-court-500 text-on-accent ring-0;
   }
 
-  /* Feuille modale (bottom sheet) */
+  /* Feuille modale (bottom sheet) : panneau noir, filet en haut. */
   .sheet-backdrop {
     @apply fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4;
     background: var(--scrim);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    animation: fade-in 200ms ease-out;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    animation: fondu 300ms ease-out;
   }
   .sheet {
-    @apply relative w-full max-w-md rounded-t-[28px] bg-surface px-5 pb-8 pt-7 sm:rounded-[28px];
+    @apply relative w-full max-w-md rounded-t-xl bg-[#050607] px-5 pb-8 pt-7 sm:rounded-xl;
     box-shadow: var(--shadow-float);
-    animation: sheet-up 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: sheet-up 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
     padding-bottom: max(2rem, env(safe-area-inset-bottom));
   }
   .sheet::before {
     content: "";
     position: absolute;
-    top: 8px;
+    top: 10px;
     left: 50%;
     width: 36px;
-    height: 5px;
+    height: 1px;
     margin-left: -18px;
-    border-radius: 3px;
-    background: rgb(var(--c-line-strong));
+    background: rgb(255 255 255 / 0.35);
   }
 
   /* Liste groupée « inset » : lignes séparées par un filet inséré */
@@ -263,38 +299,359 @@ input[type="number"]::-webkit-outer-spin-button {
     top: 0;
     left: 1rem;
     right: 0;
-    height: 0.5px;
-    background: rgb(var(--c-line));
+    height: 1px;
+    background: rgb(255 255 255 / 0.07);
   }
 }
 
-.page-enter {
-  animation: page-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes page-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  MOUVEMENT — lent, doux, jamais gratuit (repris de Tennis)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  Tout est en CSS et ne touche qu'à l'opacité, au flou et aux
+ *  transformations (joué par la carte graphique, sans saccade).
+ *  - apparition : un bloc monte de 12 px en sortant d'un léger flou ;
+ *  - titre : les capitales se resserrent en sortant du flou ;
+ *  - trace : un trait se dessine (lignes du terrain, `pathLength="1"`) ;
+ *  - pousse : une ligne s'étire depuis son origine ;
+ *  - eclore : un point naît en grossissant un peu trop, puis se pose ;
+ *  - halo : le point actif respire ;
+ *  - page : l'arrivée d'un écran (app/(app)/template.tsx).
+ */
+@layer utilities {
+  .animate-apparition {
+    animation: apparition 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .animate-titre {
+    animation: titre 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .animate-pousse {
+    animation: pousse 1.1s cubic-bezier(0.6, 0, 0.2, 1) both;
+  }
+  .animate-eclore {
+    animation: eclore 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .animate-halo {
+    animation: halo 3.2s ease-in-out infinite;
+  }
+  .animate-fondu {
+    animation: fondu 0.9s ease-out both;
+  }
+  .animate-page {
+    animation: page 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .animate-scintille {
+    animation: scintille 1.1s linear both;
+  }
+  /* Un trait SVG qui se dessine : à poser avec `pathLength="1"` sur l'élément. */
+  .trait-dessine {
+    stroke-dasharray: 1;
+    animation: trace 1.6s cubic-bezier(0.6, 0, 0.2, 1) both;
+  }
+  /* Les enfants directs apparaissent l'un après l'autre (80 ms d'écart). */
+  .cascade > * {
+    animation: apparition 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .cascade > *:nth-child(2) { animation-delay: 80ms; }
+  .cascade > *:nth-child(3) { animation-delay: 160ms; }
+  .cascade > *:nth-child(4) { animation-delay: 240ms; }
+  .cascade > *:nth-child(5) { animation-delay: 320ms; }
+  .cascade > *:nth-child(6) { animation-delay: 400ms; }
+  .cascade > *:nth-child(7) { animation-delay: 480ms; }
+  .cascade > *:nth-child(8) { animation-delay: 560ms; }
+  .cascade > *:nth-child(9) { animation-delay: 640ms; }
+  .cascade > *:nth-child(n + 10) { animation-delay: 720ms; }
+  /* Un bandeau sort du conteneur centré pour toucher les deux bords de l'écran. */
+  .pleine-largeur {
+    margin-inline: calc(50% - 50vw);
   }
 }
 
-@keyframes fade-in {
+@keyframes apparition {
   from {
     opacity: 0;
+    transform: translateY(12px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes titre {
+  from {
+    opacity: 0;
+    letter-spacing: 0.55em;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+@keyframes trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes pousse {
+  from {
+    transform: scale(0, 1);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes eclore {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes halo {
+  0%,
+  100% {
+    box-shadow: 0 0 14px 3px rgb(var(--c-accent) / 0.35);
+  }
+  50% {
+    box-shadow: 0 0 26px 8px rgb(var(--c-accent) / 0.55);
+  }
+}
+@keyframes fondu {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Apparition qui hésite (portraits de l'arbre du guide Dark). */
+@keyframes scintille {
+  0% {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  25% {
+    opacity: 0.7;
+  }
+  33% {
+    opacity: 0.1;
+  }
+  52% {
+    opacity: 0.85;
+    filter: blur(1.5px);
+  }
+  60% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 1;
+    filter: none;
+  }
+}
+@keyframes page {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 @keyframes sheet-up {
   from {
-    transform: translateY(32px);
+    transform: translateY(48px);
     opacity: 0;
+    filter: blur(4px);
   }
 }
 
+/* Compatibilité : l'ancienne classe d'arrivée de page suit la nouvelle animation. */
+.page-enter {
+  animation: page 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/*
+ * OUVERTURE (accueil) : la première visite d'une session joue un écran
+ * d'ouverture (IntroOuverture.tsx) ; la scène attend alors qu'il se lève
+ * (`--intro`). Le script en tête de page (app/layout.tsx) pose `.intro-vue`
+ * sur <html> AVANT l'affichage si l'ouverture a déjà été vue : rien ne clignote.
+ */
+html:not(.intro-vue) [data-scene] {
+  --intro: 1.7s;
+}
+.intro-vue .intro-ouverture {
+  display: none;
+}
+@keyframes intro-sortie {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes intro-jauge {
+  from {
+    transform: scale(0, 1);
+  }
+  to {
+    transform: none;
+  }
+}
+.intro-ouverture {
+  animation: intro-sortie 0.6s ease-in 1.5s both;
+}
+.intro-ouverture .jauge {
+  transform-origin: left;
+  animation: intro-jauge 1.3s cubic-bezier(0.6, 0, 0.2, 1) 0.15s both;
+}
+
+/*
+ * MENU TIROIR : le panneau glisse depuis la gauche, le voile s'assombrit.
+ * `@starting-style` donne l'état de départ à l'ouverture ; `allow-discrete`
+ * laisse la fermeture se jouer avant que le <dialog> ne disparaisse.
+ */
+dialog.tiroir {
+  transform: translateX(-100%);
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+    overlay 0.5s allow-discrete,
+    display 0.5s allow-discrete;
+}
+dialog.tiroir[open] {
+  transform: none;
+}
+@starting-style {
+  dialog.tiroir[open] {
+    transform: translateX(-100%);
+  }
+}
+dialog.tiroir::backdrop {
+  background-color: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0);
+  transition:
+    background-color 0.5s,
+    backdrop-filter 0.5s,
+    overlay 0.5s allow-discrete,
+    display 0.5s allow-discrete;
+}
+dialog.tiroir[open]::backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+}
+@starting-style {
+  dialog.tiroir[open]::backdrop {
+    background-color: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0);
+  }
+}
+
+/*
+ * ENTONNOIR (lib/origine-entonnoir.ts, components/dark/Entonnoir.tsx) — la
+ * page sort du point d'où on l'a ouverte (vignette du menu, onglet du bas) :
+ *  - attente : la page est fermée sur ce point tant que son contenu n'est pas
+ *    arrivé ; pour une vignette, un point lumineux reste posé là ;
+ *  - ouvre : un cercle centré sur le point grandit jusqu'à couvrir l'écran,
+ *    pendant que la page passe de petite, floue et lumineuse à nette ;
+ *  - fini : plus aucune animation.
+ */
+[data-entonnoir="attente"] {
+  animation: none;
+  clip-path: circle(0 at var(--ox) var(--oy));
+}
+[data-entonnoir="ouvre"] {
+  transform-origin: var(--ox) var(--oy);
+  animation: entonnoir 1s cubic-bezier(0.5, 0, 0.15, 1) backwards;
+}
+[data-entonnoir="fini"] {
+  animation: none;
+}
+@keyframes entonnoir {
+  from {
+    clip-path: circle(0 at var(--ox) var(--oy));
+    transform: scale(0.25);
+    filter: blur(12px) brightness(1.8);
+    opacity: 0.5;
+  }
+  45% {
+    filter: blur(5px) brightness(1.25);
+    opacity: 1;
+  }
+  to {
+    clip-path: circle(var(--orayon) at var(--ox) var(--oy));
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+}
+.point-entonnoir {
+  position: fixed;
+  z-index: 60;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin: -0.375rem 0 0 -0.375rem;
+  border-radius: 9999px;
+  background: rgb(var(--c-accent));
+  box-shadow: 0 0 18px 5px rgb(var(--c-accent) / 0.45);
+  pointer-events: none;
+  animation: point-entonnoir 0.7s ease-in-out infinite alternate;
+}
+@keyframes point-entonnoir {
+  from {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+}
+html[data-entonnoir-attente] .chargement-racine {
+  visibility: hidden;
+}
+
+/*
+ * RÉDUIRE LES ANIMATIONS (réglage du téléphone) : plus de mouvement ni de
+ * flou, seulement des fondus courts. L'ouverture est sautée.
+ */
 @media (prefers-reduced-motion: reduce) {
+  .animate-apparition,
+  .animate-titre,
+  .animate-pousse,
+  .animate-eclore,
+  .animate-scintille,
+  .cascade > * {
+    animation: fondu 0.3s ease-out both !important;
+  }
+  .animate-page,
+  .page-enter {
+    animation: fondu 0.2s ease-out both !important;
+  }
+  .animate-halo,
+  .trait-dessine {
+    animation: none !important;
+  }
+  html:not(.intro-vue) [data-scene] {
+    --intro: 0s;
+  }
+  .intro-ouverture {
+    display: none;
+  }
   *,
   *::before,
   *::after {
-    animation-duration: 1ms !important;
-    transition-duration: 1ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
