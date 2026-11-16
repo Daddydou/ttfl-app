@@ -7,6 +7,7 @@ import { fmtNum, frDate } from "@/lib/format";
 import { joursEntre, normaliserNom } from "@/lib/planning";
 import { MARGE_BRUIT, PART_MAX, repartirEquipe } from "@/lib/repartition";
 import type { Mode } from "@/lib/types";
+import Portail from "@/components/ui/Portail";
 
 // Répartit automatiquement les comptes de l'équipe entre les joueurs de la soirée, d'après la règle « bruit »
 // (étude sur 5 saisons) : on ne répartit que les joueurs à moins de 3 points du meilleur, 6 comptes au plus par
@@ -112,7 +113,7 @@ export function RepartitionEquipe({
       </button>
 
       {ouvert && (
-        <div
+        <Portail><div
           className="sheet-backdrop"
           onClick={fermer}
         >
@@ -216,7 +217,7 @@ export function RepartitionEquipe({
               </button>
             </div>
           </div>
-        </div>
+        </div></Portail>
       )}
     </>
   );

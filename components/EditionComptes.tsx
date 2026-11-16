@@ -6,6 +6,7 @@ import { frDate } from "@/lib/format";
 import type { Mode } from "@/lib/types";
 import { BadgeX2 } from "@/components/BadgeX2";
 import type { EtatBadgeX2 } from "@/lib/x2-affichage";
+import Portail from "@/components/ui/Portail";
 
 // Changements MANUELS sur x comptes de l'équipe, pour une soirée : on voit le pick de chaque compte, on coche ceux à
 // modifier, puis on choisit le joueur (ou on retire le pick) pour la sélection seulement. Les autres comptes ne bougent pas.
@@ -56,7 +57,7 @@ export function EditionComptes({
       </button>
 
       {ouvert && (
-        <div
+        <Portail><div
           className="sheet-backdrop"
           onClick={fermer}
         >
@@ -137,7 +138,7 @@ export function EditionComptes({
               Fermer
             </button>
           </div>
-        </div>
+        </div></Portail>
       )}
     </>
   );

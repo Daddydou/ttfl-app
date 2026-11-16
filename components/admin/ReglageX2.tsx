@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { reglerX2 } from "@/app/(app)/admin/x2-actions";
 import { COMPTES_X2, LIBELLES_X2, MODES_X2, type ModeX2 } from "@/lib/x2";
+import Portail from "@/components/ui/Portail";
 
 // Interrupteur du x2 (Admin) : arrêté / à blanc / réel, et comptes sur lesquels le mode réel agit.
 export function ReglageX2({ mode, comptes }: { mode: ModeX2; comptes: string[] }) {
@@ -73,7 +74,7 @@ export function ReglageX2({ mode, comptes }: { mode: ModeX2; comptes: string[] }
       </div>
 
       {confirmer && (
-        <div className="sheet-backdrop" onClick={() => setConfirmer(false)}>
+        <Portail><div className="sheet-backdrop" onClick={() => setConfirmer(false)}>
           <div role="dialog" aria-modal="true" aria-label="Confirmer : x2 réel" className="sheet" onClick={(e) => e.stopPropagation()}>
             <h3 className="title-2">Activer le x2 en réel ?</h3>
             <p className="mt-1 text-sm text-fg-muted">
@@ -85,7 +86,7 @@ export function ReglageX2({ mode, comptes }: { mode: ModeX2; comptes: string[] }
               <button onClick={appliquer} disabled={pending} className="btn btn-primary w-full">{pending ? "…" : "Confirmer"}</button>
             </div>
           </div>
-        </div>
+        </div></Portail>
       )}
     </section>
   );

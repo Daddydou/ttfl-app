@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { lancerCommande } from "@/app/(app)/admin/actions";
 import { ACTIONS_PC, GROUPES, type ActionPC } from "@/lib/admin";
+import Portail from "@/components/ui/Portail";
 
 type Retour = { ok: boolean; texte: string };
 
@@ -108,7 +109,7 @@ function CarteAction({ action, active }: { action: ActionPC; active: boolean }) 
       )}
 
       {confirmer && (
-        <div
+        <Portail><div
           className="sheet-backdrop"
           onClick={() => setConfirmer(false)}
         >
@@ -138,7 +139,7 @@ function CarteAction({ action, active }: { action: ActionPC; active: boolean }) 
               </button>
             </div>
           </div>
-        </div>
+        </div></Portail>
       )}
     </div>
   );

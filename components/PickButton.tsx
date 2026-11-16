@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { pickPlayer } from "@/app/actions";
 import type { Mode } from "@/lib/types";
 import { Icon } from "@/components/ui/Icon";
+import Portail from "@/components/ui/Portail";
 
 export function PickButton({
   mode,
@@ -107,7 +108,7 @@ function ConfirmSheet({
   onConfirm: () => void;
 }) {
   return (
-    <div
+    <Portail><div
       className="sheet-backdrop"
       onClick={onCancel}
     >
@@ -143,6 +144,6 @@ function ConfirmSheet({
           </button>
         </div>
       </div>
-    </div>
+    </div></Portail>
   );
 }

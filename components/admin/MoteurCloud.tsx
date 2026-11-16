@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { reglerCloud } from "@/app/(app)/admin/cloud-actions";
 import { LIBELLES_CLOUD, MODES_CLOUD, type ModeCloud } from "@/lib/cloud";
+import Portail from "@/components/ui/Portail";
 
 const CONFIRMATION_REEL =
   "Le cloud va tout faire à la place du PC : projections, Plan 30 et picks automatiques, contrôle des blessures, " +
@@ -66,7 +67,7 @@ export function MoteurCloud({ mode, dernier }: { mode: ModeCloud | null; dernier
       </div>
 
       {confirmer && (
-        <div className="sheet-backdrop" onClick={() => setConfirmer(false)}>
+        <Portail><div className="sheet-backdrop" onClick={() => setConfirmer(false)}>
           <div role="dialog" aria-modal="true" aria-label="Confirmer : cloud en charge" className="sheet" onClick={(e) => e.stopPropagation()}>
             <h3 className="title-2">Passer le cloud en charge ?</h3>
             <p className="mt-1 text-sm text-fg-muted">{CONFIRMATION_REEL}</p>
@@ -77,7 +78,7 @@ export function MoteurCloud({ mode, dernier }: { mode: ModeCloud | null; dernier
               </button>
             </div>
           </div>
-        </div>
+        </div></Portail>
       )}
     </section>
   );

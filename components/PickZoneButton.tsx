@@ -6,6 +6,7 @@ import { pickPlayerComptes } from "@/app/actions";
 import { frDate } from "@/lib/format";
 import { Icon } from "@/components/ui/Icon";
 import type { Mode } from "@/lib/types";
+import Portail from "@/components/ui/Portail";
 
 // Valide un joueur pour une soirée sur les comptes d'une zone (Compte 1, Compte 2 ou les comptes libres de
 // l'équipe). Confirmation avant écriture ; le serveur revérifie le cycle de 30 jours.
@@ -62,7 +63,7 @@ export function PickZoneButton({
         {libelle}
       </button>
       {confirmer && (
-        <div
+        <Portail><div
           className="sheet-backdrop"
           onClick={() => setConfirmer(false)}
         >
@@ -97,7 +98,7 @@ export function PickZoneButton({
               </button>
             </div>
           </div>
-        </div>
+        </div></Portail>
       )}
     </>
   );

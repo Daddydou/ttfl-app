@@ -12,6 +12,7 @@ import { normaliserNom } from "@/lib/planning";
 import { fmtNum, frDate } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
 import type { Mode } from "@/lib/types";
+import Portail from "@/components/ui/Portail";
 
 // Choix (ou retrait) du pick d'une soirée pour une zone de comptes : une liste de tous les
 // joueurs des matchs du soir avec leur projection TTFL. Les joueurs déjà pickés à ≤ 30 jours
@@ -133,7 +134,7 @@ export function NuitPicker({
       )}
 
       {ouvert && (
-        <div
+        <Portail><div
           className="sheet-backdrop"
           onClick={fermer}
         >
@@ -232,7 +233,7 @@ export function NuitPicker({
               </button>
             </div>
           </div>
-        </div>
+        </div></Portail>
       )}
     </>
   );
