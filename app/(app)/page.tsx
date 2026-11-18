@@ -8,6 +8,8 @@ import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { AlertsBanner, type Alert } from "@/components/AlertsBanner";
 import { BenchmarksCard } from "@/components/BenchmarksCard";
+import { RecapNuit } from "@/components/RecapNuit";
+import { classerNuit, resultatDuPick, topNuit, type LigneNuit } from "@/lib/recap-nuit";
 import { PicksValidesCard, type PickCompte } from "@/components/PicksValidesCard";
 import { alerteCookies, alertePcSilencieux, type EtatCookies } from "@/lib/etat-robot";
 import { AlertesPicks } from "@/components/AlertesPicks";
@@ -261,6 +263,11 @@ export default async function DashboardPage() {
 
       {/* Bloc 2 — pick secret (révéler) puis les soirées suivantes ---- */}
       <BandeauSecret etat={secret} dates={datesSecretes} discret />
+      {/* Recap de la veille : les 30 meilleurs scores TTFL de la nuit (table ttfl_resultats_nuit, remplie par le moteur) */}
+      <Suspense fallback={<BlockSkeleton />}>
+        <RecapNuitBlock mode={mode} aujourdhui={aujourdhui} />
+      </Suspense>
+
       <PicksValidesCard
         titre="Prochains soirs"
         picks={picksValides.filter((p) => p.pick_date > aujourdhui)}
@@ -321,6 +328,50 @@ async function BenchmarksBlock({ mode }: { mode: Mode }) {
   return <BenchmarksCard rows={rows} userPicks={mesPicks ?? []} />;
 }
 
+// --- Recap de la veille (streaming independant) -----------------------------
+
+async function RecapNuitBlock({ mode, aujourdhui }: { mode: Mode; aujourdhui: string }) {
+  const supabase = await createClient();
+  // Derniere soiree DEJA jouee (date de New York) : celle d'hier matin une fois le moteur passe a 9 h 40.
+  const { data: derniere } = await supabase
+    .from("ttfl_resultats_nuit")
+    .select("soiree")
+    .lt("soiree", aujourdhui)
+    .order("soiree", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ soiree: string }>();
+  if (!derniere) return null;
+
+  const [{ data: lignes }, { data: pick }] = await Promise.all([
+    supabase
+      .from("ttfl_resultats_nuit")
+      .select("player,team,ttfl,minutes")
+      .eq("soiree", derniere.soiree)
+      .limit(1000)
+      .returns<LigneNuit[]>(),
+    supabase
+      .from("ttfl_picks")
+      .select("player")
+      .eq("mode", mode)
+      .eq("pick_date", derniere.soiree)
+      .eq("compte", COMPTE_REF)
+      .maybeSingle<{ player: string }>(),
+  ]);
+  if (!lignes || lignes.length === 0) return null;
+
+  const classees = classerNuit(
+    lignes.map((l) => ({ ...l, ttfl: Number(l.ttfl), minutes: l.minutes === null ? null : Number(l.minutes) })),
+    pick?.player ?? null,
+  );
+  return (
+    <RecapNuit
+      soiree={derniere.soiree}
+      top={topNuit(classees)}
+      total={classees.length}
+      pick={resultatDuPick(classees, pick?.player ?? null)}
+    />
+  );
+}
 function BlockSkeleton() {
   return (
     <div className="card p-4">

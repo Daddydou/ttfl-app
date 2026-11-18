@@ -129,3 +129,8 @@ poussé dans Supabase.
 - REGLE : partout ou un nom de joueur est affiche (pick, plan, conseille, absent...), ajouter `<Visage nom={...} />` (`lib/visages.ts` : `visageDe`, `initiales`). Ne jamais afficher un joueur secret du compte 02 (le composant ne change rien a cette regle).
 - Page `/credits-photos` (rangee dans Plus et le menu tiroir) : auteurs et licences, obligatoire pour l'attribution.
 - Mise a jour (nouvelle recrue, nouveau joueur) : exporter les joueurs en CSV UTF-8 (`player,team`) puis `node scripts/visages-wikimedia.mjs joueurs.csv` (`--tout` pour tout refaire, `VISAGES_DETAIL=1` pour voir pourquoi un joueur n'a pas de photo). ATTENTION : un CSV mal encode (accents abimes) fait rater les etoiles (Doncic, Jokic...). Seules les licences libres sont gardees (CC BY, CC BY-SA, CC0, domaine public).
+
+## Récap de la nuit (18/11/2026)
+- Accueil : carte « Top 30 de la nuit » (`components/RecapNuit.tsx`, `lib/recap-nuit.ts`, bloc `RecapNuitBlock` dans `app/(app)/page.tsx`, en `<Suspense>`). Elle lit la table `ttfl_resultats_nuit` (une ligne par joueur et par soirée NY, politique propriétaire) : l'app ne calcule aucun score.
+- Cette table est remplie par le moteur : `ttfl/pont/resultats_nuit.py`, appelé par `pont.archiver_resultats` (tâche matin, 9 h 40). Rattrapage de toute la saison : `python -m pont.archiver_resultats --rattrapage` (une fois, sans doublon). Migration : `ttfl/pont/migration_resultats_nuit.sql` (appliquée le 18/11).
+- Le pick du compte 01 de la soirée est mis en évidence (ou rappelé sous la liste s'il est hors du top 30). Les autres comptes ne sont pas montrés ici.
