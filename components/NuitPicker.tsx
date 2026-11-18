@@ -11,6 +11,7 @@ import {
 import { normaliserNom } from "@/lib/planning";
 import { fmtNum, frDate } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Visage } from "@/components/Visage";
 import type { Mode } from "@/lib/types";
 import Portail from "@/components/ui/Portail";
 
@@ -196,6 +197,7 @@ export function NuitPicker({
                       selection ? "bg-court-500/15" : "active:bg-fill"
                     } ${desactive ? "cursor-not-allowed opacity-40" : ""}`}
                   >
+                    <Visage nom={j.player} taille={32} />
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-semibold text-fg">{j.player}</div>
                       <div className="text-[13px] text-fg-muted">

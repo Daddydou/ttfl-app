@@ -27,6 +27,7 @@ import { HistoriqueJoueur as FormeJoueur } from "@/components/HistoriqueJoueur";
 import type { HistoriqueJoueur, Mode } from "@/lib/types";
 import { BadgeX2 } from "@/components/BadgeX2";
 import { BadgeQuestionable } from "@/components/BadgeQuestionable";
+import { Visage } from "@/components/Visage";
 import { x2Pour, type CarteX2, type EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Plan glissant de 30 jours pour un compte (01 ou 02) : un joueur par soirée, choisi pour maximiser le total de points
@@ -188,6 +189,7 @@ export function PlanTrenteJours({
                       {frDate(j.date)}
                     </button>
                     <span className="flex min-w-0 flex-1 items-center justify-end gap-1.5 font-medium text-fg">
+                      <Visage nom={j.joueur} taille={20} />
                       <span className="truncate">{j.joueur ?? "—"}</span>
                       <BadgeX2 etat={x2Pour(x2, compte, j.date, j.joueur)} />
                       <BadgeQuestionable joueur={j.joueur} date={j.date} />
@@ -309,6 +311,7 @@ function DetailJour({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
+            <Visage nom={jour.joueur} taille={36} />
             <p className="truncate text-[17px] font-semibold text-fg">{jour.joueur}</p>
             <BadgeX2 etat={x2} />
             <BadgeQuestionable joueur={jour.joueur} date={jour.date} />
@@ -360,7 +363,10 @@ function DetailJour({
           <ul className="mt-1 space-y-1 text-[13px]">
             {jour.alternatives.map((a) => (
               <li key={a.joueur} className="flex items-baseline justify-between gap-2">
-                <span className="min-w-0 truncate text-fg">{a.joueur}</span>
+                <span className="flex min-w-0 items-center gap-1.5 text-fg">
+                  <Visage nom={a.joueur} taille={18} />
+                  <span className="truncate">{a.joueur}</span>
+                </span>
                 <span className="shrink-0 text-fg-muted">
                   {a.projection !== null ? `${fmtNum(a.projection, 1)} pts` : ""}
                   {a.reserve_le ? ` · réservé le ${frDate(a.reserve_le)}` : ""}

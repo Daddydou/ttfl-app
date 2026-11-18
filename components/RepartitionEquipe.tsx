@@ -1,4 +1,5 @@
 "use client";
+import { Visage } from "@/components/Visage";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -156,6 +157,7 @@ export function RepartitionEquipe({
               )}
               {proposition?.groupes.map((g) => (
                 <div key={g.player} className="flex items-center gap-3 border-b border-line px-3 py-3 last:border-0">
+                  <Visage nom={g.player} taille={32} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-semibold text-fg">{g.player}</div>
                     <div className="text-[13px] text-fg-muted">

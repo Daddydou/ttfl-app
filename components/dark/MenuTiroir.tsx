@@ -48,6 +48,7 @@ const GROUPES: { cle: string; titre: string; liens: { href: string; label: strin
     titre: "Système",
     liens: [
       { href: "/admin", label: "Admin" },
+      { href: "/credits-photos", label: "Crédits photos" },
       { href: "/mode-operatoire", label: "Mode opératoire" },
       { href: "/plus", label: "Toutes les pages" },
     ],

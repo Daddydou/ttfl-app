@@ -7,6 +7,7 @@ import { CaptureVignette } from "@/components/CaptureVignette";
 import { captureDuPick, type Capture } from "@/lib/captures";
 import { BadgeX2 } from "@/components/BadgeX2";
 import { BadgeQuestionable } from "@/components/BadgeQuestionable";
+import { Visage } from "@/components/Visage";
 import { x2Pour, type CarteX2, type EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Petite tuile calendrier : jour de la semaine + numéro, comme l'app Calendrier d'iOS.
@@ -39,6 +40,7 @@ function LigneCompte({ label, joueur, capture, secret, x2, date }: { label: stri
       <div className="flex items-baseline gap-2 text-[14px]">
         <span className="w-14 shrink-0 whitespace-nowrap text-[12px] font-semibold uppercase tracking-wide text-fg-muted">{label}</span>
         <span className={`flex min-w-0 items-baseline gap-1.5 ${joueur ? "font-semibold text-fg" : "text-fg-muted"}`}>
+          {joueur && <Visage nom={joueur} taille={20} className="self-center" />}
           <span className="truncate">{joueur ??
             (secret ? (
               <>
@@ -125,6 +127,7 @@ export function PicksValidesCard({
                   {!autres ? (
                     <>
                       <div className="flex items-center gap-1.5">
+                        <Visage nom={c1} taille={32} />
                         <span className="truncate text-[17px] font-semibold tracking-[-0.01em] text-fg">{c1}</span>
                         <BadgeX2 etat={x2Pour(x2, "01", date, c1)} />
                         <BadgeQuestionable joueur={c1} date={date} />

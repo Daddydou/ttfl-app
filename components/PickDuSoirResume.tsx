@@ -3,6 +3,7 @@ import { Icon } from "@/components/ui/Icon";
 import { fmtNum } from "@/lib/format";
 import { BadgeX2 } from "@/components/BadgeX2";
 import { BadgeQuestionable } from "@/components/BadgeQuestionable";
+import { Visage } from "@/components/Visage";
 import type { EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Résumé en tête de Conseillés : le pick posé pour la soirée affichée (le plan commande l'écran), puis, en second,
@@ -35,6 +36,7 @@ export function PickDuSoirResume({
       {pick ? (
         <div className="mt-1 flex items-baseline justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
+            <Visage nom={pick} taille={40} />
             <p className="display truncate text-[28px] leading-[1.1] text-fg">{pick}</p>
             <BadgeX2 etat={x2} />
             <BadgeQuestionable joueur={pick} date={date} />

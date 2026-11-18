@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AbsentForm } from "@/components/AbsentForm";
 import { DeleteAbsentButton } from "@/components/DeleteAbsentButton";
 import { frDate, todayISO } from "@/lib/format";
+import { Visage } from "@/components/Visage";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { TtflManualAbsent } from "@/lib/types";
 import { StarsAbsentes } from "@/components/StarsAbsentes";
@@ -98,6 +99,7 @@ export default async function AbsentsPage() {
 function AbsentRow({ a }: { a: TtflManualAbsent }) {
   return (
     <div className="card flex items-center gap-3 px-4 py-3">
+      <Visage nom={a.player} taille={32} />
       <div className="min-w-0 flex-1">
         <div className="truncate font-semibold text-fg">{a.player}</div>
         <div className="text-[13px] text-fg-muted">

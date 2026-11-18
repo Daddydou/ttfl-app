@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { Visage } from "@/components/Visage";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { CarteConseille } from "@/components/CarteConseille";
@@ -406,7 +407,10 @@ export default async function PicksConseillesPage({
           <ul className="mt-2 space-y-1 text-[13px] text-fg-muted">
             {masques.map((m) => (
               <li key={m.player} className="flex justify-between gap-2">
-                <span className="truncate text-fg">{m.player}</span>
+                <span className="flex min-w-0 items-center gap-1.5 text-fg">
+                  <Visage nom={m.player} taille={18} />
+                  <span className="truncate">{m.player}</span>
+                </span>
                 <span className="shrink-0">{RAISONS[m.raison]}</span>
               </li>
             ))}

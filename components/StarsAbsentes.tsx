@@ -1,4 +1,5 @@
 import { frDate } from "@/lib/format";
+import { Visage } from "@/components/Visage";
 import { libelleStatut } from "@/lib/blesses";
 import { formaterMoyenne, TAILLE_TOP, type SoireeStars } from "@/lib/stars-absentes";
 
@@ -25,6 +26,7 @@ export function StarsAbsentes({ soirees, classementMaj }: { soirees: SoireeStars
                     <div className="min-w-0">
                       <p className="truncate text-[14px] font-medium text-fg">
                         <span className="mr-1.5 text-[12px] font-bold text-fg-muted">n°{b.rang}</span>
+                        <Visage nom={b.joueur} taille={18} className="mr-1.5" />
                         {b.joueur}
                         {b.equipe_abbr ? <span className="ml-1.5 text-[12px] text-fg-muted">{b.equipe_abbr}</span> : null}
                       </p>

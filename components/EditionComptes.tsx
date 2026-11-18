@@ -6,6 +6,7 @@ import { frDate } from "@/lib/format";
 import type { Mode } from "@/lib/types";
 import { BadgeX2 } from "@/components/BadgeX2";
 import { BadgeQuestionable } from "@/components/BadgeQuestionable";
+import { Visage } from "@/components/Visage";
 import type { EtatBadgeX2 } from "@/lib/x2-affichage";
 import Portail from "@/components/ui/Portail";
 
@@ -108,6 +109,7 @@ export function EditionComptes({
                       />
                       <span className="w-24 shrink-0 whitespace-nowrap text-[16px] font-semibold text-fg">Compte {c}</span>
                       <span className={`flex min-w-0 flex-1 items-center justify-end gap-1.5 text-sm ${joueur ? "text-fg" : "text-fg-muted"}`}>
+                        {joueur && <Visage nom={joueur} taille={20} />}
                         <span className="truncate">{joueur ?? "aucun pick"}</span>
                         {joueur && <BadgeX2 etat={x2?.[c]} />}
                         <BadgeQuestionable joueur={joueur} date={date} />

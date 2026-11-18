@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { Visage } from "@/components/Visage";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { adversairesAvecPicks, derniersChoix, fmtRang, scoresParAdversaire, type ScoreSuivi } from "@/lib/adversaires";
 import { frDate, majuscule } from "@/lib/format";
@@ -64,7 +65,10 @@ export default async function AdversairesPage() {
           <ul className="mt-2 space-y-1.5">
             {dernier.choix.map((c) => (
               <li key={c.joueur} className="flex items-baseline justify-between gap-3 text-[14px]">
-                <span className="min-w-0 truncate font-semibold text-fg">{c.joueur}</span>
+                <span className="flex min-w-0 items-center gap-1.5 font-semibold text-fg">
+                  <Visage nom={c.joueur} taille={20} />
+                  <span className="truncate">{c.joueur}</span>
+                </span>
                 <span className="shrink-0 text-fg-muted">{c.pseudos.join(", ")}</span>
               </li>
             ))}

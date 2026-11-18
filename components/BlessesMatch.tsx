@@ -1,4 +1,5 @@
 import { frDate } from "@/lib/format";
+import { Visage } from "@/components/Visage";
 import {
   comptesDuBlesse,
   etiquetteCompte,
@@ -84,6 +85,7 @@ function LigneBlesse({ b, picks }: { b: Blesse; picks: PicksParJoueur }) {
     <li className="flex items-start justify-between gap-2">
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-1.5">
+          <Visage nom={b.joueur} taille={20} />
           <p className="truncate text-[14px] font-medium text-fg">{b.joueur}</p>
           {comptes.map((c) => (
             <span

@@ -23,6 +23,8 @@ const GROUPES: { titre: string; lignes: { href: string; titre: string; detail: s
     titre: "Système",
     lignes: [
       { href: "/admin", titre: "Admin", detail: "Santé, actions, secret, cookies, notifications", icone: "reglages" },
+      { href: "/credits-photos", titre: "Crédits photos", detail: "Auteurs et licences des photos de joueurs", icone: "livre" },
+      { href: "/credits-photos", titre: "Crédits photos", detail: "Auteurs et licences des photos de joueurs", icone: "livre" },
       { href: "/mode-operatoire", titre: "Mode opératoire", detail: "Que faire, quand, pas à pas", icone: "livre" },
     ],
   },

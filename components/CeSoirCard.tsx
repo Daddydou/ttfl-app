@@ -6,6 +6,7 @@ import { fourchette } from "@/lib/fourchette";
 import { Cloture } from "@/components/Cloture";
 import { BadgeX2 } from "@/components/BadgeX2";
 import { BadgeQuestionable } from "@/components/BadgeQuestionable";
+import { Visage } from "@/components/Visage";
 import type { EtatBadgeX2 } from "@/lib/x2-affichage";
 
 export interface LigneCeSoir {
@@ -65,6 +66,7 @@ export function CeSoirCard({
                   </span>
                 ) : l.joueur ? (
                   <span className="inline-flex max-w-full items-center gap-1.5 align-middle">
+                    <Visage nom={l.joueur} taille={24} />
                     <span className="truncate font-semibold text-fg">{l.joueur}</span>
                     <BadgeX2 etat={l.x2} />
                     <BadgeQuestionable joueur={l.joueur} date={date} />

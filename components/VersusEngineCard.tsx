@@ -1,4 +1,5 @@
 import { frDate } from "@/lib/format";
+import { Visage } from "@/components/Visage";
 import type { VersusRow } from "@/lib/stats";
 
 // Comparatif rétroactif "mon pick vs pick du moteur" sur les derniers soirs.
@@ -105,10 +106,13 @@ function DateCourte({ iso }: { iso: string }) {
 
 function Cell({ player, score }: { player: string; score: number | null }) {
   return (
-    <div className="min-w-0">
+    <div className="flex min-w-0 items-center gap-2">
+      <Visage nom={player} taille={26} />
+      <div className="min-w-0">
       <div className="truncate font-semibold text-fg">{player}</div>
       <div className="text-[13px] tabular-nums text-fg-muted">
         {score ?? "—"} pts
+      </div>
       </div>
     </div>
   );

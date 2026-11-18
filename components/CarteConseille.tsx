@@ -1,6 +1,7 @@
 import { StatusBadge } from "@/components/StatusBadge";
 import { PickZoneButton } from "@/components/PickZoneButton";
 import { Icon } from "@/components/ui/Icon";
+import { Visage } from "@/components/Visage";
 import { HistoriqueJoueur } from "@/components/HistoriqueJoueur";
 import { fmtNum, nb } from "@/lib/format";
 import { phraseFourchette } from "@/lib/fourchette";
@@ -42,6 +43,7 @@ export function CarteConseille({
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
+            <Visage nom={c.player} taille={36} />
             <h3 className="text-[18px] font-bold leading-tight tracking-[-0.015em] text-fg">{c.player}</h3>
             {c.is_urgent && <Icon name="eclair" size={16} className="shrink-0 text-court-400" aria-label="Urgent" />}
           </div>

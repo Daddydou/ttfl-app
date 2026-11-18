@@ -13,6 +13,7 @@ import {
 } from "@/lib/stats";
 import { frDate } from "@/lib/format";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { Visage } from "@/components/Visage";
 import { construireCarteX2, lireLignesX2, x2Pour, type EtatBadgeX2 } from "@/lib/x2-affichage";
 import type { TtflBenchmark, TtflPick } from "@/lib/types";
 import { chargerSecret } from "@/lib/secret";
@@ -296,6 +297,7 @@ function SmallStat({
         </span>
       </div>
       <div className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold text-fg">
+        <Visage nom={player} taille={22} />
         <span className="truncate">{player}</span>
         <BadgeX2 etat={x2} />
       </div>

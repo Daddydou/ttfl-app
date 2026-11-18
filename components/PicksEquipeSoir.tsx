@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { Visage } from "@/components/Visage";
 import { hrefConseilles } from "@/components/ConseillesNav";
 import { normaliserNom, type PickLigne } from "@/lib/planning";
 import type { Conseille, LigneSoiree } from "@/lib/conseilles";
@@ -103,6 +104,7 @@ export function PicksEquipeSoir({
               <div className="flex items-baseline justify-between gap-2">
                 <span className="flex min-w-0 items-baseline gap-2">
                   <span className="w-6 shrink-0 text-[13px] font-bold tabular-nums text-fg-muted">{r.compte}</span>
+                  {r.pick && <Visage nom={r.pick} taille={22} className="self-center" />}
                   <span className={`truncate text-[15px] ${r.pick ? "font-semibold text-fg" : "text-fg-muted"}`}>
                     {r.pick ?? "Pas de pick"}
                   </span>
