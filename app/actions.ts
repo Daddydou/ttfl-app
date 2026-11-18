@@ -6,6 +6,7 @@ import type { Mode, PlayerStatus } from "@/lib/types";
 import { COMPTE_REF } from "@/lib/compte";
 import { validerAffectations } from "@/lib/repartition";
 import { appliquerBlesses, type StatutBlesse } from "@/lib/blesses";
+import { cleCompacte, cleQuestionable, questionablesDepuis } from "@/lib/questionables";
 import { chargerSecret, refusSecret } from "@/lib/secret";
 import {
   COMPTE_VALIDE,
@@ -39,6 +40,45 @@ async function retirerMarquesAuto(
   }
 }
 
+// Règle « Questionable » (18/11/2026) : un pick Questionable qui joue APRÈS la clôture est remplacé automatiquement, SAUF
+// si tu l'as posé à la main alors qu'il était déjà Questionable (tu l'as fait en connaissance de cause). On le note ici,
+// à la pose : une ligne (soirée, compte, joueur) dans ttfl_garde_questionable, lue par le moteur et le robot. Elle ne vaut
+// que pour CE joueur : si tu changes de joueur, elle ne protège plus le suivant. Si le joueur n'est PAS Questionable à
+// la pose, la ligne est effacée : s'il le devient plus tard, la règle générale s'applique. Erreur ignorée (table absente,
+// réseau) : l'enregistrement du pick ne doit jamais échouer à cause de ce confort.
+async function noterGardesQuestionable(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  mode: Mode,
+  pickDate: string,
+  affectations: { compte: string; joueur: string }[],
+): Promise<void> {
+  try {
+    const cles = [...new Set(affectations.map((a) => cleCompacte(a.joueur)))];
+    const { data } = await supabase
+      .from("ttfl_blesses_historique")
+      .select("game_date,joueur_norm,statut")
+      .eq("game_date", pickDate)
+      .in("joueur_norm", cles)
+      .order("id", { ascending: true })
+      .returns<{ game_date: string; joueur_norm: string; statut: string }[]>();
+    const questionables = new Set(questionablesDepuis(data ?? []));
+    const gardes = affectations.filter((a) => questionables.has(cleQuestionable(pickDate, a.joueur)));
+    const aEffacer = affectations.filter((a) => !gardes.includes(a)).map((a) => a.compte);
+    if (gardes.length > 0) {
+      await supabase
+        .from("ttfl_garde_questionable")
+        .upsert(
+          gardes.map((a) => ({ mode, pick_date: pickDate, compte: a.compte, joueur: a.joueur })),
+          { onConflict: "mode,pick_date,compte" },
+        );
+    }
+    if (aEffacer.length > 0) {
+      await supabase.from("ttfl_garde_questionable").delete().eq("mode", mode).eq("pick_date", pickDate).in("compte", aEffacer);
+    }
+  } catch {
+    /* ignoré */
+  }
+}
 // Enregistre le pick du soir. La table a une contrainte unique (mode, pick_date, compte)
 // donc un upsert : re-picker le même soir pour le même compte remplace, il n'y a qu'un
 // pick par soir ET par compte (compte 01 par défaut = écrans actuels de l'application).
@@ -60,6 +100,7 @@ export async function pickPlayer(
 
   if (error) return { ok: false, error: error.message };
   await retirerMarquesAuto(supabase, mode, pickDate, [compte]);
+  await noterGardesQuestionable(supabase, mode, pickDate, [{ compte, joueur: player }]);
   revalidatePath("/");
   revalidatePath("/ce-soir");
   revalidatePath("/picks");
@@ -256,6 +297,7 @@ export async function pickPlayerComptes(
   );
   if (error) return { ok: false, error: error.message };
   await retirerMarquesAuto(supabase, mode, pickDate, liste);
+  await noterGardesQuestionable(supabase, mode, pickDate, liste.map((compte) => ({ compte, joueur })));
 
   revalidatePath("/");
   revalidatePath("/ce-soir");
@@ -392,6 +434,11 @@ export async function retirerPickComptes(
     .eq("pick_date", pickDate)
     .in("compte", liste);
   if (error) return { ok: false, error: error.message };
+  try {
+    await supabase.from("ttfl_garde_questionable").delete().eq("mode", mode).eq("pick_date", pickDate).in("compte", liste);
+  } catch {
+    /* ignoré */
+  }
 
   revalidatePath("/");
   revalidatePath("/ce-soir");
@@ -445,6 +492,12 @@ export async function pickRepartition(
   );
   if (error) return { ok: false, error: error.message };
   await retirerMarquesAuto(supabase, mode, pickDate, liste);
+  await noterGardesQuestionable(
+    supabase,
+    mode,
+    pickDate,
+    groupes.flatMap((g) => g.comptes.map((compte) => ({ compte, joueur: g.player.trim() }))),
+  );
 
   revalidatePath("/");
   revalidatePath("/ce-soir");

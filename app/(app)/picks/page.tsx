@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { RevelerBouton } from "@/components/RevelerBouton";
 import { construireCarteX2, lireLignesX2, x2Pour, type CarteX2, type EtatBadgeX2 } from "@/lib/x2-affichage";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { BadgeQuestionable } from "@/components/BadgeQuestionable";
 import { chargerSecret, heureCloture, masquerLignes, soireeSecrete } from "@/lib/secret";
 import { maintenantMs as heureServeur } from "@/lib/plan30";
 import {
@@ -489,6 +490,7 @@ function HistoriqueVue({ rows, mode, compte, x2 }: { rows: TtflPick[]; mode: Mod
                 <div className="flex items-center gap-1.5">
                   <span className="truncate font-semibold text-fg">{p.player}</span>
                   <BadgeX2 etat={x2Pour(x2, p.compte, p.pick_date, p.player)} />
+                  <BadgeQuestionable joueur={p.player} date={p.pick_date} />
                 </div>
                 <div className="text-[13px] text-fg-muted">{frDate(p.pick_date)}</div>
               </div>

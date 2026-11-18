@@ -109,7 +109,7 @@ export function PicksEquipeSoir({
                   {r.pick && <BadgeX2 etat={x2Pour(x2, r.compte, date, r.pick)} />}
                   {r.alerte && (
                     <span className={`shrink-0 text-[11px] font-semibold ${r.alerte === "out" ? "text-out" : "text-fg-muted"}`}>
-                      {r.alerte === "out" ? "Out / Doubtful" : "Incertain"}
+                      {r.alerte === "out" ? "Out / Doubtful" : "Questionable"}
                     </span>
                   )}
                 </span>

@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 import { CaptureVignette } from "@/components/CaptureVignette";
 import { captureDuPick, type Capture } from "@/lib/captures";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { BadgeQuestionable } from "@/components/BadgeQuestionable";
 import { x2Pour, type CarteX2, type EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Petite tuile calendrier : jour de la semaine + numéro, comme l'app Calendrier d'iOS.
@@ -32,7 +33,7 @@ export interface PickCompte {
   compte: string;
 }
 
-function LigneCompte({ label, joueur, capture, secret, x2 }: { label: string; joueur?: string; capture?: Capture | null; secret?: boolean; x2?: EtatBadgeX2 | null }) {
+function LigneCompte({ label, joueur, capture, secret, x2, date }: { label: string; date?: string; joueur?: string; capture?: Capture | null; secret?: boolean; x2?: EtatBadgeX2 | null }) {
   return (
     <div>
       <div className="flex items-baseline gap-2 text-[14px]">
@@ -48,6 +49,7 @@ function LigneCompte({ label, joueur, capture, secret, x2 }: { label: string; jo
               "pas de pick"
             ))}</span>
           {joueur && <BadgeX2 etat={x2} />}
+          <BadgeQuestionable joueur={joueur} date={date} />
         </span>
       </div>
       {capture && (
@@ -125,14 +127,15 @@ export function PicksValidesCard({
                       <div className="flex items-center gap-1.5">
                         <span className="truncate text-[17px] font-semibold tracking-[-0.01em] text-fg">{c1}</span>
                         <BadgeX2 etat={x2Pour(x2, "01", date, c1)} />
+                        <BadgeQuestionable joueur={c1} date={date} />
                       </div>
                       {captureDuPick(captures, "01", date, c1) && <CaptureVignette capture={captureDuPick(captures, "01", date, c1)!} />}
                     </>
                   ) : (
                     <div className="space-y-0.5">
-                      <LigneCompte label="Cpt 01" joueur={c1} capture={captureDuPick(captures, "01", date, c1)} x2={x2Pour(x2, "01", date, c1)} />
-                      <LigneCompte label="Cpt 02" joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} secret={datesSecretes.includes(date)} x2={x2Pour(x2, "02", date, parDateCompte.get(`${date}|02`))} />
-                      <LigneCompte label="Cpt 13" joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} x2={x2Pour(x2, "13", date, parDateCompte.get(`${date}|13`))} />
+                      <LigneCompte label="Cpt 01" date={date} joueur={c1} capture={captureDuPick(captures, "01", date, c1)} x2={x2Pour(x2, "01", date, c1)} />
+                      <LigneCompte label="Cpt 02" date={date} joueur={parDateCompte.get(`${date}|02`)} capture={captureDuPick(captures, "02", date, parDateCompte.get(`${date}|02`))} secret={datesSecretes.includes(date)} x2={x2Pour(x2, "02", date, parDateCompte.get(`${date}|02`))} />
+                      <LigneCompte label="Cpt 13" date={date} joueur={parDateCompte.get(`${date}|13`)} capture={captureDuPick(captures, "13", date, parDateCompte.get(`${date}|13`))} x2={x2Pour(x2, "13", date, parDateCompte.get(`${date}|13`))} />
                     </div>
                   )}
                   {/* La tuile donne déjà le jour : on n'ajoute que « demain » / « aujourd'hui ». */}
@@ -145,7 +148,7 @@ export function PicksValidesCard({
                       </summary>
                       <div className="mt-1.5 space-y-0.5">
                         {equipe.map((e) => (
-                          <LigneCompte key={e.compte} label={`Cpt ${e.compte}`} joueur={e.joueur} capture={captureDuPick(captures, e.compte, date, e.joueur)} x2={x2Pour(x2, e.compte, date, e.joueur)} />
+                          <LigneCompte key={e.compte} date={date} label={`Cpt ${e.compte}`} joueur={e.joueur} capture={captureDuPick(captures, e.compte, date, e.joueur)} x2={x2Pour(x2, e.compte, date, e.joueur)} />
                         ))}
                       </div>
                     </details>

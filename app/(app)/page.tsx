@@ -243,6 +243,7 @@ export default async function DashboardPage() {
       {/* Bloc 1 — ce soir : chaque compte, la fourchette du compte 01, la fraîcheur, l'accès aux conseillés ---- */}
       <CeSoirCard
         titreDate={titreDate}
+        date={aujourdhui}
         lignes={[ligneCeSoir(COMPTE_REF), ligneCeSoir("02"), ligneCeSoir("13")]}
         equipe={{ posees: equipePosees, total: COMPTES_EQUIPE.length, href: "/ce-soir?pour=equipe" }}
         cloture={secret.lignes[aujourdhui]?.cloture ?? null}

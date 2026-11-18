@@ -270,6 +270,27 @@ export const MODES: ModeOperatoire[] = [
     misAJour: "2026-10-23",
   },
   {
+    id: "questionable",
+    section: "surveillance",
+    titre: "Joueur Questionable : quand il est remplacé",
+    pourQuoi: "Comprendre pourquoi un pick Questionable est parfois changé tout seul, et quand il est gardé.",
+    quand: "Quand tu vois la pastille Q à côté d'un joueur, ou une notification « Questionable ».",
+    etapes: [
+      "La pastille Q s'affiche à côté du joueur partout où il apparaît (ce soir et les 3 soirées suivantes).",
+      "Si son match commence AVANT la clôture de la soirée : il est gardé. S'il devient Out ensuite, le rapport de blessures le montre et le contrôle habituel le remplace.",
+      "Si son match commence APRÈS la clôture : il est remplacé automatiquement par le joueur suivant du Plan 30 (disponible ou probable), car après la clôture il ne serait plus remplaçable.",
+      "S'il n'y a aucun remplaçant sain, le Questionable est gardé (tu es prévenu).",
+      "Si le joueur portait le x2, le x2 est posé ailleurs selon les calculs habituels.",
+      "Tu reçois une notification quand un joueur pické (par toi ou automatiquement) devient Questionable.",
+    ],
+    attention: [
+      "Si tu poses toi-même un joueur qui est DÉJÀ Questionable à ce moment-là, il est gardé (ton choix). S'il le devient après ta pose, la règle générale s'applique.",
+      "La règle vaut pour tous les comptes. Pour la couper : mettre {\"mode\":\"off\"} dans donnees/questionable_regle.json du moteur.",
+      "Le compte 02 reste secret : sa notification ne cite pas le joueur.",
+    ],
+    lien: { href: "/ce-soir", libelle: "Voir ce soir" },
+    misAJour: "2026-11-18",
+  },  {
     id: "alerte-budget",
     section: "surveillance",
     titre: "Alerte : minutes GitHub presque épuisées",

@@ -3,6 +3,7 @@ import type { Semaine } from "@/lib/semaine";
 import { frDate } from "@/lib/format";
 import { libelleStatutEnvoi } from "@/lib/planning";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { BadgeQuestionable } from "@/components/BadgeQuestionable";
 import { x2Pour, type CarteX2 } from "@/lib/x2-affichage";
 
 // « Jayson Tatum » → « J. Tatum » ; les suffixes (Jr., III…) restent avec le nom.
@@ -60,6 +61,7 @@ export function GrilleSemaine({ semaine, x2 }: { semaine: Semaine; x2?: CarteX2 
                           )}
                           {nomCourt(c.joueur)}
                           <BadgeX2 etat={x2Pour(x2, l.compte, c.date, c.joueur)} />
+                          <BadgeQuestionable joueur={c.joueur} date={c.date} />
                         </span>
                         {c.auto && (
                           <span

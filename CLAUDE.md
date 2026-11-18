@@ -117,3 +117,9 @@ poussé dans Supabase.
 - Pick secret : le x2 d'une soirée secrète du compte 02 est affiché « 🔒 secret » et les actions sont refusées (`refusSecret`).
 - Badge « ×2 » partout où un pick est affiché : `components/BadgeX2.tsx` + `lib/x2-affichage.ts` (`lireLignesX2` dans le `Promise.all` de la page, `construireCarteX2` avec le secret, `x2Pour(carte, compte, date, joueur)`). Le badge suit le JOUEUR (nom normalisé) ; pleine = `pose`, pointillés = `voulu` ; rien pour `a_retirer` / `annule_site` / `echec` ni pour le 02 d'une soirée secrète. Tout nouvel écran qui montre un pick doit l'ajouter. Tests : `tests/x2-affichage.test.tsx`.
 - Fiche « Mode op. » : `x2` (lib/modes-operatoires.ts). Tests : `tests/x2-lib.test.ts`.
+
+
+## Questionable (18/11/2026)
+- Pastille « Q » à côté d'un joueur Questionable, partout où un pick est affiché : `components/BadgeQuestionable.tsx` + `lib/questionables.ts` (`lireQuestionables` : dernier statut de `ttfl_blesses_historique` pour ce soir et les 3 soirées suivantes ; `QuestionablesProvider` dans `app/(app)/layout.tsx`, chaque pastille lit dans son `<Suspense>`). Tout nouvel écran qui montre un pick doit l'ajouter (comme le badge ×2). Jamais l'accent (réservé aux actions).
+- Exemption à la pose : `noterGardesQuestionable` dans `app/actions.ts` (pickPlayer, pickPlayerComptes, pickRepartition, retirerPickComptes) écrit/efface `ttfl_garde_questionable` ; erreur ignorée. Tests : `tests/badge-questionable.test.tsx`, `tests/garde-questionable-actions.test.ts`.
+- Fiche « Mode op. » : `questionable` (lib/modes-operatoires.ts). Règle et interrupteur côté moteur : voir `ttfl/CLAUDE.md`.

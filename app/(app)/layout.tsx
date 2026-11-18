@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { QuestionablesProvider } from "@/components/BadgeQuestionable";
+import { lireQuestionables } from "@/lib/questionables";
 import { BottomNav } from "@/components/BottomNav";
 import { NewRunNotifier } from "@/components/NewRunNotifier";
 import { NotifyToggle } from "@/components/NotifyToggle";
@@ -49,7 +51,10 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Statuts Questionable des prochaines soirées : lus sans bloquer l'affichage (chaque pastille attend dans son <Suspense>).
+  const questionables = createClient().then(lireQuestionables).catch(() => [] as string[]);
   return (
+    <QuestionablesProvider promesse={questionables}>
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
       <IntroOuverture saison={saisonEnCours()} />
       {/* Barre du haut transparente (comme Tennis) : le menu à gauche, le nom au centre,
@@ -103,5 +108,6 @@ export default function AppLayout({
 
       <BottomNav />
     </div>
+    </QuestionablesProvider>
   );
 }

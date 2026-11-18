@@ -26,6 +26,7 @@ import {
 import { HistoriqueJoueur as FormeJoueur } from "@/components/HistoriqueJoueur";
 import type { HistoriqueJoueur, Mode } from "@/lib/types";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { BadgeQuestionable } from "@/components/BadgeQuestionable";
 import { x2Pour, type CarteX2, type EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Plan glissant de 30 jours pour un compte (01 ou 02) : un joueur par soirée, choisi pour maximiser le total de points
@@ -189,6 +190,7 @@ export function PlanTrenteJours({
                     <span className="flex min-w-0 flex-1 items-center justify-end gap-1.5 font-medium text-fg">
                       <span className="truncate">{j.joueur ?? "—"}</span>
                       <BadgeX2 etat={x2Pour(x2, compte, j.date, j.joueur)} />
+                      <BadgeQuestionable joueur={j.joueur} date={j.date} />
                     </span>
                     <span className="num w-12 shrink-0 text-right text-fg-muted">
                       {j.projection !== null ? fmtNum(j.projection, 1) : ""}
@@ -309,6 +311,7 @@ function DetailJour({
           <div className="flex items-center gap-1.5">
             <p className="truncate text-[17px] font-semibold text-fg">{jour.joueur}</p>
             <BadgeX2 etat={x2} />
+            <BadgeQuestionable joueur={jour.joueur} date={jour.date} />
           </div>
           <p className="text-[13px] text-fg-muted">
             {infos}

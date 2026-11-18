@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { fmtNum } from "@/lib/format";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { BadgeQuestionable } from "@/components/BadgeQuestionable";
 import type { EtatBadgeX2 } from "@/lib/x2-affichage";
 
 // Résumé en tête de Conseillés : le pick posé pour la soirée affichée (le plan commande l'écran), puis, en second,
@@ -14,12 +15,14 @@ export function PickDuSoirResume({
   n1,
   action,
   x2,
+  date,
 }: {
   titre: string; // « Ce soir · Compte 1 »
   pick: string | null; // joueur posé (null = pas encore de pick)
   projectionPick: number | null;
   pose: boolean; // case TTFL confirmée (capture reçue)
   n1: { player: string; projection: number | null } | null; // n° 1 du classement pour cette zone
+  date?: string | null; // soirée du pick (AAAA-MM-JJ) : pastille Questionable
   x2?: EtatBadgeX2 | null; // bonus ×2 sur le pick posé
   action?: ReactNode; // bouton « Picker X » (absent si le n° 1 est déjà posé ou indisponible pour ce compte)
 }) {
@@ -34,6 +37,7 @@ export function PickDuSoirResume({
           <div className="flex min-w-0 items-center gap-2">
             <p className="display truncate text-[28px] leading-[1.1] text-fg">{pick}</p>
             <BadgeX2 etat={x2} />
+            <BadgeQuestionable joueur={pick} date={date} />
           </div>
           <span className="shrink-0 text-right">
             {projectionPick != null && (

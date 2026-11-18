@@ -4,6 +4,7 @@ import { planEquipeParJour, planPerime, type TtflPlan30 } from "@/lib/plan30";
 import { normaliserNom } from "@/lib/planning";
 import type { HistoriqueJoueur } from "@/lib/types";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { BadgeQuestionable } from "@/components/BadgeQuestionable";
 import { x2Pour, type CarteX2 } from "@/lib/x2-affichage";
 
 // Plan 30 jours des comptes 03 à 12 : calculé par le moteur (un plan par compte), présenté soirée par soirée avec le ou
@@ -64,6 +65,7 @@ export function PlanEquipe({
                     <>
                       <span className="min-w-0">
                         <span className="text-fg">{g.joueur}</span>
+                        <BadgeQuestionable joueur={g.joueur} date={j.date} className="ml-1.5" />
                         <span className="text-fg-muted"> · {g.comptes.join(", ")}</span>
                         {avecX2.length > 0 && (
                           <span className="ml-1.5 inline-flex items-center gap-1 align-middle text-fg-muted">

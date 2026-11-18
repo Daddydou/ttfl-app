@@ -276,6 +276,7 @@ export default async function PicksConseillesPage({
           projectionPick={pickResume ? (ligneDe(pickResume)?.projection ?? null) : null}
           pose={!!captureDuPick(captures, compteResume, date, pickResume)}
           x2={x2Pour(x2, compteResume, date, pickResume)}
+          date={date}
           n1={conseilles[0] ? { player: conseilles[0].player, projection: conseilles[0].projection } : null}
           action={
             // Une seule grande action, en tête : poser le n° 1 (s'il diffère du pick et reste libre pour ce compte).

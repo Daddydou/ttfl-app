@@ -5,6 +5,7 @@ import { fmtNum, majuscule } from "@/lib/format";
 import { fourchette } from "@/lib/fourchette";
 import { Cloture } from "@/components/Cloture";
 import { BadgeX2 } from "@/components/BadgeX2";
+import { BadgeQuestionable } from "@/components/BadgeQuestionable";
 import type { EtatBadgeX2 } from "@/lib/x2-affichage";
 
 export interface LigneCeSoir {
@@ -25,12 +26,14 @@ export function CeSoirCard({
   projection,
   fraicheur,
   cloture = null,
+  date = null,
 }: {
   titreDate: string; // « sam. 24 oct. »
   lignes: LigneCeSoir[];
   equipe: { posees: number; total: number; href: string };
   projection: number | null; // projection du pick du compte 01 (null = inconnue)
   fraicheur: ReactNode;
+  date?: string | null; // soirée affichée (AAAA-MM-JJ) : sert à la pastille Questionable
   cloture?: string | null; // heure de clôture de la soirée (ISO), si le moteur l'a enregistrée
 }) {
   const f = fourchette(projection);
@@ -64,6 +67,7 @@ export function CeSoirCard({
                   <span className="inline-flex max-w-full items-center gap-1.5 align-middle">
                     <span className="truncate font-semibold text-fg">{l.joueur}</span>
                     <BadgeX2 etat={l.x2} />
+                    <BadgeQuestionable joueur={l.joueur} date={date} />
                   </span>
                 ) : (
                   <span className="font-semibold text-quest">pas encore de pick</span>
