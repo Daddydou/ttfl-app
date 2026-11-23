@@ -58,6 +58,12 @@ export function moisDe(date: string): string {
   return date.slice(0, 7);
 }
 
+/** Un x2 peut-il être posé sur cette soirée ? (mois de la saison x2 ET soirée pas encore passée.) Sert à montrer ou non la
+ *  case « poser aussi le x2 » ; le serveur revérifie tout (`validerDemandeX2`). */
+export function x2Possible(date: string, aujourdhui: string): boolean {
+  return (MOIS_SAISON as readonly string[]).includes(moisDe(date)) && date >= aujourdhui;
+}
+
 /** Vérifie une demande de x2 faite à la main (bouton de l'application). Renvoie un message d'erreur ou null. */
 export function validerDemandeX2(args: {
   compte: string;

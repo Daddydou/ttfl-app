@@ -6,6 +6,7 @@ import { lancerCommande } from "@/app/(app)/admin/actions";
 import { deverrouillerPickManuel, verrouillerPickManuel } from "@/app/actions";
 import { normaliserNom } from "@/lib/planning";
 import { PickZoneButton } from "@/components/PickZoneButton";
+import { CaseX2 } from "@/components/CaseX2";
 import { CaptureVignette } from "@/components/CaptureVignette";
 import { captureDuPick, type Capture } from "@/lib/captures";
 import { frDate, fmtNum, humanAge } from "@/lib/format";
@@ -242,6 +243,7 @@ const COMPTES_AUTO = ["02", "13"]; // les comptes gérés par le robot (pick aut
 function VerrouManuel({ jour, mode, verrouille, compte }: { jour: JourPlan30; mode: Mode; verrouille: boolean; compte: string }) {
   const router = useRouter();
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [avecX2, setAvecX2] = useState(false);
   const [pending, start] = useTransition();
 
   function agir() {
@@ -249,7 +251,8 @@ function VerrouManuel({ jour, mode, verrouille, compte }: { jour: JourPlan30; mo
     start(async () => {
       const res = verrouille
         ? await deverrouillerPickManuel(jour.date, compte)
-        : await verrouillerPickManuel(mode, jour.date, jour.joueur ?? "", compte);
+        : await verrouillerPickManuel(mode, jour.date, jour.joueur ?? "", compte, avecX2);
+      if (res.ok) setAvecX2(false);
       setMessage(res.ok ? { ok: true, texte: res.message ?? "Enregistré." } : { ok: false, texte: res.error });
       if (res.ok) router.refresh();
     });
@@ -271,6 +274,7 @@ function VerrouManuel({ jour, mode, verrouille, compte }: { jour: JourPlan30; mo
                 : "Poser et valider à la main"}
         </button>
       </div>
+      {!verrouille && jour.joueur && <CaseX2 date={jour.date} coche={avecX2} onChange={setAvecX2} />}
       {message && <Retour message={message} />}
     </div>
   );

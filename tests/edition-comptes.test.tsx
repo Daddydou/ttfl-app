@@ -65,7 +65,7 @@ describe("EditionComptes — changements manuels sur x comptes", () => {
     await userEvent.click(await screen.findByRole("button", { name: /Giannis Antetokounmpo/ }));
     await userEvent.click(screen.getByRole("button", { name: "Valider" }));
     await waitFor(() => expect(pickPlayerComptes).toHaveBeenCalledTimes(1));
-    expect(pickPlayerComptes).toHaveBeenCalledWith("regular", "2026-10-21", "Giannis Antetokounmpo", ["03", "05"]);
+    expect(pickPlayerComptes).toHaveBeenCalledWith("regular", "2026-10-21", "Giannis Antetokounmpo", ["03", "05"], false);
   });
 
   it("« Tout sélectionner » puis « Aucun »", async () => {

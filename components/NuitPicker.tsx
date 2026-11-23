@@ -14,6 +14,8 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Visage } from "@/components/Visage";
 import type { Mode } from "@/lib/types";
 import Portail from "@/components/ui/Portail";
+import { CaseX2 } from "@/components/CaseX2";
+import { BoutonX2Pick } from "@/components/BoutonX2Pick";
 
 // Choix (ou retrait) du pick d'une soirée pour une zone de comptes : une liste de tous les
 // joueurs des matchs du soir avec leur projection TTFL. Les joueurs déjà pickés à ≤ 30 jours
@@ -43,6 +45,7 @@ export function NuitPicker({
   const [choisi, setChoisi] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [retraitArme, setRetraitArme] = useState(false);
+  const [avecX2, setAvecX2] = useState(false);
   const [pending, start] = useTransition();
 
   // La liste est chargée à l'ouverture seulement (une soirée = jusqu'à ~200 joueurs).
@@ -78,13 +81,14 @@ export function NuitPicker({
     setChoisi(null);
     setRecherche("");
     setErreur(null);
+    setAvecX2(false);
   }
 
   function valider() {
     if (!choisi) return;
     setErreur(null);
     start(async () => {
-      const res = await pickPlayerComptes(mode, date, choisi, comptes);
+      const res = await pickPlayerComptes(mode, date, choisi, comptes, avecX2);
       if (res.ok) {
         fermer();
         setJoueurs(null); // rechargé à la prochaine ouverture
@@ -108,13 +112,14 @@ export function NuitPicker({
     <>
       {/* Un pick posé : « Changer » / « Retirer » restent discrets (le joueur est l'information, pas le bouton).
           Pas de pick : « Choisir un joueur » est la vraie action à faire, en orange plein. */}
-      <div className={`mt-3 flex items-center gap-2 ${aUnPick ? "justify-end" : ""}`}>
+      <div className={`mt-3 flex flex-wrap items-center gap-2 ${aUnPick ? "justify-end" : ""}`}>
         <button
           onClick={() => setOuvert(true)}
           className={aUnPick ? "btn btn-plain btn-sm" : "btn btn-primary flex-1 !min-h-[44px] !text-[16px]"}
         >
           {aUnPick ? "Changer" : "Choisir un joueur"}
         </button>
+        {aUnPick && <BoutonX2Pick date={date} comptes={comptes} />}
         {aUnPick &&
           (retraitArme ? (
             <button onClick={retirer} disabled={pending} className="btn btn-sm bg-out/15 text-out">
@@ -213,6 +218,8 @@ export function NuitPicker({
                 );
               })}
             </div>
+
+            <CaseX2 date={date} coche={avecX2} onChange={setAvecX2} nbComptes={comptes.length} />
 
             {erreur && (
               <p className="mt-3 rounded-[10px] bg-out/10 px-3 py-2 text-sm text-out">{erreur}</p>

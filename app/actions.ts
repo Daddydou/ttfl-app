@@ -8,6 +8,8 @@ import { validerAffectations } from "@/lib/repartition";
 import { appliquerBlesses, type StatutBlesse } from "@/lib/blesses";
 import { cleCompacte, cleQuestionable, questionablesDepuis } from "@/lib/questionables";
 import { chargerSecret, refusSecret } from "@/lib/secret";
+import { chargerLignesX2, ecrireX2, verifierX2, type AffectationX2 } from "@/lib/x2-pose";
+import type { LigneX2 } from "@/lib/x2";
 import {
   COMPTE_VALIDE,
   JOURS_CYCLE,
@@ -79,6 +81,30 @@ async function noterGardesQuestionable(
     /* ignoré */
   }
 }
+// x2 demandé EN MÊME TEMPS que le pick (case « poser aussi le x2 » des écrans où l'on choisit un joueur, 23/11/2026).
+// 1) controleX2 : vérifie la demande AVANT d'écrire le pick (joueur déjà x2 sur ce compte, soirée passée, mois hors saison…) :
+//    si elle est refusée, rien n'est enregistré, l'écran garde ses choix. 2) poserX2ApresPick : écrit le x2 une fois le pick
+//    enregistré. Le pick reste prioritaire : si l'écriture du x2 échoue, le pick est bien là et le message le dit.
+async function controleX2(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  pickDate: string,
+  affectations: AffectationX2[],
+): Promise<{ erreur: string | null; lignes: LigneX2[] }> {
+  const { lignes, erreur } = await chargerLignesX2(supabase);
+  if (erreur) return { erreur, lignes: [] };
+  return { erreur: verifierX2({ date: pickDate, aujourdhui: aujourdhuiNY(), affectations, lignes }), lignes };
+}
+
+async function poserX2ApresPick(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  pickDate: string,
+  affectations: AffectationX2[],
+  lignes: LigneX2[],
+): Promise<string> {
+  const res = await ecrireX2(supabase, pickDate, affectations, lignes);
+  return res.ok ? res.message : `Pick enregistré, mais le x2 n'a pas pu être posé : ${res.error}`;
+}
+
 // Enregistre le pick du soir. La table a une contrainte unique (mode, pick_date, compte)
 // donc un upsert : re-picker le même soir pour le même compte remplace, il n'y a qu'un
 // pick par soir ET par compte (compte 01 par défaut = écrans actuels de l'application).
@@ -246,6 +272,7 @@ export async function pickPlayerComptes(
   pickDate: string,
   player: string,
   comptes: string[],
+  avecX2: boolean = false, // pose aussi le x2 du mois sur ce joueur, pour chacun de ces comptes
 ): Promise<ActionResult> {
   if (mode !== "regular") {
     return { ok: false, error: "Le planning est disponible en saison régulière." };
@@ -285,6 +312,11 @@ export async function pickPlayerComptes(
     };
   }
 
+  // x2 demandé avec le pick : refusé = rien n'est enregistré (le joueur ne change pas à moitié).
+  const affectationsX2 = liste.map((compte) => ({ compte, joueur }));
+  const x2 = avecX2 ? await controleX2(supabase, pickDate, affectationsX2) : null;
+  if (x2?.erreur) return { ok: false, error: x2.erreur };
+
   const { error } = await supabase.from("ttfl_picks").upsert(
     liste.map((compte) => ({
       mode,
@@ -298,14 +330,16 @@ export async function pickPlayerComptes(
   if (error) return { ok: false, error: error.message };
   await retirerMarquesAuto(supabase, mode, pickDate, liste);
   await noterGardesQuestionable(supabase, mode, pickDate, liste.map((compte) => ({ compte, joueur })));
+  const messageX2 = x2 ? await poserX2ApresPick(supabase, pickDate, affectationsX2, x2.lignes) : null;
 
   revalidatePath("/");
   revalidatePath("/ce-soir");
   revalidatePath("/picks");
   revalidatePath("/stats");
+  if (messageX2) revalidatePath("/admin", "layout");
   return {
     ok: true,
-    message: `${joueur} enregistré le ${pickDate} pour ${liste.length} compte(s).`,
+    message: `${joueur} enregistré le ${pickDate} pour ${liste.length} compte(s).${messageX2 ? ` ${messageX2}` : ""}`,
   };
 }
 
@@ -323,13 +357,14 @@ export async function verrouillerPickManuel(
   pickDate: string,
   player: string,
   compte: string = "02",
+  avecX2: boolean = false,
 ): Promise<ActionResult> {
   const joueur = player.trim();
   if (!COMPTES_VERROU.includes(compte)) return { ok: false, error: "Compte invalide." };
   if (!DATE_ISO.test(pickDate)) return { ok: false, error: "Date invalide." };
   if (!joueur || joueur.length > 80) return { ok: false, error: "Joueur invalide." };
 
-  const pose = await pickPlayerComptes(mode, pickDate, joueur, [compte]);
+  const pose = await pickPlayerComptes(mode, pickDate, joueur, [compte], avecX2);
   if (!pose.ok) return pose;
 
   const supabase = await createClient();
@@ -339,7 +374,10 @@ export async function verrouillerPickManuel(
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/ce-soir");
-  return { ok: true, message: `${joueur} validé à la main le ${pickDate} : aucun remplacement automatique.` };
+  return {
+    ok: true,
+    message: `${joueur} validé à la main le ${pickDate} : aucun remplacement automatique.${avecX2 && pose.message ? ` ${pose.message}` : ""}`,
+  };
 }
 
 // Retire le verrou : le plan reprend la main (le pick posé reste en place jusqu'au prochain calcul).
@@ -454,6 +492,7 @@ export async function pickRepartition(
   mode: Mode,
   pickDate: string,
   groupes: { player: string; comptes: string[] }[],
+  x2Comptes: string[] = [], // comptes qui reçoivent AUSSI le x2 du mois sur leur joueur de la répartition
 ): Promise<ActionResult> {
   if (mode !== "regular") {
     return { ok: false, error: "Le planning est disponible en saison régulière." };
@@ -478,6 +517,13 @@ export async function pickRepartition(
   const probleme = validerAffectations(groupes, voisins ?? [], pickDate);
   if (probleme) return { ok: false, error: probleme };
 
+  // x2 demandé sur certains comptes de la répartition : vérifié avant d'écrire quoi que ce soit.
+  const affectationsX2 = groupes.flatMap((g) =>
+    g.comptes.filter((c) => x2Comptes.includes(c)).map((compte) => ({ compte, joueur: g.player.trim() })),
+  );
+  const x2 = affectationsX2.length > 0 ? await controleX2(supabase, pickDate, affectationsX2) : null;
+  if (x2?.erreur) return { ok: false, error: x2.erreur };
+
   const { error } = await supabase.from("ttfl_picks").upsert(
     groupes.flatMap((g) =>
       g.comptes.map((compte) => ({
@@ -498,14 +544,16 @@ export async function pickRepartition(
     pickDate,
     groupes.flatMap((g) => g.comptes.map((compte) => ({ compte, joueur: g.player.trim() }))),
   );
+  const messageX2 = x2 ? await poserX2ApresPick(supabase, pickDate, affectationsX2, x2.lignes) : null;
 
   revalidatePath("/");
   revalidatePath("/ce-soir");
   revalidatePath("/picks");
   revalidatePath("/stats");
+  if (messageX2) revalidatePath("/admin", "layout");
   return {
     ok: true,
-    message: `Répartition enregistrée le ${pickDate} : ${groupes.length} joueur(s) pour ${liste.length} compte(s).`,
+    message: `Répartition enregistrée le ${pickDate} : ${groupes.length} joueur(s) pour ${liste.length} compte(s).${messageX2 ? ` ${messageX2}` : ""}`,
   };
 }
 

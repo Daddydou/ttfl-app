@@ -59,7 +59,7 @@ describe("Pick manuel validé (compte 02)", () => {
     rendre("02", { statut: "valide" });
     expect(screen.getByText("Pick remplaçable par le robot")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Valider à la main" }));
-    await waitFor(() => expect(verrouiller).toHaveBeenCalledWith("regular", "2026-10-20", "Joueur 1", "02"));
+    await waitFor(() => expect(verrouiller).toHaveBeenCalledWith("regular", "2026-10-20", "Joueur 1", "02", false));
     expect(await screen.findByText("Joueur 1 validé à la main.")).toBeInTheDocument();
     expect(refresh).toHaveBeenCalled();
   });

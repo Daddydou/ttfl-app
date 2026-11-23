@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { COMPTES_X2, MODES_X2, validerDemandeX2, libelleMois, type LigneX2, type ModeX2 } from "@/lib/x2";
-import { aujourdhuiNY, normaliserNom } from "@/lib/planning";
+import { COMPTES_X2, MODES_X2, validerDemandeX2, type ModeX2 } from "@/lib/x2";
+import { chargerLignesX2, ecrireX2, verifierX2 } from "@/lib/x2-pose";
+import { aujourdhuiNY } from "@/lib/planning";
 import { refusSecret } from "@/lib/secret";
 
 export type ResultatX2 = { ok: true; message: string } | { ok: false; error: string };
@@ -12,6 +13,7 @@ const MODE_DB = "regular";
 
 function revalider() {
   revalidatePath("/admin", "layout");
+  revalidatePath("/");
   revalidatePath("/picks");
   revalidatePath("/ce-soir");
 }
@@ -46,47 +48,48 @@ export async function poserX2(compte: string, date: string): Promise<ResultatX2>
   const secret = await refusSecret(supabase, [compte], [date], aujourdhui);
   if (secret) return { ok: false, error: secret };
 
-  const [pickRes, lignesRes, regRes] = await Promise.all([
+  const [pickRes, lignesRes] = await Promise.all([
     supabase.from("ttfl_picks").select("player").eq("mode", MODE_DB).eq("compte", compte).eq("pick_date", date).maybeSingle<{ player: string }>(),
-    supabase.from("ttfl_x2").select("*").eq("mode", MODE_DB).returns<LigneX2[]>(),
-    supabase.from("ttfl_x2_reglage").select("mode,comptes_reels").eq("id", 1).maybeSingle<{ mode: string; comptes_reels: string[] }>(),
+    chargerLignesX2(supabase),
   ]);
   if (pickRes.error) return { ok: false, error: pickRes.error.message };
-  if (lignesRes.error) return { ok: false, error: lignesRes.error.message };
-  const lignes = lignesRes.data ?? [];
+  if (lignesRes.erreur) return { ok: false, error: lignesRes.erreur };
+  const lignes = lignesRes.lignes;
   const joueur = pickRes.data?.player ?? null;
   const refus = validerDemandeX2({ compte, date, aujourdhui, joueurDuPick: joueur, lignes });
   if (refus) return { ok: false, error: refus };
 
-  const mois = date.slice(0, 7);
-  const existante = lignes.find((l) => l.compte === compte && l.mois === mois);
-  const { error } = await supabase.from("ttfl_x2").upsert(
-    {
-      mode: MODE_DB,
-      compte,
-      mois,
-      pick_date: date,
-      player: joueur,
-      joueur_cle: normaliserNom(joueur as string).replace(/ /g, ""),
-      source: "app",
-      statut: "voulu",
-      date_site: existante?.date_site ?? null,
-      rang: null,
-      message: "demandé depuis l'application",
-      maj_le: new Date().toISOString(),
-    },
-    { onConflict: "mode,compte,mois" },
-  );
-  if (error) return { ok: false, error: error.message };
+  const res = await ecrireX2(supabase, date, [{ compte, joueur: joueur as string }], lignes);
+  if (res.ok) revalider();
+  return res;
+}
+
+// Pose le x2 du mois sur le pick DÉJÀ enregistré de chaque compte donné, pour une soirée (sans toucher au joueur).
+// Utilisé par le bouton « ×2 » à côté de « Changer » : un compte sans pick est simplement ignoré (et signalé).
+export async function poserX2Comptes(date: string, comptes: string[]): Promise<ResultatX2> {
+  const liste = [...new Set(comptes)].filter((c) => COMPTES_X2.includes(c));
+  if (liste.length === 0) return { ok: false, error: "Aucun compte valide." };
+  const supabase = await createClient();
+  const aujourdhui = aujourdhuiNY();
+  const secret = await refusSecret(supabase, liste, [date], aujourdhui);
+  if (secret) return { ok: false, error: secret };
+
+  const [picksRes, lignesRes] = await Promise.all([
+    supabase.from("ttfl_picks").select("compte,player").eq("mode", MODE_DB).eq("pick_date", date).in("compte", liste).returns<{ compte: string; player: string }[]>(),
+    chargerLignesX2(supabase),
+  ]);
+  if (picksRes.error) return { ok: false, error: picksRes.error.message };
+  if (lignesRes.erreur) return { ok: false, error: lignesRes.erreur };
+  const affectations = (picksRes.data ?? []).map((p) => ({ compte: p.compte, joueur: p.player }));
+  if (affectations.length === 0) return { ok: false, error: "Il faut d'abord un pick sur cette soirée : le x2 est lié au joueur." };
+
+  const refus = verifierX2({ date, aujourdhui, affectations, lignes: lignesRes.lignes });
+  if (refus) return { ok: false, error: refus };
+  const res = await ecrireX2(supabase, date, affectations, lignesRes.lignes);
+  if (!res.ok) return res;
   revalider();
-  const reg = regRes.data;
-  const actif = reg?.mode === "reel" && (reg.comptes_reels ?? []).includes(compte);
-  return {
-    ok: true,
-    message: actif
-      ? `x2 de ${libelleMois(mois)} demandé pour le compte ${compte} : le robot le pose sur le site dans les 10 minutes.`
-      : `x2 enregistré, mais le robot n'agit pas encore sur le compte ${compte} (réglage « x2 » : ${reg?.mode ?? "off"}). Il sera posé dès que tu l'activeras.`,
-  };
+  const sansPick = liste.filter((c) => !affectations.some((a) => a.compte === c));
+  return { ok: true, message: sansPick.length > 0 ? `${res.message} (Sans pick, ignoré : ${sansPick.join(", ")}.)` : res.message };
 }
 
 // Retire le x2 du mois : le robot le retire du site au prochain passage.

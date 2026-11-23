@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { MOIS_SAISON, grilleSaison, lireModeX2, validerDemandeX2, type LigneX2 } from "@/lib/x2";
+import { MOIS_SAISON, grilleSaison, lireModeX2, validerDemandeX2, x2Possible, type LigneX2 } from "@/lib/x2";
 
 const ligne = (o: Partial<LigneX2> = {}): LigneX2 => ({
   compte: "03", mois: "2026-11", pick_date: "2026-11-09", player: "Luka Doncic", source: "auto", statut: "pose",
@@ -44,6 +44,14 @@ describe("x2 : règles de l'application", () => {
   it("autorise de déplacer le x2 du même mois (même joueur, autre soirée)", () => {
     const lignes = [ligne({ mois: "2026-12", pick_date: "2026-12-01", player: "Shai Gilgeous-Alexander" })];
     expect(validerDemandeX2({ ...base, lignes })).toBeNull();
+  });
+
+  it("x2Possible : soirée du jour ou à venir, dans la saison du x2 seulement", () => {
+    expect(x2Possible("2026-11-23", "2026-11-23")).toBe(true);
+    expect(x2Possible("2027-04-10", "2026-11-23")).toBe(true);
+    expect(x2Possible("2026-11-22", "2026-11-23")).toBe(false); // passée
+    expect(x2Possible("2026-10-30", "2026-10-01")).toBe(false); // octobre : pas de x2
+    expect(x2Possible("2027-05-01", "2026-11-23")).toBe(false); // après avril
   });
 
   it("la grille donne un état par mois et par compte", () => {

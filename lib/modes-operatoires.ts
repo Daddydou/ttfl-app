@@ -136,6 +136,7 @@ export const MODES: ModeOperatoire[] = [
       "Règle du site : un seul x2 par mois et par compte (novembre 2026 → avril 2027, rien en octobre), jamais deux fois le même joueur sur un compte. Il se pose sur une soirée, mais chez nous il est LIÉ AU JOUEUR : si le pick de la soirée change (blessure, remplacement, choix), le x2 est retiré du site puis reposé ailleurs tant que le mois n'est pas fini.",
       "Comptes 02 à 13 : le moteur choisit seul. Il prend le meilleur joueur du classement des moyennes TTFL de la saison qui n'a pas encore reçu de x2 sur ce compte, à la première soirée où il est disponible (il attend le n°1 jusqu'à 7 jours, sinon il prend le meilleur disponible). Pas de plafond de comptes sur la même star.",
       "Compte 01 : le robot ne décide jamais. Pose ou retire le x2 depuis Plus > Admin > x2 (« Poser un x2 à la main » : choisis le compte puis un de ses picks à venir), ou directement sur le site : le robot le reprend.",
+      "Partout où tu poses ou changes un joueur (Conseillés, Ce soir, Plan 30, Mes picks, « Modifier certains comptes », « Répartir l'équipe », « Valider à la main »), tu peux cocher « Poser aussi le x2 de <mois> » : le pick et le x2 partent ensemble. Sur un pick déjà posé (« Pické » ou « Changer »), le bouton « ×2 » (deux appuis) pose le x2 sans changer de joueur. Si le x2 est refusé (joueur déjà x2 sur ce compte, soirée passée, hors novembre → avril), rien n'est enregistré et le message dit pourquoi. S'il y a déjà un x2 ce mois-ci pour le compte, il est déplacé.",
       "Réglage : Plus > Admin > x2. « À blanc » = le moteur calcule sans rien poser ; « Réel » = le robot pose et retire de vrais x2, uniquement sur les comptes cochés. Commence par un seul compte et vérifie le résultat sur le site.",
       "Le tableau « Les x2 de la saison » montre, par compte et par mois, la soirée, le joueur et l'état (prévu, posé, à retirer…). « Retirer » demande au robot d'enlever le x2 du site (sous 10 minutes) ; pour un compte automatique, le moteur en proposera un autre ce mois-ci.",
       "Le x2 se voit partout où un pick est affiché (Accueil, Mes picks, Conseillés, Semaine équipe, Stats) : une pastille « ×2 » pleine = posé sur le site, en pointillés = prévu mais pas encore posé. Pour le compte 02, elle n'apparaît qu'une fois la soirée close.",
@@ -146,7 +147,7 @@ export const MODES: ModeOperatoire[] = [
       "Une alerte « x2 retiré (le pick de la soirée a changé) » est normale : le moteur repose le x2 sur un autre joueur ou une autre soirée.",
     ],
     lien: { href: "/admin/x2", libelle: "Ouvrir x2" },
-    misAJour: "2026-11-06",
+    misAJour: "2026-11-23",
   },
   {
     id: "verifier-picks",

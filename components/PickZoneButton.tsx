@@ -7,6 +7,8 @@ import { frDate } from "@/lib/format";
 import { Icon } from "@/components/ui/Icon";
 import type { Mode } from "@/lib/types";
 import Portail from "@/components/ui/Portail";
+import { CaseX2 } from "@/components/CaseX2";
+import { BoutonX2Pick } from "@/components/BoutonX2Pick";
 
 // Valide un joueur pour une soirée sur les comptes d'une zone (Compte 1, Compte 2 ou les comptes libres de
 // l'équipe). Confirmation avant écriture ; le serveur revérifie le cycle de 30 jours.
@@ -33,18 +35,26 @@ export function PickZoneButton({
   const router = useRouter();
   const [confirmer, setConfirmer] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [avecX2, setAvecX2] = useState(false);
   const [pending, start] = useTransition();
 
   if (dejaPicke) {
-    return <span className="inline-flex items-center gap-1 text-[14px] font-semibold text-avail"><Icon name="coche" size={16} strokeWidth={2.4} />Pické</span>;
+    // Déjà pické : on ne change pas le joueur, mais on peut y poser le x2 (bouton « ×2 »).
+    return (
+      <span className="inline-flex flex-wrap items-center justify-end gap-2">
+        <span className="inline-flex items-center gap-1 text-[14px] font-semibold text-avail"><Icon name="coche" size={16} strokeWidth={2.4} />Pické</span>
+        <BoutonX2Pick date={date} comptes={comptes} />
+      </span>
+    );
   }
 
   function valider() {
     setErreur(null);
     start(async () => {
-      const res = await pickPlayerComptes(mode, date, player, comptes);
+      const res = await pickPlayerComptes(mode, date, player, comptes, avecX2);
       if (res.ok) {
         setConfirmer(false);
+        setAvecX2(false);
         router.refresh();
       } else {
         setErreur(res.error);
@@ -80,6 +90,7 @@ export function PickZoneButton({
               {frDate(date)} — {zoneLabel}
               {comptes.length > 1 ? ` (${comptes.length} comptes)` : ""}. Il sera bloqué 30 jours.
             </p>
+            <CaseX2 date={date} coche={avecX2} onChange={setAvecX2} nbComptes={comptes.length} />
             {erreur && <p className="mt-3 rounded-[10px] bg-out/10 px-3 py-2 text-sm text-out">{erreur}</p>}
             <div className="mt-5 flex gap-3">
               <button

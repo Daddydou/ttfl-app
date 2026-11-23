@@ -5,7 +5,8 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { listerJoueursDuSoir, pickRepartition, type JoueurDuSoir } from "@/app/actions";
 import { fmtNum, frDate } from "@/lib/format";
-import { joursEntre, normaliserNom } from "@/lib/planning";
+import { aujourdhuiNY, joursEntre, normaliserNom } from "@/lib/planning";
+import { libelleMois, moisDe, x2Possible } from "@/lib/x2";
 import { MARGE_BRUIT, PART_MAX, repartirEquipe } from "@/lib/repartition";
 import type { Mode } from "@/lib/types";
 import Portail from "@/components/ui/Portail";
@@ -37,6 +38,7 @@ export function RepartitionEquipe({
   const [joueurs, setJoueurs] = useState<JoueurDuSoir[] | null>(null);
   const [avanceSeule, setAvanceSeule] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [groupesX2, setGroupesX2] = useState<string[]>([]); // joueurs dont les comptes reçoivent aussi le x2 du mois
   const [pending, start] = useTransition();
 
   useEffect(() => {
@@ -68,7 +70,12 @@ export function RepartitionEquipe({
   function fermer() {
     setOuvert(false);
     setErreur(null);
+    setGroupesX2([]);
   }
+
+  const x2Autorise = x2Possible(date, aujourdhuiNY());
+  const basculerX2 = (joueur: string) =>
+    setGroupesX2((l) => (l.includes(joueur) ? l.filter((j) => j !== joueur) : [...l, joueur]));
 
   function valider() {
     if (!proposition || proposition.groupes.length === 0) return;
@@ -78,6 +85,7 @@ export function RepartitionEquipe({
         mode,
         date,
         proposition.groupes.map((g) => ({ player: g.player, comptes: g.comptes })),
+        proposition.groupes.filter((g) => groupesX2.includes(g.player)).flatMap((g) => g.comptes),
       );
       if (res.ok) {
         fermer();
@@ -163,6 +171,18 @@ export function RepartitionEquipe({
                     <div className="text-[13px] text-fg-muted">
                       {g.comptes.length} compte{g.comptes.length > 1 ? "s" : ""} : {g.comptes.join(", ")}
                     </div>
+                    {x2Autorise && (
+                      <label className="mt-1 flex cursor-pointer items-center gap-2 text-[13px] font-semibold text-fg">
+                        <input
+                          type="checkbox"
+                          checked={groupesX2.includes(g.player)}
+                          onChange={() => basculerX2(g.player)}
+                          aria-label={`Poser aussi le x2 de ${libelleMois(moisDe(date))} sur ${g.player}`}
+                          className="h-5 w-5 shrink-0 accent-court-500"
+                        />
+                        + x2 de {libelleMois(moisDe(date))} sur {g.comptes.length > 1 ? "ces comptes" : "ce compte"}
+                      </label>
+                    )}
                   </div>
                   <div className="w-10 shrink-0 text-right font-bold tabular-nums text-fg">
                     {fmtNum(g.projection)}
