@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { X2DuMoisBlock } from "@/components/X2DuMoisBlock";
 import { createClient } from "@/lib/supabase/server";
 import { COMPTE_REF } from "@/lib/compte";
 import { compteValide, resumerComptes, type ResumeCompte } from "@/lib/historique";
@@ -222,6 +224,7 @@ export default async function PicksPage({
           action={<Link href="/equipe" className="text-[13px] font-semibold text-court-400">Semaine équipe →</Link>}
         />
         <VueTabs courant={params} />
+        {mode === "regular" && <Suspense fallback={null}><X2DuMoisBlock /></Suspense>}
         <PlanningVue params={params} data={data} mode={mode} />
       </div>
     );
@@ -240,6 +243,7 @@ export default async function PicksPage({
     <div className="space-y-4">
       <PageHeader titre="Mes picks" sousTitre="Historique et points de tes 13 comptes" />
       <VueTabs courant={params} />
+      {mode === "regular" && <Suspense fallback={null}><X2DuMoisBlock /></Suspense>}
       <ChoixCompte resume={resumerComptes(tous)} courant={compte} mode={mode} />
       <HistoriqueVue rows={rows} mode={mode} compte={compte} x2={carteX2Histo} />
     </div>
