@@ -96,7 +96,7 @@ export const MODES: ModeOperatoire[] = [
     etapes: [
       "Ouvre Plus > Stats : l'Aperçu donne les chiffres clés, et la barre de pastilles en haut ouvre chaque sous-page.",
       "Équipe : classement des comptes, soirées, joueurs les plus joués et les plus rentables. Mes picks : ton compte (forme, séries, jours de la semaine, repères du moteur).",
-      "Stratégie : comparaison des formules du Plan 30 et bilan des bonus ×2. Adversaires (Plus > Adversaires) : pour chaque joueur suivi du Centre de surveillance, la liste des joueurs du top 30 de nos projections qu'il peut encore prendre sur les 7 prochains jours, rangés par première date possible (un joueur qu'il a pické à 30 jours ou moins est exclu). Joueurs NBA : projections, forme et défenses du soir.",
+      "Stratégie : comparaison des formules du Plan 30 et bilan des bonus ×2. Adversaires (Plus > Adversaires) : pour chaque joueur suivi du Centre de surveillance, la liste des joueurs du top 30 de nos projections qu'il peut encore prendre sur les 7 prochains jours, rangés par première date possible (un joueur qu'il a pické à 30 jours ou moins est exclu). Touche un adversaire pour voir les jours, puis un jour pour voir ses joueurs ; retouche-le pour le replier. Joueurs NBA : projections, forme et défenses du soir.",
       "Vainqueurs : tes pronos face aux résultats et la fiabilité des favoris. Système : santé du moteur dans le cloud (passages, échecs, durées).",
       "Le choix Saison régulière / Playoffs en haut des pages concernées change les chiffres affichés.",
     ],
