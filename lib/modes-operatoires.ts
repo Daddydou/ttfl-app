@@ -96,7 +96,7 @@ export const MODES: ModeOperatoire[] = [
     etapes: [
       "Ouvre Plus > Stats : l'Aperçu donne les chiffres clés, et la barre de pastilles en haut ouvre chaque sous-page.",
       "Équipe : classement des comptes, soirées, joueurs les plus joués et les plus rentables. Mes picks : ton compte (forme, séries, jours de la semaine, repères du moteur).",
-      "Stratégie : comparaison des formules du Plan 30 et bilan des bonus ×2. Adversaires : les joueurs suivis. Joueurs NBA : projections, forme et défenses du soir.",
+      "Stratégie : comparaison des formules du Plan 30 et bilan des bonus ×2. Adversaires (Plus > Adversaires) : pour chaque joueur suivi du Centre de surveillance, la liste des joueurs du top 30 de nos projections qu'il peut encore prendre sur les 7 prochains jours, rangés par première date possible (un joueur qu'il a pické à 30 jours ou moins est exclu). Joueurs NBA : projections, forme et défenses du soir.",
       "Vainqueurs : tes pronos face aux résultats et la fiabilité des favoris. Système : santé du moteur dans le cloud (passages, échecs, durées).",
       "Le choix Saison régulière / Playoffs en haut des pages concernées change les chiffres affichés.",
     ],
@@ -105,7 +105,7 @@ export const MODES: ModeOperatoire[] = [
       "Tant qu'une soirée n'est pas close, le pick du compte 02 n'entre dans aucune statistique (pick secret).",
     ],
     lien: { href: "/stats", libelle: "Ouvrir les stats" },
-    misAJour: "2026-11-07",
+    misAJour: "2026-11-24",
   },
   {
     id: "choisir-pick",
@@ -140,6 +140,7 @@ export const MODES: ModeOperatoire[] = [
       "Réglage : Plus > Admin > x2. « À blanc » = le moteur calcule sans rien poser ; « Réel » = le robot pose et retire de vrais x2, uniquement sur les comptes cochés. Commence par un seul compte et vérifie le résultat sur le site.",
       "Le tableau « Les x2 de la saison » montre, par compte et par mois, la soirée, le joueur et l'état (prévu, posé, à retirer…). « Retirer » demande au robot d'enlever le x2 du site (sous 10 minutes) ; pour un compte automatique, le moteur en proposera un autre ce mois-ci.",
       "Le x2 se voit partout où un pick est affiché (Accueil, Mes picks, Conseillés, Semaine équipe, Stats) : une pastille « ×2 » pleine = posé sur le site, en pointillés = prévu mais pas encore posé. Pour le compte 02, elle n'apparaît qu'une fois la soirée close.",
+      "Le résumé « x2 de <mois> » (en haut de Mes picks, onglets Planning et Historique) montre pour les 13 comptes : « Posé et validé » (posé sur le site et soirée jouée), « Posé sur le site, soirée à venir », « Prévu, pas encore posé » (dans les jours suivants), ou « Aucun x2 prévu ». Il signale en rouge ce qui est à vérifier (prévu mais jamais posé, échec, retiré à la main) et montre le x2 du mois suivant s'il est déjà prévu. Pour le compte 02, tant que la soirée est secrète : « 🔒 secret », sans date ni joueur.",
     ],
     attention: [
       "Si tu retires un x2 à la main directement sur le site, le robot ne le repose pas ce mois-ci (il le note « retiré à la main »).",

@@ -3,6 +3,7 @@
 
 import type { TtflSuivi, TtflSuiviPick } from "@/lib/types";
 import { moyenne } from "@/lib/stats-outils";
+import { nomJoueurSuivi } from "@/lib/adversaires";
 
 export interface JourSuivi {
   users_id: number;
@@ -83,10 +84,11 @@ export interface JoueurPopulaire {
 export function picksPopulaires(picks: TtflSuiviPick[], n = 10): JoueurPopulaire[] {
   const par = new Map<string, { n: number; ids: Set<number> }>();
   for (const p of picks) {
-    const e = par.get(p.joueur) ?? { n: 0, ids: new Set<number>() };
+    const nom = nomJoueurSuivi(p.joueur); // le site colle le score au nom : « Nikola Jokić · 76 pts »
+    const e = par.get(nom) ?? { n: 0, ids: new Set<number>() };
     e.n += 1;
     e.ids.add(p.users_id);
-    par.set(p.joueur, e);
+    par.set(nom, e);
   }
   return [...par.entries()]
     .map(([joueur, e]) => ({ joueur, n: e.n, adversaires: e.ids.size }))

@@ -33,13 +33,12 @@ describe("page Adversaires avec scores", () => {
   const suivis = [{ users_id: 1, pseudo: "Alpha", equipe: "Eq", rang: 10, points: 1200, moyenne: null, best_picks: 0, x2: 0, suivi: true, maj_le: "2026-10-21T08:00:00Z" }];
   const picks = [{ users_id: 1, pick_date: "2026-10-21", joueur: "Luka Doncic" }];
 
-  it("montre la moyenne récente et le score de la soirée", async () => {
+  it("montre la moyenne récente et le meilleur score", async () => {
     createClient.mockResolvedValue(
       fakeSupabase({ ttfl_suivis: suivis, ttfl_suivis_picks: picks, ttfl_suivis_scores: [sc(1, "2026-10-21", 44), sc(1, "2026-10-20", 36)] }),
     );
     render(await AdversairesPage());
     expect(screen.getByText(/moy\. 40\.0 sur 2 soirées · meilleur 44/)).toBeInTheDocument();
-    expect(screen.getByText("44")).toBeInTheDocument();
   });
 
   it("reste utilisable sans la vue des scores", async () => {
