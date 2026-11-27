@@ -31,13 +31,16 @@ export function CeSoirCard({
 }: {
   titreDate: string; // « sam. 24 oct. »
   lignes: LigneCeSoir[];
-  equipe: { posees: number; total: number; href: string };
+  equipe?: { posees: number; total: number; href: string }; // ancienne ligne « Équipe » : inutile quand tous les comptes sont listés
   projection: number | null; // projection du pick du compte 01 (null = inconnue)
   fraicheur: ReactNode;
   date?: string | null; // soirée affichée (AAAA-MM-JJ) : sert à la pastille Questionable
   cloture?: string | null; // heure de clôture de la soirée (ISO), si le moteur l'a enregistrée
 }) {
   const f = fourchette(projection);
+  // Tous les comptes listés : un compteur « N/M posés sur TTFL » (le compte au pick secret n'est pas compté).
+  const visibles = lignes.filter((l) => !l.secret);
+  const resume = lignes.length > 1 ? { posees: visibles.filter((l) => l.pose).length, total: visibles.length } : null;
   return (
     <section className="card space-y-3 p-4" aria-labelledby="titre-ce-soir">
       <div>
@@ -48,6 +51,11 @@ export function CeSoirCard({
           <span className="text-[15px] text-fg-muted">{majuscule(titreDate)}</span>
         </div>
         <Cloture iso={cloture} />
+        {resume && (
+          <p className={`mt-1 text-[13px] font-medium num ${resume.posees < resume.total ? "text-quest" : "text-avail"}`}>
+            {resume.posees}/{resume.total} posés sur TTFL
+          </p>
+        )}
       </div>
 
       {/* Chaque ligne mène aux conseillés de ce compte (pour changer ou vérifier en un geste). */}
@@ -67,7 +75,8 @@ export function CeSoirCard({
                 ) : l.joueur ? (
                   <span className="inline-flex max-w-full items-center gap-1.5 align-middle">
                     <Visage nom={l.joueur} taille={24} />
-                    <span className="truncate font-semibold text-fg">{l.joueur}</span>
+                    {/* Vert = bien posé sur TTFL (confirmé par le site), sinon neutre. */}
+                    <span className={`truncate font-semibold ${l.pose ? "text-avail" : "text-fg"}`}>{l.joueur}</span>
                     <BadgeX2 etat={l.x2} />
                     <BadgeQuestionable joueur={l.joueur} date={date} />
                   </span>
@@ -85,19 +94,21 @@ export function CeSoirCard({
             </Link>
           </li>
         ))}
-        <li className="list-row !p-0">
-          <Link href={equipe.href} className="flex w-full items-center gap-3 px-4 py-3 active:bg-fill/60">
-            <span className="w-14 shrink-0 whitespace-nowrap text-[12px] font-semibold uppercase tracking-wide text-fg-muted">
-              Équipe
-            </span>
-            <span
-              className={`flex-1 text-[15px] font-medium num ${equipe.posees < equipe.total ? "text-quest" : "text-fg"}`}
-            >
-              {equipe.posees}/{equipe.total} comptes avec un pick
-            </span>
-            <Icon name="chevron" size={14} className="shrink-0 text-fg-faint" />
-          </Link>
-        </li>
+        {equipe && (
+          <li className="list-row !p-0">
+            <Link href={equipe.href} className="flex w-full items-center gap-3 px-4 py-3 active:bg-fill/60">
+              <span className="w-14 shrink-0 whitespace-nowrap text-[12px] font-semibold uppercase tracking-wide text-fg-muted">
+                Équipe
+              </span>
+              <span
+                className={`flex-1 text-[15px] font-medium num ${equipe.posees < equipe.total ? "text-quest" : "text-fg"}`}
+              >
+                {equipe.posees}/{equipe.total} comptes avec un pick
+              </span>
+              <Icon name="chevron" size={14} className="shrink-0 text-fg-faint" />
+            </Link>
+          </li>
+        )}
       </ul>
 
       {f && (

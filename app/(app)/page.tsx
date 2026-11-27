@@ -7,7 +7,6 @@ import { COMPTE_REF } from "@/lib/compte";
 import { RealtimeRuns } from "@/components/RealtimeRuns";
 import { FreshnessBanner } from "@/components/FreshnessBanner";
 import { AlertsBanner, type Alert } from "@/components/AlertsBanner";
-import { BenchmarksCard } from "@/components/BenchmarksCard";
 import { RecapNuit } from "@/components/RecapNuit";
 import { classerNuit, resultatDuPick, topNuit, type LigneNuit } from "@/lib/recap-nuit";
 import { PicksValidesCard, type PickCompte } from "@/components/PicksValidesCard";
@@ -28,8 +27,8 @@ import { picksAVenir } from "@/lib/conseilles";
 import { aujourdhuiNY } from "@/lib/planning";
 import { chargerCaptures } from "@/lib/captures";
 import { ageMs, nb, todayISO } from "@/lib/format";
-import type { Mode, TtflBenchmark, TtflRun } from "@/lib/types";
-import type { PickScore } from "@/lib/benchmarks";
+import type { Mode, TtflRun } from "@/lib/types";
+import { COMPTES_CE_SOIR, comptesPosesSurTtfl, hrefConseilles, type EnvoiSoir } from "@/lib/ce-soir-comptes";
 
 export const dynamic = "force-dynamic";
 
@@ -40,8 +39,8 @@ function saisonDe(iso: string): string {
 }
 export const metadata = { title: "Accueil — TTFL" };
 
-// LECTURE SEULE : cette page ne calcule ni score ni projection. En tête, la carte « Ce soir » (un compte par ligne,
-// fraîcheur, fourchette du moteur) ; dessous, les soirées suivantes, les alertes et les repères.
+// LECTURE SEULE : cette page ne calcule ni score ni projection. En tête, la carte « Ce soir » (les 13 comptes, une ligne chacun : pick, vert quand le site TTFL l'a confirmé,
+// pastille ×2, fraîcheur, fourchette du moteur) ; dessous, le top 30 de la nuit, les soirées suivantes et les alertes.
 // Le classement conseillé est dans l'onglet « Conseillés ».
 
 export default async function DashboardPage() {
@@ -89,7 +88,7 @@ export default async function DashboardPage() {
         ])
       : null;
 
-  const [pickRes, aVenirRes, secret, capturesBrutes, lignesX2] = await Promise.all([
+  const [pickRes, aVenirRes, secret, capturesBrutes, lignesX2, envoisRes] = await Promise.all([
     run
       ? supabase
           .from("ttfl_picks")
@@ -110,6 +109,13 @@ export default async function DashboardPage() {
     chargerSecret(supabase, aujourdhui),
     chargerCaptures(supabase),
     lireLignesX2(supabase, aujourdhui),
+    // Ce que le site TTFL a réellement ce soir (statut « confirme » = le pick est bien posé) : sert au vert de « Ce soir ».
+    supabase
+      .from("ttfl_envois")
+      .select("compte,joueur,joueur_site,statut")
+      .eq("mode", mode)
+      .eq("pick_date", aujourdhui)
+      .returns<EnvoiSoir[]>(),
   ]);
   const maintenantMs = heureServeur();
   // Pick secret du compte 02 : ses picks, captures et alertes des soirées pas encore closes sont retirés (lib/secret.ts).
@@ -202,15 +208,21 @@ export default async function DashboardPage() {
 
   // --- Carte « Ce soir » : un compte par ligne (le compte secret n'affiche qu'un cadenas, jamais de joueur).
   const joueurDuSoir = (compte: string) => tousPicks.find((p) => p.pick_date === aujourdhui && p.compte === compte)?.player ?? null;
+  // « Bien posé sur TTFL » = le site a CONFIRMÉ (ttfl_envois) le même joueur que le pick voulu. Une capture d'écran du
+  // robot du PC n'est plus nécessaire (le moteur tourne dans le cloud) : on la garde seulement en repli.
+  const posesSurTtfl = comptesPosesSurTtfl(
+    envoisRes.data ?? [],
+    tousPicks.flatMap((p) => (p.pick_date === aujourdhui && p.compte ? [{ compte: p.compte, player: p.player }] : [])),
+  );
   const ligneCeSoir = (compte: string): LigneCeSoir => {
     const secretCeSoir = compte === secret.compte && datesSecretes.includes(aujourdhui);
     const joueur = secretCeSoir ? null : joueurDuSoir(compte);
     return {
       label: `Cpt ${compte}`,
-      href: `/ce-soir?pour=c${compte}`,
+      href: hrefConseilles(compte),
       joueur,
       secret: secretCeSoir,
-      pose: !!captureDuPick(captures, compte, aujourdhui, joueur),
+      pose: !secretCeSoir && (posesSurTtfl.has(compte) || !!captureDuPick(captures, compte, aujourdhui, joueur)),
       x2: x2Pour(x2, compte, aujourdhui, joueur),
     };
   };
@@ -246,8 +258,7 @@ export default async function DashboardPage() {
       <CeSoirCard
         titreDate={titreDate}
         date={aujourdhui}
-        lignes={[ligneCeSoir(COMPTE_REF), ligneCeSoir("02"), ligneCeSoir("13")]}
-        equipe={{ posees: equipePosees, total: COMPTES_EQUIPE.length, href: "/ce-soir?pour=equipe" }}
+        lignes={COMPTES_CE_SOIR.map(ligneCeSoir)}
         cloture={secret.lignes[aujourdhui]?.cloture ?? null}
         projection={mode === "regular" ? projectionC1 : null}
         fraicheur={
@@ -279,53 +290,10 @@ export default async function DashboardPage() {
       />
 
       <InstallerApp />
-
-      {/* Bloc 3 — toi vs les repères modèle ------------------------------ */}
-      <Suspense fallback={<BlockSkeleton />}>
-        <BenchmarksBlock mode={mode} />
-      </Suspense>
+
       </div>
     </div>
   );
-}
-
-// --- Repères modèle (streaming indépendant) ---------------------------------
-
-async function BenchmarksBlock({ mode }: { mode: Mode }) {
-  const supabase = await createClient();
-
-  const [{ data: benchmarks }, { data: mesPicks }] = await Promise.all([
-    supabase
-      .from("ttfl_benchmarks")
-      .select("*")
-      .eq("mode", mode)
-      .order("computed_at", { ascending: false })
-      .returns<TtflBenchmark[]>(),
-    // Les picks scorés du compte 01 : la carte compare à soirées égales avec chaque repère (lib/benchmarks.ts).
-    supabase
-      .from("ttfl_picks")
-      .select("pick_date,score")
-      .eq("mode", mode)
-      .eq("compte", COMPTE_REF)
-      .not("score", "is", null)
-      .returns<PickScore[]>(),
-  ]);
-
-  // Un seul tournoi par mode pour l'instant (ttfl_picks ne distingue pas
-  // encore les éditions de playoffs) : si plusieurs lignes existaient quand
-  // même pour une même stratégie, ne garder que la plus récente.
-  const rows = Object.values(
-    (benchmarks ?? []).reduce<Record<string, TtflBenchmark>>((acc, b) => {
-      if (!acc[b.strategy]) acc[b.strategy] = b;
-      return acc;
-    }, {}),
-  );
-
-  // Pas encore de benchmarks pour ce tournoi (début de saison) : on masque le
-  // bloc proprement plutôt que d'afficher des zéros.
-  if (rows.length === 0) return null;
-
-  return <BenchmarksCard rows={rows} userPicks={mesPicks ?? []} />;
 }
 
 // --- Recap de la veille (streaming independant) -----------------------------
